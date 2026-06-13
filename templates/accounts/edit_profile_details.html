@@ -1,0 +1,692 @@
+<!-- templates/accounts/edit_profile_details.html -->
+
+{% extends 'base.html' %}
+{% block title %}پروفایل{% endblock %}
+{% block content %}
+
+
+<div class="content">
+
+        <div class="rm-page-header-inner-profile">
+        <div class="rm-header-left">
+            <span class="rm-eyebrow">30% تکمیل شده</span>
+            <h1 class="rm-page-title">ویرایش پروفایل</h1>
+        </div>
+        <div class="rm-header-actions">
+            <a href="{% url 'accounts:profile' pk=request.user.profile.pk %}" class="rm-btn rm-btn-outline">
+                بازگشت
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <form id="profileForm" class="profile-card" method="post" action="{% url 'accounts:edit_profile' %}">
+        {% csrf_token %}
+
+        <h2>ثبت اطلاعات پروفایل</h2>
+        <p>اطلاعات خود را وارد کنید.</p>
+
+        <!-- ==================== ۱. اطلاعات هویتی ==================== -->
+        <h3 class="heder-form-edit">۱. اطلاعات هویتی و ارتباطی</h3>
+
+        <div class="row-2">
+            <div class="field-group">
+                <label>نام *</label>
+                {{ form.first_name }}
+                {{ form.first_name.errors }}
+            </div>
+            <div class="field-group">
+                <label>نام خانوادگی *</label>
+                {{ form.last_name }}
+                {{ form.last_name.errors }}
+            </div>
+        </div>
+
+        <div class="row-3">
+            <div class="field-group">
+                <label>جنسیت *</label>
+                {{ form.gender }}
+                {{ form.gender.errors }}
+            </div>
+            <div class="field-group">
+                <label>وضعیت تأهل</label>
+                {{ form.marital_status }}
+            </div>
+            <div class="field-group">
+                <label>وضعیت سربازی</label>
+                {{ form.military_status }}
+            </div>
+        </div>
+
+        <div class="field-group">
+            <label>عنوان شغلی</label>
+            {{ form.job_title }}
+        </div>
+
+        <div class="row-2">
+            <div class="field-group">
+                <label>تاریخ تولد *</label>
+                {{ form.birth_date }}
+                {{ form.birth_date.errors }}
+            </div>
+            <div class="field-group">
+                <label>کشور</label>
+                {{ form.country }}
+            </div>
+        </div>
+
+        <div class="row-2">
+            <div class="field-group">
+                <label>استان / شهر</label>
+                {{ form.city }}
+            </div>
+            <div class="field-group">
+                <label>شماره موبایل *</label>
+                {{ form.phone }}
+                {{ form.phone.errors }}
+            </div>
+        </div>
+
+        <div class="row-2">
+            <div class="field-group">
+                <label>ایمیل</label>
+                {{ form.email }}
+            </div>
+            <div class="field-group">
+                <label>وب‌سایت شخصی</label>
+                {{ form.website }}
+            </div>
+        </div>
+
+        <div class="row-2">
+            <div class="field-group">
+                <label>کد ملی / شماره پاسپورت</label>
+                {{ form.national_id }}
+            </div>
+            <div class="field-group">
+                <label>شناسه ORCID</label>
+                {{ form.orcid }}
+            </div>
+        </div>
+
+        <!-- شبکه‌های اجتماعی -->
+        <h4>شبکه‌های اجتماعی و پروفایل‌های علمی</h4>
+        {{ social_formset.management_form }}
+        <div id="socialContainer">
+            {% for sf in social_formset %}
+            <div class="repeatable-item">
+                {% if sf.instance.pk %}
+                <div class="checkbox-delete">
+                    <p>حذف</p>
+                    {{ sf.DELETE }}
+                </div>
+                {% endif %}
+                <div class="row-2">
+                    <div class="field-group">
+                        <label>نوع شبکه</label>
+                        {{ sf.social_type }}
+                    </div>
+                    <div class="field-group">
+                        <label>لینک پروفایل</label>
+                        {{ sf.url }}
+                    </div>
+                </div>
+                {% for hidden in sf.hidden_fields %}{{ hidden }}{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn-add-form" onclick="addFormsetRow('socialContainer', 'social_profiles')">+
+            افزودن
+            پروفایل</button>
+
+
+
+        <hr>
+        <!-- ==================== ۲. تحصیلی ==================== -->
+        <h3 class="heder-form-edit">۲. اطلاعات تحصیلی</h3>
+        {{ education_formset.management_form }}
+        <div id="educationContainer">
+            {% for ef in education_formset %}
+            <div class="repeatable-item">
+                {% if ef.instance.pk %}
+                <div class="checkbox-delete">
+                    <p>حذف</p>
+                    {{ ef.DELETE }}
+                </div>
+                {% endif %}
+                <div class="row-2">
+                    <div class="field-group">
+                        <label>رشته تحصیلی *</label>
+                        {{ ef.field }}
+                        {{ ef.field.errors }}
+                    </div>
+                    <div class="field-group">
+                        <label>مقطع تحصیلی *</label>
+                        {{ ef.degree }}
+                        {{ ef.degree.errors }}
+                    </div>
+                </div>
+                <div class="row-2">
+                    <div class="field-group">
+                        <label>دانشگاه</label>
+                        {{ ef.university }}
+                    </div>
+                    <div class="field-group">
+                        <label>تیپ دانشگاه</label>
+                        {{ ef.uni_type }}
+                    </div>
+                </div>
+                <div class="row-2">
+                    <div class="field-group">
+                        <label>تاریخ شروع</label>
+                        {{ ef.start_date }}
+                    </div>
+                    <div class="field-group">
+                        <label>تاریخ پایان</label>
+                        {{ ef.end_date }}
+                    </div>
+                </div>
+                <div class="row-3">
+                    <div class="field-group">
+                        <label>مرحله تحصیلی</label>
+                        {{ ef.stage }}
+                    </div>
+                    <div class="field-group">
+                        <label>ترم فعلی</label>
+                        {{ ef.current_term }}
+                    </div>
+                    <div class="field-group">
+                        <label>ترم‌های باقیمانده</label>
+                        {{ ef.remaining_terms }}
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label>معدل</label>
+                    {{ ef.gpa }}
+                </div>
+                {% for hidden in ef.hidden_fields %}{{ hidden }}{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn-add-form" onclick="addFormsetRow('educationContainer', 'educations')">+ افزودن
+            مقطع
+            تحصیلی</button>
+
+
+
+        <div class="field-group">
+            <label>وضعیت طرح نیروی انسانی</label>
+            {{ form.service_plan }}
+        </div>
+
+        <hr>
+        <!-- ==================== ۳. پژوهشی ==================== -->
+        <h3 class="heder-form-edit">۳. سوابق پژوهشی</h3>
+
+        <div class="row-2">
+            <div class="field-group">
+                <label>تعداد پروپوزال‌ها</label>
+                {{ form.proposal_count }}
+            </div>
+            <div class="field-group">
+                <label>وضعیت پروپوزال‌ها</label>
+                {{ form.proposal_status }}
+            </div>
+        </div>
+
+        <div class="row-2">
+            <div class="field-group">
+                <label>مهارت‌های نرم‌افزاری</label>
+                {{ form.software_skills }}
+            </div>
+            <div class="field-group">
+                <label>مهارت‌های نگارشی</label>
+                {{ form.writing_skills }}
+            </div>
+        </div>
+
+        <!-- مقالات -->
+        <h4>مقالات چاپ‌شده</h4>
+        {{ article_formset.management_form }}
+        <div id="articlesContainer">
+            {% for af in article_formset %}
+            <div class="repeatable-item">
+                {% if af.instance.pk %}
+                <div class="checkbox-delete">
+                    <p>حذف</p>
+                    {{ af.DELETE }}
+                </div>
+                {% endif %}
+                <div class="field-group">
+                    <label>عنوان مقاله</label>
+                    {{ af.title }}
+                </div>
+                <div class="row-2">
+                    <div class="field-group">
+                        <label>نام ژورنال</label>
+                        {{ af.journal }}
+                    </div>
+                    <div class="field-group">
+                        <label>Impact Factor</label>
+                        {{ af.impact_factor }}
+                    </div>
+                </div>
+                <div class="row-4">
+                    <div class="field-group">
+                        <label>چارک</label>
+                        {{ af.quartile }}
+                    </div>
+                    <div class="field-group">
+                        <label>سال چاپ</label>
+                        {{ af.year }}
+                    </div>
+                    <div class="field-group">
+                        <label>نفر چندم</label>
+                        {{ af.author_rank }}
+                    </div>
+                    <div class="field-group">
+                        <label>تعداد نویسندگان</label>
+                        {{ af.total_authors }}
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label>ایندکس</label>
+                    {{ af.index }}
+                </div>
+                {% for hidden in af.hidden_fields %}{{ hidden }}{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn-add-form" onclick="addFormsetRow('articlesContainer', 'articles')">+ افزودن
+            مقاله</button>
+
+
+
+        <!-- ارائه‌ها -->
+        <h4>ارائه‌ها در کنگره‌ها</h4>
+        {{ presentation_formset.management_form }}
+        <div id="presentationsContainer">
+            {% for pf in presentation_formset %}
+            <div class="repeatable-item">
+                {% if pf.instance.pk %}
+                <div class="checkbox-delete">
+                    <p>حذف</p>
+                    {{ pf.DELETE }}
+                </div>
+                {% endif %}
+                <div class="field-group">
+                    <label>عنوان ارائه</label>
+                    {{ pf.title }}
+                </div>
+                <div class="row-2">
+                    <div class="field-group">
+                        <label>نام کنگره / رویداد</label>
+                        {{ pf.event }}
+                    </div>
+                    <div class="field-group">
+                        <label>سطح رویداد</label>
+                        {{ pf.level }}
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label>نتیجه</label>
+                    {{ pf.result }}
+                </div>
+                {% for hidden in pf.hidden_fields %}{{ hidden }}{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn-add-form" onclick="addFormsetRow('presentationsContainer', 'presentations')">+
+            افزودن ارائه</button>
+
+
+
+        <hr>
+        <!-- ==================== ۴. بالینی ==================== -->
+        <h3 class="heder-form-edit">۴. مهارت‌های بالینی</h3>
+
+        <div class="field-group">
+            <label>گواهینامه‌های مهارتی</label>
+            {{ form.clinical_certs }}
+        </div>
+        <div class="field-group">
+            <label>سوابق کار بالینی</label>
+            {{ form.clinical_exp }}
+        </div>
+        <div class="field-group">
+            <label>مهارت‌های پروسیجرال</label>
+            {{ form.procedures }}
+        </div>
+
+        <hr>
+        <!-- ==================== ۵. زبان و فوق برنامه ==================== -->
+        <h3 class="heder-form-edit">۵. زبان و فوق برنامه</h3>
+
+        <div class="row-2">
+            <div class="field-group">
+                <label>زبان مادری</label>
+                {{ form.native_lang }}
+            </div>
+            <div class="field-group">
+                <label>سطح زبان انگلیسی</label>
+                {{ form.english_level }}
+            </div>
+        </div>
+        <div class="row-2">
+            <div class="field-group">
+                <label>مدرک زبان انگلیسی</label>
+                {{ form.lang_cert }}
+            </div>
+            <div class="field-group">
+                <label>سایر زبان‌ها</label>
+                {{ form.other_langs }}
+            </div>
+        </div>
+
+        <!-- سوابق اجرایی -->
+        <h4>سوابق اجرایی</h4>
+        {{ executive_formset.management_form }}
+        <div id="executiveContainer">
+            {% for xf in executive_formset %}
+            <div class="repeatable-item">
+                {% if xf.instance.pk %}
+                <div class="checkbox-delete">
+                    <p>حذف</p>
+                    {{ xf.DELETE }}
+                </div>
+                {% endif %}
+                <div class="field-group">
+                    <label>عنوان سمت / نام تشکل</label>
+                    {{ xf.title }}
+                </div>
+                <div class="row-2">
+                    <div class="field-group">
+                        <label>تاریخ شروع</label>
+                        {{ xf.start_date }}
+                    </div>
+                    <div class="field-group">
+                        <label>تاریخ پایان</label>
+                        {{ xf.end_date }}
+                    </div>
+                </div>
+                {% for hidden in xf.hidden_fields %}{{ hidden }}{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn-add-form" onclick="addFormsetRow('executiveContainer', 'executive_records')">+
+            افزودن سابقه اجرایی</button>
+
+
+
+        <div class="field-group">
+            <label>فعالیت‌های فوق برنامه</label>
+            {{ form.extracurricular }}
+        </div>
+
+        <hr>
+        <!-- ==================== ۶. دوره‌های آموزشی گذرانده‌شده ==================== -->
+        <h3 class="heder-form-edit">۶. دوره‌های آموزشی گذرانده‌شده</h3>
+        {{ training_course_formset.management_form }}
+
+        <div id="training_coursesContainer">
+            {% for tf in training_course_formset %}
+            <div class="repeatable-item">
+                {% if tf.instance.pk %}
+                <div class="checkbox-delete">
+                    <p>حذف</p>
+                    {{ tf.DELETE }}
+                </div>
+                {% endif %}
+
+                <div class="row-3">
+                    <div class="field-group">
+                        <label>عنوان دوره</label>
+                        {{ tf.title }}
+                        {{ tf.title.errors }}
+                    </div>
+                    <div class="field-group">
+                        <label>دسته</label>
+                        {{ tf.category }}
+                        {{ tf.category.errors }}
+                    </div>
+                    <div class="field-group">
+                        <label>وضعیت</label>
+                        {{ tf.status }}
+                        {{ tf.status.errors }}
+                    </div>
+                </div>
+
+                <div class="row-3">
+                    <div class="field-group">
+                        <label>برگزارکننده</label>
+                        {{ tf.organizer }}
+                        {{ tf.organizer.errors }}
+                    </div>
+                    <div class="field-group">
+                        <label>تاریخ</label>
+                        {{ tf.date }}
+                        {{ tf.date.errors }}
+                    </div>
+                    <div class="field-group">
+                        <label>گواهی</label>
+                        {{ tf.certificate }}
+                        {{ tf.certificate.errors }}
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label>مهارت کسب‌شده</label>
+                    {{ tf.skills_gained }}
+                    {{ tf.skills_gained.errors }}
+                </div>
+
+                {% for hidden in tf.hidden_fields %}{{ hidden }}{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn-add-form"
+            onclick="addFormsetRow('training_coursesContainer', 'training_courses')">
+            + افزودن دوره آموزشی
+        </button>
+
+
+
+        <!-- ==================== ۷. اهداف ==================== -->
+        <h3 class="heder-form-edit">۷. اهداف و چشم‌انداز</h3>
+
+        <div class="field-group">
+            <label>هدف نهایی حرفه‌ای *</label>
+            {{ form.goal }}
+            {{ form.goal.errors }}
+        </div>
+        <div class="field-group">
+            <label>حوزه تخصصی</label>
+            {{ form.specialty }}
+        </div>
+        <div class="field-group">
+            <label>توضیحات اهداف</label>
+            {{ form.goal_notes }}
+        </div>
+
+        {{ form.errors }}
+
+        <div class="btn-form-edit">
+            <a href="{% url 'accounts:profile' pk=request.user.profile.pk %}"
+                class="rm-btn rm-btn-outline rm-btn-block">انصراف</a>
+            <button type="submit">ذخیره و بازگشت به پروفایل</button>
+        </div>
+    </form>
+</div>
+
+
+
+<!-- Empty form templates - مخفی -->
+<div id="social_profiles-empty" style="display:none">
+    {% with social_formset.empty_form as ef %}
+    <div class="row-2">
+        <div class="field-group"><label>نوع شبکه</label>{{ ef.social_type }}</div>
+        <div class="field-group"><label>لینک پروفایل</label>{{ ef.url }}</div>
+    </div>
+    {% for hidden in ef.hidden_fields %}{{ hidden }}{% endfor %}
+    {% endwith %}
+</div>
+
+<div id="educations-empty" style="display:none">
+    {% with education_formset.empty_form as ef %}
+    <div class="row-2">
+        <div class="field-group"><label>رشته *</label>{{ ef.field }}{{ ef.field.errors }}</div>
+        <div class="field-group"><label>مقطع *</label>{{ ef.degree }}{{ ef.degree.errors }}</div>
+    </div>
+    <div class="row-2">
+        <div class="field-group"><label>دانشگاه</label>{{ ef.university }}</div>
+        <div class="field-group"><label>تیپ</label>{{ ef.uni_type }}</div>
+    </div>
+    <div class="row-2">
+        <div class="field-group"><label>شروع</label>{{ ef.start_date }}</div>
+        <div class="field-group"><label>پایان</label>{{ ef.end_date }}</div>
+    </div>
+    <div class="row-3">
+        <div class="field-group"><label>مرحله</label>{{ ef.stage }}</div>
+        <div class="field-group"><label>ترم فعلی</label>{{ ef.current_term }}</div>
+        <div class="field-group"><label>ترم‌های باقیمانده</label>{{ ef.remaining_terms }}</div>
+    </div>
+    <div class="field-group"><label>معدل</label>{{ ef.gpa }}</div>
+    {% for hidden in ef.hidden_fields %}{{ hidden }}{% endfor %}
+    {% endwith %}
+</div>
+
+
+<div id="training_courses-empty" style="display:none">
+    {% with training_course_formset.empty_form as tf %}
+    <div class="row-3">
+        <div class="field-group">
+            <label>عنوان دوره</label>
+            {{ tf.title }}{{ tf.title.errors }}
+        </div>
+        <div class="field-group">
+            <label>دسته</label>
+            {{ tf.category }}{{ tf.category.errors }}
+        </div>
+        <div class="field-group">
+            <label>وضعیت</label>
+            {{ tf.status }}{{ tf.status.errors }}
+        </div>
+    </div>
+
+    <div class="row-3">
+        <div class="field-group">
+            <label>برگزارکننده</label>
+            {{ tf.organizer }}
+        </div>
+        <div class="field-group">
+            <label>تاریخ</label>
+            {{ tf.date }}
+        </div>
+        <div class="field-group">
+            <label>گواهی</label>
+            {{ tf.certificate }}
+        </div>
+    </div>
+
+    <div class="field-group">
+        <label>مهارت کسب‌شده</label>
+        {{ tf.skills_gained }}
+    </div>
+
+    {% for hidden in tf.hidden_fields %}{{ hidden }}{% endfor %}
+    {% endwith %}
+</div>
+
+
+<div id="articles-empty" style="display:none">
+    {% with article_formset.empty_form as af %}
+    <div class="field-group"><label>عنوان</label>{{ af.title }}</div>
+    <div class="row-2">
+        <div class="field-group"><label>ژورنال</label>{{ af.journal }}</div>
+        <div class="field-group"><label>Impact Factor</label>{{ af.impact_factor }}</div>
+    </div>
+    <div class="row-4">
+        <div class="field-group"><label>چارک</label>{{ af.quartile }}</div>
+        <div class="field-group"><label>سال</label>{{ af.year }}</div>
+        <div class="field-group"><label>نفر چندم</label>{{ af.author_rank }}</div>
+        <div class="field-group"><label>تعداد نویسندگان</label>{{ af.total_authors }}</div>
+    </div>
+    <div class="field-group"><label>ایندکس</label>{{ af.index }}</div>
+    {% for hidden in af.hidden_fields %}{{ hidden }}{% endfor %}
+    {% endwith %}
+</div>
+
+<div id="presentations-empty" style="display:none">
+    {% with presentation_formset.empty_form as pf %}
+    <div class="field-group"><label>عنوان</label>{{ pf.title }}</div>
+    <div class="row-2">
+        <div class="field-group"><label>کنگره</label>{{ pf.event }}</div>
+        <div class="field-group"><label>سطح</label>{{ pf.level }}</div>
+    </div>
+    <div class="field-group"><label>نتیجه</label>{{ pf.result }}</div>
+    {% for hidden in pf.hidden_fields %}{{ hidden }}{% endfor %}
+    {% endwith %}
+</div>
+
+<div id="executive_records-empty" style="display:none">
+    {% with executive_formset.empty_form as xf %}
+    <div class="field-group"><label>عنوان سمت</label>{{ xf.title }}</div>
+    <div class="row-2">
+        <div class="field-group"><label>شروع</label>{{ xf.start_date }}</div>
+        <div class="field-group"><label>پایان</label>{{ xf.end_date }}</div>
+    </div>
+    {% for hidden in xf.hidden_fields %}{{ hidden }}{% endfor %}
+    {% endwith %}
+</div>
+
+
+
+
+<script>
+    // ---- نمایش/مخفی کردن فیلد سربازی ----
+    document.getElementById('genderSelect').addEventListener('change', function () {
+        document.getElementById('militaryField').style.display =
+            this.value === 'زن' ? 'none' : 'block';
+    });
+
+    // ---- افزودن ردیف formset ----
+    function addFormsetRow(containerId, prefix) {
+        const totalInput = document.querySelector(`[name="${prefix}-TOTAL_FORMS"]`);
+        if (!totalInput) {
+            console.error(`Management form not found for prefix: "${prefix}". Available:`,
+                [...document.querySelectorAll('[name*="TOTAL_FORMS"]')].map(el => el.name));
+            return;
+        }
+
+        const container = document.getElementById(containerId);
+        const emptyForm = document.getElementById(`${prefix}-empty`);
+        if (!emptyForm) {
+            console.error(`Empty form template not found: #${prefix}-empty`);
+            return;
+        }
+
+        const newIndex = parseInt(totalInput.value);
+        totalInput.value = newIndex + 1;
+
+        const newRow = emptyForm.cloneNode(true);
+        newRow.id = `${prefix}-${newIndex}`;
+        newRow.style.display = '';
+        newRow.className = 'repeatable-item';
+        newRow.innerHTML = newRow.innerHTML.replace(/__prefix__/g, newIndex);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.classList = 'btn-delet-form';
+        deleteBtn.type = 'button';
+        deleteBtn.textContent = 'حذف';
+        deleteBtn.onclick = function () {
+            this.parentElement.remove();
+        };
+
+
+        container.appendChild(newRow);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,30 @@
+<!-- templates/accounts/login.html -->
+ 
+{% extends 'base.html' %}
+
+{% block title %}ورود{% endblock %}
+
+{% block content %}
+
+
+<head>
+    <meta charset="UTF-8">
+    <title>ورود</title>
+</head>
+<body>
+    <h2>ورود به حساب کاربری</h2>
+
+    {% if form.errors %}
+        <p style="color:red;">نام کاربری یا رمز عبور اشتباه است.</p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">ورود</button>
+    </form>
+
+    <p>حساب ندارید؟ <a href="{% url 'accounts:register' %}">ثبت‌نام</a></p>
+
+
+{% endblock %}

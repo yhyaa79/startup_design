@@ -1,0 +1,72 @@
+<!-- templates/roadmap/roadmap_form.html -->
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="rm-page">
+  <div class="rm-page-header rm-page-header-compact">
+    <div class="rm-page-header-inner">
+      <div class="rm-header-left">
+        <span class="rm-eyebrow">رودمپ</span>
+        <h1 class="rm-page-title">{{ action }} رودمپ</h1>
+      </div>
+      <a href="{% url 'roadmap:roadmap_detail' %}" class="rm-btn rm-btn-outline">بازگشت</a>
+    </div>
+  </div>
+
+  <div class="rm-body">
+    <div class="rm-card">
+      <div class="rm-card-header">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        اطلاعات رودمپ
+      </div>
+      <div class="rm-card-body">
+        <form method="post" class="rm-form">
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="rm-field">
+              <label class="rm-label">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}
+                <div class="rm-field-error">{{ field.errors }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+          <div class="rm-form-actions">
+            <button type="submit" class="rm-btn rm-btn-primary">{{ action }}</button>
+            <a href="{% url 'roadmap:roadmap_detail' %}" class="rm-btn rm-btn-outline">انصراف</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {% if roadmap and stages %}
+      <div class="rm-card rm-card-mt">
+        <div class="rm-card-header rm-card-header-flex">
+          <span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            مراحل رودمپ
+          </span>
+          <a href="{% url 'roadmap:stage_create' roadmap.id %}" class="rm-btn rm-btn-xs rm-btn-primary">افزودن مرحله</a>
+        </div>
+        <div class="rm-card-body rm-card-body-flush">
+          <ul class="rm-stage-list">
+            {% for stage in stages %}
+              <li class="rm-stage-list-item">
+                <div class="rm-stage-list-info">
+                  <span class="rm-stage-list-title">{{ stage.title }}</span>
+                  <span class="rm-stage-list-meta">{{ stage.status }} · ترتیب {{ stage.order }}</span>
+                </div>
+                <div class="rm-step-actions">
+                  <a href="{% url 'roadmap:stage_detail' stage.id %}" class="rm-btn rm-btn-xs rm-btn-ghost">جزئیات</a>
+                  <a href="{% url 'roadmap:stage_edit' stage.id %}" class="rm-btn rm-btn-xs rm-btn-outline">ویرایش</a>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

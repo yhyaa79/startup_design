@@ -1,0 +1,529 @@
+<!-- templates/roadmap/stage_form.html -->
+
+
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="rm-page">
+
+    <!-- Header -->
+    <div class="rm-page-header rm-page-header-compact">
+        <div class="rm-page-header-inner">
+            <div class="rm-header-left">
+                <span class="rm-eyebrow">{{ roadmap.title }}</span>
+                <h1 class="rm-page-title">{{ action }} مرحله</h1>
+                <p class="rm-page-desc">
+                    اطلاعات مرحله، فعالیت‌ها و چک‌لیست‌های آن را مدیریت کنید.
+                </p>
+            </div>
+
+            <div class="rm-header-actions">
+                <a href="{% url 'roadmap:stage_detail' stage.id %}" class="rm-btn rm-btn-outline">
+                    بازگشت
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" class="rm-body" id="stage-form">
+        {% csrf_token %}
+
+        <div class="">
+
+            <!-- Main Column -->
+            <div class="rm-detail-main">
+
+                <!-- Stage Info -->
+                <div class="rm-card">
+                    <div class="rm-card-header">
+                        اطلاعات مرحله
+                    </div>
+
+                    <div class="rm-card-body">
+
+                        {% if stage_form.non_field_errors %}
+                        <div class="rm-form-errors">
+                            {% for error in stage_form.non_field_errors %}
+                            <div class="rm-error-text">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% for field in stage_form %}
+                        <div class="rm-form-group">
+                            <label for="{{ field.id_for_label }}" class="rm-form-label">
+                                {{ field.label }}
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                            <small class="rm-form-help">{{ field.help_text }}</small>
+                            {% endif %}
+
+                            {% if field.errors %}
+                            <div class="rm-field-errors">
+                                {% for error in field.errors %}
+                                <div class="rm-error-text">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+                <!-- Activities -->
+                <div class="rm-card rm-card-mt">
+                    <div class="rm-card-header rm-card-header-between">
+                        <span>فعالیت‌های مرحله</span>
+                    </div>
+
+                    <div class="rm-card-body">
+                        {{ activity_formset.management_form }}
+
+                        {% if activity_formset.non_form_errors %}
+                        <div class="rm-form-errors">
+                            {% for error in activity_formset.non_form_errors %}
+                            <div class="rm-error-text">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div id="activity-forms-container">
+
+                            {% for form in activity_formset %}
+                            {% if form.instance.pk %}
+                            <div class="rm-formset-item activity-form-item">
+                                {% for hidden in form.hidden_fields %}
+                                {{ hidden }}
+                                {% endfor %}
+
+                                <div class="rm-formset-head">
+                                    <h4 class="rm-formset-title">فعالیت</h4>
+                                    {% if form.DELETE %}
+                                    <div class="rm-delete-label">
+                                        <p>حذف</p>
+                                        <div>{{ form.DELETE }}</div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="rm-formset-grid">
+                                    {% for field in form.visible_fields %}
+                                    {% if field.name == 'activity' %}
+                                    <div class="rm-form-group activity-picker-group">
+                                        <label class="rm-form-label">{{ field.label }}</label>
+
+                                        <div class="activity-picker" data-field-id="{{ field.id_for_label }}">
+                                            <div class="selected-activity-box">
+                                                {% if form.instance.activity %}
+                                                <strong>{{ form.instance.activity.title }}</strong>
+                                                <div>{{ form.instance.activity.category }}</div>
+                                                <small>{{ form.instance.activity.description }}</small>
+                                                {% else %}
+                                                <span class="placeholder">هنوز فعالیتی انتخاب نشده است</span>
+                                                {% endif %}
+                                            </div>
+
+                                            <button type="button"
+                                                class="rm-btn rm-btn-outline rm-btn-xs open-activity-modal-btn">
+                                                انتخاب فعالیت
+                                            </button>
+                                        </div>
+
+                                        <div style="display:none;">
+                                            {{ field }}
+                                        </div>
+
+                                        {% if field.errors %}
+                                        <div class="rm-field-errors">
+                                            {% for error in field.errors %}
+                                            <div class="rm-error-text">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% elif field.name != 'DELETE' %}
+                                    <div class="rm-form-group">
+                                        <label for="{{ field.id_for_label }}" class="rm-form-label">
+                                            {{ field.label }}
+                                        </label>
+
+                                        {{ field }}
+
+                                        {% if field.help_text %}
+                                        <small class="rm-form-help">{{ field.help_text }}</small>
+                                        {% endif %}
+
+                                        {% if field.errors %}
+                                        <div class="rm-field-errors">
+                                            {% for error in field.errors %}
+                                            <div class="rm-error-text">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+
+                        </div>
+
+                        <template id="activity-empty-form-template">
+                            <div class="rm-formset-item activity-form-item">
+                                __HIDDEN_FIELDS__
+                                <div class="rm-formset-head">
+                                    <h4 class="rm-formset-title">فعالیت جدید</h4>
+                                    <button type="button" class="rm-btn rm-btn-danger rm-btn-xs remove-form-btn">
+                                        حذف
+                                    </button>
+                                </div>
+
+                                <div class="rm-formset-grid">
+                                    __VISIBLE_FIELDS__
+                                </div>
+                            </div>
+                        </template>
+
+                        <div id="activity-empty-form-data" style="display:none;">
+                            {% with form=activity_formset.empty_form %}
+                            <div class="empty-hidden-fields">
+                                {% for hidden in form.hidden_fields %}
+                                {{ hidden }}
+                                {% endfor %}
+                            </div>
+
+                            <div class="empty-visible-fields">
+                                {% for field in form.visible_fields %}
+                                {% if field.name == 'activity' %}
+                                <div class="rm-form-group activity-picker-group">
+                                    <label class="rm-form-label">{{ field.label }}</label>
+
+                                    <div class="activity-picker" data-field-id="{{ field.id_for_label }}">
+                                        <div class="selected-activity-box">
+                                            <span class="placeholder">هنوز فعالیتی انتخاب نشده است</span>
+                                        </div>
+
+                                        <button type="button"
+                                            class="rm-btn rm-btn-outline rm-btn-xs open-activity-modal-btn">
+                                            انتخاب فعالیت
+                                        </button>
+                                    </div>
+
+                                    <div style="display:none;">
+                                        {{ field }}
+                                    </div>
+                                </div>
+                                {% elif field.name != 'DELETE' %}
+                                <div class="rm-form-group">
+                                    <label for="{{ field.id_for_label }}" class="rm-form-label">
+                                        {{ field.label }}
+                                    </label>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                    <small class="rm-form-help">{{ field.help_text }}</small>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+
+                            {% endwith %}
+                        </div>
+                        <button type="button" class="rm-btn rm-btn-primary rm-btn-xs" id="add-activity-btn">
+                            افزودن فعالیت جدید
+                        </button>
+                    </div>
+                    
+                </div>
+
+
+
+                <!-- Side Column -->
+                <div class="rm-detail-side">
+
+                    <!-- Actions -->
+                    <div class="rm-card">
+                        <div class="rm-card-header">
+                            عملیات
+                        </div>
+
+                        {% if request.method == 'POST' %}
+                        <div style="background:red;color:white;padding:10px">
+                            stage: {{ stage_form.errors }}
+                            activity: {{ activity_formset.errors }} | non_form: {{ activity_formset.non_form_errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="rm-card-body">
+                            <div class="rm-action-stack">
+                                <button type="submit" class="rm-btn rm-btn-primary rm-btn-block">
+                                    ذخیره تغییرات
+                                </button>
+
+                                <a href="{% url 'roadmap:stage_detail' stage.id %}"
+                                    class="rm-btn rm-btn-outline rm-btn-block">
+                                    انصراف
+                                </a>
+
+                                <a href="{% url 'roadmap:stage_delete' stage.id %}"
+                                    class="rm-btn rm-btn-danger rm-btn-block"
+                                    onclick="return confirm('آیا از حذف این مرحله مطمئن هستید؟');">
+                                    حذف مرحله
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="activity-modal" class="rm-modal" style="display:none;">
+    <div class="rm-modal-backdrop"></div>
+    <div class="rm-modal-dialog">
+        <div class="rm-modal-header">
+            <h3>انتخاب فعالیت</h3>
+            <button type="button" class="rm-btn rm-btn-danger rm-btn-xs" id="close-activity-modal">بستن</button>
+        </div>
+
+        <div class="rm-modal-body">
+            <div class="rm-form-group">
+                <label class="rm-form-label">جست‌وجو</label>
+                <input type="text" id="activity-search-input" class="rm-form-input" placeholder="عنوان، توضیحات، دسته‌بندی...">
+            </div>
+
+            <div id="activity-list" class="activity-list"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.RoadmapDebug = {
+        enabled: true,
+        log(...args) {
+            if (this.enabled) console.log('[RoadmapDebug]', ...args);
+        },
+        warn(...args) {
+            if (this.enabled) console.warn('[RoadmapDebug]', ...args);
+        },
+        error(...args) {
+            if (this.enabled) console.error('[RoadmapDebug]', ...args);
+        }
+    };
+
+    let currentTargetFieldId = null;
+    let activitySearchTimeout = null;
+
+    function updateElementIndex(html, prefix, index) {
+        const regex = new RegExp(prefix + '-(__prefix__|\\d+)-', 'g');
+        return html.replace(regex, prefix + '-' + index + '-');
+    }
+
+    function addNewForm({
+        prefix,
+        containerId,
+        totalFormsId,
+        dataWrapperId,
+        templateId
+    }) {
+        const container = document.getElementById(containerId);
+        const totalFormsInput = document.getElementById(totalFormsId);
+        const dataWrapper = document.getElementById(dataWrapperId);
+        const template = document.getElementById(templateId);
+
+        if (!container || !totalFormsInput || !dataWrapper || !template) {
+            RoadmapDebug.error('Missing formset elements', {
+                prefix,
+                containerId,
+                totalFormsId,
+                dataWrapperId,
+                templateId
+            });
+            return;
+        }
+
+        const formIndex = parseInt(totalFormsInput.value || '0', 10);
+
+        let hiddenFieldsHtml = dataWrapper.querySelector('.empty-hidden-fields').innerHTML;
+        let visibleFieldsHtml = dataWrapper.querySelector('.empty-visible-fields').innerHTML;
+        let templateHtml = template.innerHTML;
+
+        hiddenFieldsHtml = updateElementIndex(hiddenFieldsHtml, prefix, formIndex);
+        visibleFieldsHtml = updateElementIndex(visibleFieldsHtml, prefix, formIndex);
+
+        templateHtml = templateHtml
+            .replace('__HIDDEN_FIELDS__', hiddenFieldsHtml)
+            .replace('__VISIBLE_FIELDS__', visibleFieldsHtml);
+
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = templateHtml.trim();
+
+        const newItem = wrapper.firstElementChild;
+        if (!newItem) {
+            RoadmapDebug.error('Failed to create new form item', { prefix, formIndex });
+            return;
+        }
+
+        newItem.dataset.formIndex = formIndex;
+        container.appendChild(newItem);
+        totalFormsInput.value = formIndex + 1;
+    }
+
+    function openActivityModal(fieldId) {
+        currentTargetFieldId = fieldId;
+        const modal = document.getElementById('activity-modal');
+        modal.style.display = 'block';
+        loadActivities('');
+    }
+
+    function closeActivityModal() {
+        const modal = document.getElementById('activity-modal');
+        modal.style.display = 'none';
+        currentTargetFieldId = null;
+    }
+
+    function renderActivities(activities) {
+        const list = document.getElementById('activity-list');
+
+        if (!activities.length) {
+            list.innerHTML = '<div class="rm-empty">هیچ فعالیتی پیدا نشد.</div>';
+            return;
+        }
+
+        list.innerHTML = activities.map(activity => `
+            <div class="activity-card">
+                <div class="activity-card-header">
+                    <h4>${activity.title}</h4>
+                    <span class="activity-badge">${activity.category || ''}</span>
+                </div>
+
+                <div class="activity-card-body">
+                    <p>${activity.description || ''}</p>
+                    ${activity.resume_output ? `<div class="activity-card-body-item"><strong class="activity-card-body-strong">خروجی رزومه:</strong> ${activity.resume_output}</div>` : ''}
+                    ${activity.duration_days ? `<div class="activity-card-body-item"><strong class="activity-card-body-strong">مدت زمان:</strong> ${activity.duration_days} روز</div>` : ''}
+                </div>
+
+                <div class="activity-card-footer">
+                    <button type="button"
+                            class="rm-btn rm-btn-primary rm-btn-xs select-activity-btn"
+                            data-id="${activity.id}"
+                            data-title="${(activity.title || '').replace(/"/g, '&quot;')}"
+                            data-category="${(activity.category || '').replace(/"/g, '&quot;')}"
+                            data-description="${(activity.description || '').replace(/"/g, '&quot;')}">
+                        انتخاب
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function loadActivities(query) {
+        const url = `{% url 'roadmap:activity_search_api' %}?q=${encodeURIComponent(query)}`;
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            renderActivities(data.results || []);
+        })
+        .catch(error => {
+            RoadmapDebug.error('Error loading activities', error);
+        });
+    }
+
+    function setSelectedActivity(fieldId, activityData) {
+        const field = document.getElementById(fieldId);
+        if (!field) {
+            RoadmapDebug.error('Target field not found', fieldId);
+            return;
+        }
+
+        field.value = activityData.id;
+
+        const picker = field.closest('.rm-form-group').querySelector('.selected-activity-box');
+        if (picker) {
+            picker.innerHTML = `
+                <strong>${activityData.title}</strong>
+                <div>${activityData.category || ''}</div>
+                <small>${activityData.description || ''}</small>
+            `;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const addActivityBtn = document.getElementById('add-activity-btn');
+        if (addActivityBtn) {
+            addActivityBtn.addEventListener('click', function () {
+                addNewForm({
+                    prefix: 'activities',
+                    containerId: 'activity-forms-container',
+                    totalFormsId: 'id_activities-TOTAL_FORMS',
+                    dataWrapperId: 'activity-empty-form-data',
+                    templateId: 'activity-empty-form-template'
+                });
+            });
+        }
+
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-form-btn')) {
+                const item = e.target.closest('.rm-formset-item');
+                if (item) {
+                    item.remove();
+                }
+            }
+
+            if (e.target.classList.contains('open-activity-modal-btn')) {
+                const picker = e.target.closest('.activity-picker');
+                const fieldId = picker.dataset.fieldId;
+                openActivityModal(fieldId);
+            }
+
+            if (e.target.classList.contains('select-activity-btn')) {
+                const btn = e.target;
+                setSelectedActivity(currentTargetFieldId, {
+                    id: btn.dataset.id,
+                    title: btn.dataset.title,
+                    category: btn.dataset.category,
+                    description: btn.dataset.description
+                });
+                closeActivityModal();
+            }
+        });
+
+        const closeBtn = document.getElementById('close-activity-modal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeActivityModal);
+        }
+
+        const backdrop = document.querySelector('.rm-modal-backdrop');
+        if (backdrop) {
+            backdrop.addEventListener('click', closeActivityModal);
+        }
+
+        const searchInput = document.getElementById('activity-search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                clearTimeout(activitySearchTimeout);
+                activitySearchTimeout = setTimeout(() => {
+                    loadActivities(searchInput.value.trim());
+                }, 300);
+            });
+        }
+    });
+</script>
+
+
+
+{% endblock %}

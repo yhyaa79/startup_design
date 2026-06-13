@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+accounts/ai_utils.py
+roadmap/services/ai_roadmap.py
+roadmap/services/profile_activity_sync.py
+
+# Virtual environment
+venv/
+.env/
+.venv/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Secret / environment files
+.env
+.env.*
+*.env
+secret_key.txt
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Migrations cache (not migration files)
+**/__pycache__/
+
+# Build files
+dist/
+build/
+*.egg-info/
+
+# Local settings
+local_settings.py
+
+# If you have uploaded files
+uploads/

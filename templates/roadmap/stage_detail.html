@@ -1,0 +1,154 @@
+<!-- templates/roadmap/stage_detail.html -->
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="rm-page">
+    <div class="rm-page-header rm-page-header-compact">
+        <div class="rm-page-header-inner">
+            <div class="rm-header-left">
+                <span class="rm-eyebrow">{{ roadmap.title }}</span>
+                <h1 class="rm-page-title">{{ stage.title }}</h1>
+            </div>
+            <div class="rm-header-actions">
+                <a href="{% url 'roadmap:stage_edit' stage.id %}" class="rm-btn rm-btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                    ویرایش مرحله
+                </a>
+                <a href="{% url 'roadmap:roadmap_detail' %}" class="rm-btn rm-btn-outline">
+                    بازگشت
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <div class="fields-grid col-4">
+            <div class="rm-stat-card">
+                <span class="rm-stat-label">وضعیت مرحله</span>
+                {% if stage.get_progress == 100 %}
+                <span class="rm-stat-value">تکمیل‌شده</span>
+                {% elif stage.id == active_stage.id %}
+                <span class="rm-stat-value">در حال انجام</span>
+                {% else %}
+                <span class="rm-stat-value">در انتظار</span>
+                {% endif %}
+            </div>
+            <div class="rm-stat-card">
+                <span class="rm-stat-label">ترتیب مرحله</span>
+                <span class="rm-stat-value">{{ stage.order }}</span>
+            </div>
+            <div class="rm-stat-card rm-stat-card-progress">
+                <span class="rm-stat-label">پیشرفت</span>
+                <div class="rm-progress-wrap">
+                    <div class="rm-progress-bar-track">
+                        <div class="rm-progress-bar-fill" style="width: {{ progress }}%;"></div>
+                    </div>
+                    <span class="rm-progress-pct">{{ progress }}%</span>
+                </div>
+            </div>
+            <div class="rm-stat-card">
+                <span class="rm-stat-label">مدت زمان</span>
+                <span class="rm-stat-value">{{ duration }} <small>روز</small></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="">
+
+        <div class="rm-detail-main">
+            <div class="rm-card">
+                <div class="rm-card-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                    اطلاعات مرحله
+                </div>
+                <div class="rm-card-body">
+                    {% if stage.description %}
+                    <div class="rm-info-row">
+                        <span class="rm-info-label">توضیحات</span>
+                        <span class="rm-info-val">{{ stage.description }}</span>
+                    </div>
+                    {% endif %}
+                    {% if stage.objectives %}
+                    <div class="rm-info-row">
+                        <span class="rm-info-label">اهداف</span>
+                        <span class="rm-info-val">{{ stage.objectives }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="rm-card rm-card-mt">
+                <div class="rm-card-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" /></svg>
+                    فعالیت‌های مرحله
+                </div>
+                <div class="rm-card-body rm-card-body-flush">
+                    {% if stage.stage_activities.all %}
+                    <div class="rm-activity-table-wrap">
+                        <table class="rm-activity-table">
+                            <thead>
+                                <tr>
+                                    <th>عنوان فعالیت</th>
+                                    <th>دسته</th>
+                                    <th>مدت</th>
+                                    <th>خروجی رزومه</th>
+                                    <th>وضعیت</th>
+                                    <th>اقدام</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in stage.stage_activities.all %}
+                                <tr class="{% if item.is_completed %}rm-row-done{% endif %}">
+                                    <td class="rm-td-title">
+                                        {{ item.activity.title }}
+                                        <div class="rm-td-note">{{ item.activity.description }}</div>
+                                    </td>
+                                    <td><span class="tag">{{ item.activity.category }}</span></td>
+                                    <td>{{ item.activity.duration_days }} روز</td>
+                                    <td class="rm-td-muted">{{ item.activity.resume_output }}</td>
+                                    <td>
+                                        {% if item.is_completed %}
+                                        <span class="tag rm-status-done">تکمیل‌شده</span>
+                                        {% else %}
+                                        <span class="tag rm-status-upcoming">در انتظار</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if not item.is_completed %}
+                                        <form method="post" action="{% url 'roadmap:stage_activity_toggle' item.id %}"
+                                            onsubmit="return confirm('مطمئن هستید؟ بعد از تأیید، دیگر امکان تغییر وضعیت این فعالیت وجود نخواهد داشت.');">
+                                            {% csrf_token %}
+                                            <button type="submit">تغییر وضعیت</button>
+                                        </form>
+                                        {% else %}
+                                        <span class="rm-btn-not-activ">غیرفعال</span>
+                                        {% endif %}
+                                    </td>
+
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="rm-card-empty">فعالیتی برای این مرحله ثبت نشده است.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
