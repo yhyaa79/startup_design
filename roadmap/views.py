@@ -9,6 +9,15 @@ from .forms import (
     RoadmapForm, StageForm,
     StageActivityFormSet
 )
+from accounts.models import (
+    Profile,
+    TrainingCourse,
+    Article,
+    Presentation,
+    ExecutiveRecord,
+    Education,
+    SocialProfile,
+)
 from .services.ai_roadmap import generate_ai_roadmap
 import logging
 from accounts.models import TrainingCourse, Article, Presentation, ExecutiveRecord
@@ -305,6 +314,16 @@ def stage_activity_toggle(request, stage_activity_id):
 
 
 
+# roadmap/views.py
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.db import transaction
+
+from .models import Roadmap, Stage, StageActivity, Activity
+from .services.ai_roadmap import generate_ai_roadmap
+
+
 @login_required
 def roadmap_generate_ai(request):
     """
@@ -313,40 +332,43 @@ def roadmap_generate_ai(request):
 
     profile = request.user.profile
 
-    if hasattr(profile, 'roadmap'):
-        return redirect('roadmap:roadmap_detail')
+    if hasattr(profile, "roadmap"):
+        return redirect("roadmap:roadmap_detail")
 
     roadmap_json = generate_ai_roadmap(profile)
 
-    roadmap = Roadmap.objects.create(
-        profile=profile,
-        title=roadmap_json["title"],
-        description=roadmap_json["description"],
-        status=roadmap_json.get("status", "فعال")
-    )
-
-    for stage_data in roadmap_json.get("stages", []):
-
-        stage = Stage.objects.create(
-            roadmap=roadmap,
-            title=stage_data["title"],
-            description=stage_data.get("description", ""),
-            objectives=stage_data.get("objectives", ""),
-            order=stage_data.get("order", 0),
+    with transaction.atomic():
+        roadmap = Roadmap.objects.create(
+            profile=profile,
+            title=roadmap_json["title"],
+            description=roadmap_json.get("description", ""),
+            status=roadmap_json.get("status", "فعال"),
         )
 
-        # activities
-        for act in stage_data.get("activities", []):
-            activity = Activity.objects.filter(title=act["title"]).first()
+        for stage_data in roadmap_json.get("stages", []):
+            stage = Stage.objects.create(
+                roadmap=roadmap,
+                title=stage_data["title"],
+                description=stage_data.get("description", ""),
+                objectives=stage_data.get("objectives", ""),
+                order=stage_data.get("order", 0),
+            )
 
-            if activity:
-                StageActivity.objects.create(
-                    stage=stage,
-                    activity=activity,
-                    notes=act.get("notes", "")
-                )
+            for order, act in enumerate(stage_data.get("activities", []), start=1):
+                activity = Activity.objects.filter(
+                    title=act["title"],
+                    is_active=True,
+                ).first()
 
-    return redirect('roadmap:roadmap_detail')
+                if activity:
+                    StageActivity.objects.create(
+                        stage=stage,
+                        activity=activity,
+                        notes=act.get("notes", ""),
+                        order=order,
+                    )
+
+    return redirect("roadmap:roadmap_detail")
 
 
 

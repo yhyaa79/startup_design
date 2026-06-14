@@ -6,6 +6,7 @@ __pycache__/
 accounts/ai_utils.py
 roadmap/services/ai_roadmap.py
 roadmap/services/profile_activity_sync.py
+roadmap/services/ai_roadmap.py
 
 # Virtual environment
 venv/

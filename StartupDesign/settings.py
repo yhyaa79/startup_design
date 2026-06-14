@@ -74,6 +74,33 @@ TEMPLATES = [
 WSGI_APPLICATION = "StartupDesign.wsgi.application"
 
 
+# settings.py
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
+
+
+import os
+
+# api key
+
+GAPGPT_API_BASE = os.getenv("GAPGPT_API_BASE", "https://api.gapgpt.app/v1")
+GAPGPT_API_KEY = os.getenv("GAPGPT_API_KEY", "")
+GAPGPT_MODEL_NAME = os.getenv("GAPGPT_MODEL_NAME", "gapgpt-qwen-3.5")
+GAPGPT_TIMEOUT = int(os.getenv("GAPGPT_TIMEOUT", "120"))
+
+
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
