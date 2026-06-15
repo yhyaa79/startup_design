@@ -1,10 +1,14 @@
 <!-- templates/core/home.html -->
 
+
 {% extends 'base.html' %}
 
 {% block title %}صفحه اصلی{% endblock %}
+{% block topbar_title %}داشبورد مدیریت{% endblock %}
 
 {% block content %}
+
+
 <div class="content">
     <!-- TWO-COLUMN CONTENT -->
     <div class="content-profile">
@@ -100,7 +104,7 @@
 
 
             <!-- ROADMAP -->
-            {% if roadmcap %}
+            {% if roadmap %}
             <div class="roadmap-card">
                 <div class="section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -199,11 +203,15 @@
             {% else %}
             <div class="roadmap-card">
                 <p>هنوز نقشه راهی برای شما تعریف نشده است.</p>
-                <p>ابتدا از کامل بودن پروفایل خود اطمینان حاصل کند بعد گزینه "ایجاد نقشه راه" را انتخاب کنید</p>
+                <p>ابتدا از کامل بودن پروفایل خود اطمینان حاصل کنید بعد گزینه "ایجاد نقشه راه" را انتخاب کنید</p>
                 {% if user.is_authenticated and not user.profile.first_name and not user.profile.last_name and not user.profile.job_title %}
-                برای ساخت رود مپ حرفه ای لطفا اول پروفایل خود را بسازید
+                    برای ساخت رود مپ حرفه‌ای لطفاً اول پروفایل خود را بسازید
                 {% else %}
-                    <a href="{% url 'roadmap:roadmap_generate_ai' %}" class="rm-btn rm-btn-primary">ایجاد نقشه راه</a>
+                    <!-- لینک با intercept جاوااسکریپت -->
+                <!-- لینک بدون href معمولی -->
+<!--                 <a href="#" id="roadmapLink" class="rm-btn rm-btn-primary" onclick="handleRoadmapClick(event)">
+                    ایجاد نقشه راه
+                </a> -->
                 {% endif %}
             </div>
             {% endif %}
@@ -601,46 +609,181 @@
 
 
 </div>
-{% endblock %}
-
-
-
-
-<!-- 
-
-<div class="content">
-    <div class="row justify-content-center">
-        <div class="col-md-6 text-center">
-            <h1 class="mb-4">خوش آمدید</h1>
-
-            <div class="d-grid gap-3">
-
-                {% if request.user.is_authenticated %}
-                <a href="{% url 'accounts:profile' pk=request.user.profile.pk %}">
-                    مشاهده پروفایل
-                </a>
-
-
-                <a href="{% url 'accounts:edit_profile' %}" class="btn btn-outline-secondary btn-lg">
-                    ویرایش پروفایل
-                </a>
-
-                <a href="{% url 'accounts:edit_profile_ai' %}" class="btn btn-outline-secondary btn-lg">
-                    ویرایش پروفایل با هوش مصنوعی
-                </a>
-
-                {% else %}
-                <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg">
-                    ورود به حساب
-                </a>
-                <a href="{% url 'accounts:register' %}" class="btn btn-outline-secondary btn-lg">
-                    ثبت نام
-                </a>
-                {% endif %}
-
+<!-- ═══ مودال پردازش ═══ -->
+<div id="processingModal" class="processing-modal" style="display:none;">
+    <div class="processing-content">
+        <div class="processing-animation">
+            <div class="brain-icon">
+                <svg viewBox="0 0 100 100" width="80" height="80">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.3"/>
+                    <circle cx="50" cy="50" r="35" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.5"/>
+                    <circle cx="50" cy="50" r="25" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.7"/>
+                    <circle cx="50" cy="50" r="15" fill="#4A90D9">
+                        <animate attributeName="r" values="15;18;15" dur="1s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="1;0.7;1" dur="1s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="20" cy="30" r="3" fill="#4A90D9">
+                        <animate attributeName="cy" values="30;20;30" dur="1.5s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="80" cy="40" r="3" fill="#4A90D9">
+                        <animate attributeName="cy" values="40;30;40" dur="1.8s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0;1;0" dur="1.8s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="30" cy="70" r="3" fill="#4A90D9">
+                        <animate attributeName="cy" values="70;60;70" dur="1.3s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0;1;0" dur="1.3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="70" cy="65" r="3" fill="#4A90D9">
+                        <animate attributeName="cy" values="65;75;65" dur="1.6s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+            </div>
+            <div class="processing-text">
+                <h3>در حال ایجاد نقشه راه...</h3>
+                <p>هوش مصنوعی در حال تحلیل پروفایل شما است</p>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
             </div>
         </div>
     </div>
 </div>
 
--->
+<!-- ═══ مودال خطا ═══ -->
+<div id="errorModal" class="processing-modal" style="display:none;">
+    <div class="processing-content">
+        <div class="processing-text">
+            <h3>خطا در پردازش</h3>
+            <p>در حال حاضر سرویس هوش مصنوعی در دسترس نیست.</p>
+            <p>لطفاً چند دقیقه دیگر دوباره تلاش کنید.</p>
+            <button onclick="closeErrorModal()" class="btn-submit" style="margin-top:16px;">
+                بستن
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.processing-modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.processing-content {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 50px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideUp 0.4s ease;
+    max-width: 400px;
+    width: 90%;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.processing-animation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.brain-icon { animation: pulse 2s ease-in-out infinite; }
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50%       { transform: scale(1.05); }
+}
+
+.processing-text h3 {
+    color: #2c3e50;
+    font-size: 1.3rem;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+}
+
+.processing-text p {
+    color: #7f8c8d;
+    font-size: 0.95rem;
+    margin: 4px 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #ecf0f1;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4A90D9, #67B26F, #4A90D9);
+    background-size: 200% 100%;
+    border-radius: 3px;
+    animation: progressMove 1.5s ease-in-out infinite;
+}
+
+@keyframes progressMove {
+    0%   { width: 0%;   background-position: 0%   50%; }
+    50%  { width: 70%;  background-position: 100% 50%; }
+    100% { width: 100%; background-position: 0%   50%; }
+}
+</style>
+
+<script>
+async function handleRoadmapClick(event) {
+    event.preventDefault();
+
+    document.getElementById('processingModal').style.display = 'flex';
+
+    try {
+        const response = await fetch("{% url 'roadmap:roadmap_generate_ai' %}", {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            window.location.href = data.redirect_url;
+        } else {
+            document.getElementById('processingModal').style.display = 'none';
+            document.getElementById('errorModal').style.display = 'flex';
+        }
+
+    } catch (error) {
+        document.getElementById('processingModal').style.display = 'none';
+        document.getElementById('errorModal').style.display = 'flex';
+    }
+}
+
+function closeErrorModal() {
+    document.getElementById('errorModal').style.display = 'none';
+}
+</script>
+
+
+{% endblock %}

@@ -1,27 +1,32 @@
 <!-- templates/accounts/edit_profile_details.html -->
 
 {% extends 'base.html' %}
+
 {% block title %}پروفایل{% endblock %}
+{% block topbar_title %}ویرایش پروفایل{% endblock %}
+
 {% block content %}
 
 
-<div class="content">
+<div class="div-hidden">
+    {% block topbar_actions %}
+    <button type="submit" form="profileForm" class="rm-btn rm-btn-primary">
+        ذخیره ویرایش
+    </button>
 
-        <div class="rm-page-header-inner-profile">
-        <div class="rm-header-left">
-            <span class="rm-eyebrow">30% تکمیل شده</span>
-            <h1 class="rm-page-title">ویرایش پروفایل</h1>
-        </div>
-        <div class="rm-header-actions">
-            <a href="{% url 'accounts:profile' pk=request.user.profile.pk %}" class="rm-btn rm-btn-outline">
-                بازگشت
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <polyline points="15 18 9 12 15 6" />
-                </svg>
-            </a>
-        </div>
-    </div>
+
+    <a href="{% url 'accounts:profile' pk=request.user.profile.pk %}" class="rm-btn rm-btn-outline">
+        بازگشت
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6" />
+        </svg>
+    </a>
+    {% endblock %}
+</div>
+
+
+
+<div class="content">
 
     <form id="profileForm" class="profile-card" method="post" action="{% url 'accounts:edit_profile' %}">
         {% csrf_token %}
@@ -512,12 +517,6 @@
         </div>
 
         {{ form.errors }}
-
-        <div class="btn-form-edit">
-            <a href="{% url 'accounts:profile' pk=request.user.profile.pk %}"
-                class="rm-btn rm-btn-outline rm-btn-block">انصراف</a>
-            <button type="submit">ذخیره و بازگشت به پروفایل</button>
-        </div>
     </form>
 </div>
 

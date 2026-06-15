@@ -262,7 +262,7 @@ label {
 }
 
 .sidebar-logo {
-    padding: 28px 24px 20px;
+    padding: 28px 20px 20px;
     border-bottom: 1px solid var(--border);
 }
 
@@ -277,8 +277,8 @@ label {
 }
 
 .logo-icon {
-    width: 36px;
-    height: 36px;
+    width: 42px;
+    height: 42px;
     background: var(--primary);
     border-radius: var(--radius-sm);
     display: flex;
@@ -324,6 +324,8 @@ label {
     color: #3b82f6;
     text-decoration: none;
 }
+
+
 
 
 .sidebar-nav {
@@ -435,7 +437,7 @@ label {
 .topbar-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 14px;
 }
 
 .icon-btn {
@@ -1280,6 +1282,13 @@ label {
     z-index: 50;
 }
 
+.topbar-page-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
 .topbar-title {
     font-size: 14px;
     font-weight: 700;
@@ -1294,12 +1303,6 @@ label {
     height: 16px;
     color: var(--primary);
     stroke-width: 1.5;
-}
-
-.topbar-actions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
 }
 
 .icon-btn {
@@ -1423,6 +1426,10 @@ label {
     color: var(--primary);
     padding: 2px 8px;
     border-radius: 20px;
+}
+
+.div-hidden {
+ display: none;
 }
 
 /* PROFILE HERO */
@@ -3131,7 +3138,7 @@ label {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 16px;
+    padding: 5px 8px;
     border-radius: var(--radius-sm);
     font-size: 13px;
     font-weight: 600;

@@ -314,11 +314,11 @@ def stage_activity_toggle(request, stage_activity_id):
 
 
 
-# roadmap/views.py
-
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.db import transaction
+from django.http import JsonResponse
+from django.urls import reverse
 
 from .models import Roadmap, Stage, StageActivity, Activity
 from .services.ai_roadmap import generate_ai_roadmap
@@ -333,42 +333,63 @@ def roadmap_generate_ai(request):
     profile = request.user.profile
 
     if hasattr(profile, "roadmap"):
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({
+                "success": True,
+                "redirect_url": reverse("roadmap:roadmap_detail")
+            })
         return redirect("roadmap:roadmap_detail")
 
-    roadmap_json = generate_ai_roadmap(profile)
+    try:
+        roadmap_json = generate_ai_roadmap(profile)
 
-    with transaction.atomic():
-        roadmap = Roadmap.objects.create(
-            profile=profile,
-            title=roadmap_json["title"],
-            description=roadmap_json.get("description", ""),
-            status=roadmap_json.get("status", "فعال"),
-        )
-
-        for stage_data in roadmap_json.get("stages", []):
-            stage = Stage.objects.create(
-                roadmap=roadmap,
-                title=stage_data["title"],
-                description=stage_data.get("description", ""),
-                objectives=stage_data.get("objectives", ""),
-                order=stage_data.get("order", 0),
+        with transaction.atomic():
+            roadmap = Roadmap.objects.create(
+                profile=profile,
+                title=roadmap_json["title"],
+                description=roadmap_json.get("description", ""),
+                status=roadmap_json.get("status", "فعال"),
             )
 
-            for order, act in enumerate(stage_data.get("activities", []), start=1):
-                activity = Activity.objects.filter(
-                    title=act["title"],
-                    is_active=True,
-                ).first()
+            for stage_data in roadmap_json.get("stages", []):
+                stage = Stage.objects.create(
+                    roadmap=roadmap,
+                    title=stage_data["title"],
+                    description=stage_data.get("description", ""),
+                    objectives=stage_data.get("objectives", ""),
+                    order=stage_data.get("order", 0),
+                )
 
-                if activity:
-                    StageActivity.objects.create(
-                        stage=stage,
-                        activity=activity,
-                        notes=act.get("notes", ""),
-                        order=order,
-                    )
+                for order, act in enumerate(stage_data.get("activities", []), start=1):
+                    activity = Activity.objects.filter(
+                        title=act["title"],
+                        is_active=True,
+                    ).first()
 
-    return redirect("roadmap:roadmap_detail")
+                    if activity:
+                        StageActivity.objects.create(
+                            stage=stage,
+                            activity=activity,
+                            notes=act.get("notes", ""),
+                            order=order,
+                        )
+
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({
+                "success": True,
+                "redirect_url": reverse("roadmap:roadmap_detail")
+            })
+
+        return redirect("roadmap:roadmap_detail")
+
+    except Exception:
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({
+                "success": False,
+                "message": "خطا در ساخت نقشه راه"
+            }, status=500)
+
+        return redirect("core:home")
 
 
 

@@ -25,7 +25,8 @@ SECRET_KEY = "django-insecure-$^ovj=cm3*k-#ic#%9)eeclp_c-b8kbs4vop^0z+9$xmat%!9n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['startupdesign.liara.run']
+#ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -103,13 +104,28 @@ GAPGPT_TIMEOUT = int(os.getenv("GAPGPT_TIMEOUT", "120"))
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
+""" 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     }
+} 
+"""
+
+from pathlib import Path
+import os
+
+
+DB_PATH = os.getenv("SQLITE_PATH", "/usr/src/app/database/db.sqlite3")
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": DB_PATH,
+    }
 }
+
 
 
 # Password validation

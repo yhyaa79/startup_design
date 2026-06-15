@@ -1,0 +1,16 @@
+{
+  "app": "startupdesign",
+  "port": 80,
+  "build": {
+    "location": "iran"
+  },
+  "disks": [
+    {
+      "name": "database",
+      "mountTo": "/usr/src/app/database"
+    }
+  ],
+  "django": {
+    "settingsFile": "StartupDesign/settings.py"
+  }
+}
