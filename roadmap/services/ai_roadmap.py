@@ -6,7 +6,6 @@ import re
 import requests
 
 from django.conf import settings
-
 from roadmap.models import Activity
 from roadmap.services.profile_data import _collect_profile_data
 
@@ -15,10 +14,6 @@ from roadmap.services.profile_data import _collect_profile_data
 # تنظیمات API
 # ═══════════════════════════════════════════════════════════════
 
-API_BASE = "https://api.gapgpt.app/v1"
-API_KEY = "sk-pIFI1SNGCgPOiY2vDP3kZAjVK0omTdYv7zBBbs32tsg9pgYg"
-
-MODEL_NAME = "gapgpt-qwen-3.5"
 TIMEOUT = 120  # ثانیه
 
 # ═══════════════════════════════════════════════════════════════
@@ -30,7 +25,7 @@ def _call_gpt_api(messages: list, max_tokens: int = 4000) -> str:
     ارسال درخواست به API و دریافت پاسخ مدل.
     """
 
-    if not API_KEY:
+    if not settings.GAPGPT_API_KEY:
         raise ValueError(
             "API Key تنظیم نشده است. "
             "لطفاً GAPGPT_API_KEY را در settings یا env تنظیم کنید."
@@ -38,11 +33,11 @@ def _call_gpt_api(messages: list, max_tokens: int = 4000) -> str:
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}",
+        "Authorization": f"Bearer {settings.GAPGPT_API_KEY}",
     }
 
     payload = {
-        "model": MODEL_NAME,
+        "model": settings.GAPGPT_MODEL_NAME,
         "messages": messages,
         "max_tokens": max_tokens,
         "temperature": 0.25,
@@ -50,7 +45,7 @@ def _call_gpt_api(messages: list, max_tokens: int = 4000) -> str:
 
     try:
         response = requests.post(
-            f"{API_BASE}/chat/completions",
+            f"{settings.GAPGPT_API_BASE}/chat/completions",
             headers=headers,
             json=payload,
             timeout=TIMEOUT,

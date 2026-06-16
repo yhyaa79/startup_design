@@ -137,7 +137,11 @@ def edit_profile_ai(request):
                 text = (text + '\n' + file_text).strip()
             except (ImportError, ValueError) as e:
                 messages.error(request, str(e))
-                return render(request, 'accounts/edit_profile_ai_details.html', {'raw_text': profile.raw_text})
+                return render(
+                    request,
+                    'accounts/edit_profile_ai_details.html',
+                    {'raw_text': profile.raw_text}
+                )
 
         profile.raw_text = text
         profile.save(update_fields=['raw_text'])
@@ -145,7 +149,10 @@ def edit_profile_ai(request):
         try:
             data = extract_profile_from_text(text)
         except Exception:
-            messages.error(request, "در حال حاضر سرویس هوش مصنوعی در دسترس نیست. لطفاً بعداً دوباره تلاش کنید.")
+            messages.error(
+                request,
+                "در حال حاضر سرویس هوش مصنوعی در دسترس نیست. لطفاً بعداً دوباره تلاش کنید."
+            )
             return render(
                 request,
                 'accounts/edit_profile_ai_details.html',
@@ -154,9 +161,6 @@ def edit_profile_ai(request):
                     'ai_error': True
                 }
             )
-
-
-        data = extract_profile_from_text(text)
 
         for field, value in data.get('profile', {}).items():
             setattr(profile, field, value)
@@ -181,5 +185,9 @@ def _bulk_replace(related_manager, model_class, items: list, profile):
 
 
 def _bulk_append(related_manager, model_class, items: list, profile):
+    # فیلدهای معتبر مدل رو بگیر
+    valid_fields = {f.name for f in model_class._meta.get_fields() if hasattr(f, 'column')}
     for item in items:
-        model_class.objects.create(profile=profile, **item)
+        # فقط فیلدهای معتبر رو نگه دار
+        filtered = {k: v for k, v in item.items() if k in valid_fields}
+        model_class.objects.create(profile=profile, **filtered)

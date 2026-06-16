@@ -4,4 +4,5 @@ pathlib==1.0.1
 Django==4.2.16
 django-nested-admin
 requests
+psycopg2-binary
 

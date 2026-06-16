@@ -3,16 +3,16 @@
 import json
 import re
 import requests
+from django.conf import settings
 
+
+
+TIMEOUT = getattr(settings, "GAPGPT_TIMEOUT", 60)
 
 # ═══════════════════════════════════════════════════════════════
 # تنظیمات API - GapGPT
 # ═══════════════════════════════════════════════════════════════
-API_BASE = "https://api.gapgpt.app/v1"
-API_KEY = "sk-pIFI1SNGCgPOiY2vDP3kZAjVK0omTdYv7zBBbs32tsg9pgYg"
 
-MODEL_NAME = "gapgpt-qwen-3.5"
-TIMEOUT = 120  # ثانیه
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -90,13 +90,14 @@ TIMEOUT = 120  # ثانیه
           "index": "ISI / Web of Science" | "Scopus" | "PubMed" | "ISI + Scopus" | "سایر" | ""
         }
       ],
-      "presentations": [
-        {
-          "title": str,
-          "event": str,
-          "level": "بین‌المللی" | "ملی" | "قطبی" | "دانشگاهی" | "",
-          "result": "برگزیده / جایزه" | "ارائه عادی" | ""
-        }
+        "presentations": [
+            {
+                "title": "",
+                "event": "",
+                "level": "",   # بین‌المللی | ملی | قطبی | دانشگاهی
+                "result": ""   # برگزیده / جایزه | ارائه عادی
+            }
+        ],
       ],
       "executive_records": [
         {
@@ -124,34 +125,19 @@ TIMEOUT = 120  # ثانیه
 # تابع کمکی برای ارتباط با API
 # ═══════════════════════════════════════════════════════════════
 
-def _call_gpt_api(messages: list, max_tokens: int = 4000) -> str:
-    """
-    ارسال درخواست به API GapGPT و دریافت پاسخ.
-    
-    Args:
-        messages: لیست پیام‌ها در فرمت OpenAI
-        max_tokens: حداکثر توکن خروجی
-    
-    Returns:
-        متن پاسخ از مدل
-    
-    Raises:
-        ConnectionError: در صورت بروز خطای شبکه
-        ValueError: در صورت دریافت پاسخ نامعتبر
-    """
-    if API_KEY == "YOUR_API_KEY_HERE" or not API_KEY:
-        raise ValueError(
-            "API Key تنظیم نشده است! "
-            "لطفاً متغیر API_KEY را در فایل ai_utils.py ویرایش کنید."
-        )
+
+
+def _call_gpt_api(messages: list, max_tokens: int = 2000) -> str:
+    if settings.GAPGPT_API_KEY == "YOUR_API_KEY_HERE" or not settings.GAPGPT_API_KEY:
+        raise ValueError("API Key تنظیم نشده است.")
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}",
+        "Authorization": f"Bearer {settings.GAPGPT_API_KEY}",
     }
 
     payload = {
-        "model": MODEL_NAME,
+        "model": settings.GAPGPT_MODEL_NAME,
         "messages": messages,
         "max_tokens": max_tokens,
         "temperature": 0.3,
@@ -159,35 +145,33 @@ def _call_gpt_api(messages: list, max_tokens: int = 4000) -> str:
 
     try:
         response = requests.post(
-            f"{API_BASE}/chat/completions",
+            f"{settings.GAPGPT_API_BASE}/chat/completions",
             headers=headers,
             json=payload,
-            timeout=TIMEOUT,
+            timeout=(10, TIMEOUT),
         )
         response.raise_for_status()
-        
-        data = response.json()
-        content = data["choices"][0]["message"]["content"]
-        return content
 
-    except requests.exceptions.ConnectionError:
-        raise ConnectionError("خطا در اتصال به API. لطفاً اتصال اینترنت خود را بررسی کنید.")
+        data = response.json()
+        return data["choices"][0]["message"]["content"]
+
     except requests.exceptions.Timeout:
         raise TimeoutError("زمان انتظار برای پاسخ API به پایان رسید.")
+    except requests.exceptions.ConnectionError:
+        raise ConnectionError("خطا در اتصال به API.")
     except requests.exceptions.HTTPError as e:
         raise ValueError(f"خطای HTTP از API: {e.response.status_code} - {e.response.text}")
-    except (KeyError, IndexError) as e:
-        raise ValueError(f"خطا در پردازش پاسخ API: {str(e)}")
+    except (KeyError, IndexError, ValueError, json.JSONDecodeError) as e:
+        raise ValueError(f"پاسخ API نامعتبر است: {str(e)}")
+
+
+
+
 
 
 def _parse_json_response(response_text: str) -> dict:
-    """
-    پارس کردن پاسخ JSON از مدل.
-    در صورتی که پاسخ داخل بلوک کد باشد، ابتدا آن را استخراج می‌کند.
-    """
-    # حتل کردن بلوک‌های کد markdown
     text = response_text.strip()
-    
+
     # بررسی بلوک کد ```json ... ```
     json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', text)
     if json_match:
@@ -197,11 +181,9 @@ def _parse_json_response(response_text: str) -> dict:
     code_match = re.search(r'```\s*([\s\S]*?)\s*```', text)
     if code_match:
         text = code_match.group(1)
-    
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError as e:
-        raise ValueError(f"خطا در پارس JSON: {str(e)}\n\nمتن دریافتی:\n{text}")
+
+    return json.loads(text)
+
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -209,34 +191,14 @@ def _parse_json_response(response_text: str) -> dict:
 # ═══════════════════════════════════════════════════════════════
 
 def extract_profile_from_text(text: str) -> dict:
-    """
-    استخراج داده‌های ساختاریافته پروفایل از متن خام فارسی با استفاده از LLM.
-    
-    Args:
-        text: متن خام شامل اطلاعات پروفایل کاربر
-    
-    Returns:
-        دیکشنری با ساختار زیر:
-        {
-            "profile": {...},
-            "social_profiles": [...],
-            "educations": [...],
-            "articles": [...],
-            "presentations": [...],
-            "executive_records": [...],
-            "training_courses": [...]
-        }
-    """
-    import re
-    
     system_prompt = """تو یک دستیار هوشمند برای استخراج اطلاعات از متن‌های فارسی هستیت.
 وظیفت این است که متن زیر را بخوانی و اطلاعات موجود در آن را به صورت ساختاریافته استخراج کنی.
 
 قوانین مهم:
 1. فقط اطلاعاتی را استخراج کن که صراحتاً در متن ذکر شده‌اند.
 2. اگر اطلاعاتی وجود ندارد، آن فیلد را خالی ("") یا null بگذار.
-3. تاریخ‌ها را به صورت جلالی بنویس (مثال: ۱۴۰۲/۰۳/۱۵).
-4. اعداد را به صورت انگلیسی بنویس (مثال: 1402 نه ۱۴۰۲).
+3. تاریخ‌ها را به صورت جلالی بنویس (مثال: 1402/03/15).
+4. اعداد را به صورت انگلیسی بنویس.
 5. فقط و فقط یک شیء JSON خالص برگردان، بدون هیچ توضیح اضافی."""
 
     user_prompt = f"""لطفاً اطلاعات زیر را از متن استخراج کن و به صورت JSON برگردان:
@@ -246,55 +208,43 @@ def extract_profile_from_text(text: str) -> dict:
 خروجی باید دقیقاً با این ساختار باشد:
 {{
   "profile": {{
-    "first_name": "نام",
-    "last_name": "نام خانوادگی",
-    "gender": "مرد یا زن",
-    "marital_status": "مجرد یا متأهل یا خالی",
-    "military_status": "معاف یا طرح پزشکی یا سرباز یا پایان خدمت یا خالی",
-    "job_title": "عنوان شغلی",
-    "birth_date": "تاریخ تولد جلالی",
-    "country": "کشور",
-    "city": "شهر",
-    "phone": "شماره تلفن",
-    "email": "ایمیل",
-    "website": "وب‌سایت",
-    "national_id": "کد ملی",
-    "orcid": "شناسه ORCID",
-    "proposal_count": عدد یا null,
-    "proposal_status": "همه در جریان یا همه خاتمه‌یافته یا ترکیبی یا خالی",
-    "software_skills": "مهارت‌های نرم‌افزاری",
-    "writing_skills": "مهارت‌های نگارشی",
-    "clinical_certs": "گواهینامه‌های بالینی",
-    "clinical_exp": "سوابق بالینی",
-    "procedures": "مهارت‌های پروسیجرال",
-    "native_lang": "زبان مادری",
-    "english_level": "A1 یا A2 یا B1 یا B2 یا C1 یا C2 یا خالی",
-    "lang_cert": "مدرک زبان",
-    "other_langs": "سایر زبان‌ها",
-    "extracurricular": "فعالیت‌های فوق برنامه",
-    "goal": "استعداد درخشان یا ۴۰ امتیازی یا هیات علمی یا ریسرچ پوزیشن / فلوشیپ خارج",
-    "specialty": "حوزه تخصصی",
-    "goal_notes": "توضیحات اهداف",
-    "service_plan": "مشمول نیستم یا در حال گذراندن یا پایان یافته یا خالی"
+    "first_name": "",
+    "last_name": "",
+    "gender": "",
+    "marital_status": "",
+    "military_status": "",
+    "job_title": "",
+    "birth_date": "",
+    "country": "",
+    "city": "",
+    "phone": "",
+    "email": "",
+    "website": "",
+    "national_id": "",
+    "orcid": "",
+    "proposal_count": null,
+    "proposal_status": "",
+    "software_skills": "",
+    "writing_skills": "",
+    "clinical_certs": "",
+    "clinical_exp": "",
+    "procedures": "",
+    "native_lang": "",
+    "english_level": "",
+    "lang_cert": "",
+    "other_langs": "",
+    "extracurricular": "",
+    "goal": "",
+    "specialty": "",
+    "goal_notes": "",
+    "service_plan": ""
   }},
-  "social_profiles": [
-    {{"social_type": "LinkedIn یا GitHub یا Google Scholar یا ResearchGate یا Dribbble یا Twitter / X یا Instagram یا سایر", "url": "لینک"}}
-  ],
-  "educations": [
-    {{"field": "پزشکی یا دندان‌پزشکی یا داروسازی یا پرستاری یا فیزیوتراپی یا سایر", "degree": "کارشناسی یا کارشناسی ارشد یا دکتری عمومی یا دکتری تخصصی", "university": "نام دانشگاه", "uni_type": "تیپ ۱ یا تیپ ۲ یا تیپ ۳ یا خالی", "start_date": "تاریخ شروع جلالی", "end_date": "تاریخ پایان جلالی", "stage": "علوم پایه یا فیزیوپات یا استاژری یا اینترنی یا فارغ‌التحصیل یا خالی", "current_term": عدد یا null, "remaining_terms": عدد یا null, "gpa": عدد یا null}}
-  ],
-  "articles": [
-    {{"title": "عنوان مقاله", "journal": "نام ژورنال", "impact_factor": عدد یا null, "quartile": "Q1 یا Q2 یا Q3 یا Q4 یا خالی", "year": عدد یا null, "author_rank": عدد یا null, "total_authors": عدد یا null, "index": "ISI / Web of Science یا Scopus یا PubMed یا ISI + Scopus یا سایر یا خالی"}}
-  ],
-  "presentations": [
-    {{"title": "عنوان ارائه", "event": "نام رویداد", "level": "بین‌المللی یا ملی یا قطبی یا دانشگاهی یا خالی", "result": "برگزیده / جایزه یا ارائه عادی یا خالی"}}
-  ],
-  "executive_records": [
-    {{"title": "عنوان سمت", "start_date": "تاریخ شروع جلالی", "end_date": "تاریخ پایان جلالی"}}
-  ],
-  "training_courses": [
-    {{"title": "عنوان دوره", "category": "پژوهشی یا بالینی یا آموزشی یا نرم‌افزاری یا زبان یا سایر یا خالی", "status": "تکمیل‌شده یا در حال گذراندن یا ناتمام یا خالی", "organizer": "برگزارکننده", "date": "تاریخ جلالی", "certificate": "دارد یا ندارد یا خالی", "skills_gained": "مهارت‌های کسب‌شده"}}
-  ]
+  "social_profiles": [],
+  "educations": [],
+  "articles": [],
+  "presentations": [],
+  "executive_records": [],
+  "training_courses": []
 }}"""
 
     messages = [
@@ -302,7 +252,16 @@ def extract_profile_from_text(text: str) -> dict:
         {"role": "user", "content": user_prompt},
     ]
 
-    response_text = _call_gpt_api(messages, max_tokens=4000)
-    result = _parse_json_response(response_text)
-    
-    return result
+    response_text = _call_gpt_api(messages, max_tokens=2000)
+    return _parse_json_response(response_text)
+
+
+
+
+
+
+
+
+
+
+
