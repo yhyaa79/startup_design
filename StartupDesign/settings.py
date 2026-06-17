@@ -15,7 +15,7 @@ SECRET_KEY = os.getenv(
     "django-insecure-dev-only-change-this-in-production"
 )
 
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+DEBUG = True
 
 ALLOWED_HOSTS = os.getenv(
     "ALLOWED_HOSTS",
@@ -97,27 +97,22 @@ LOGGING = {
 # =========================================================
 # Database Liara
 # =========================================================
-
-if os.getenv("LIARA"):
-    # محیط لیارا
-    DB_DIR = Path("/usr/src/app/database")
-    DB_DIR.mkdir(parents=True, exist_ok=True)
-    DB_PATH = DB_DIR / "db.sqlite3"
-else:
-    # محیط لوکال
-    DB_PATH = BASE_DIR / "db.sqlite3"
+""" 
+DB_DIR = Path(os.getenv("SQLITE_DIR", "/usr/src/app/database"))
+DB_DIR.mkdir(parents=True, exist_ok=True)
+DB_PATH = DB_DIR / "db.sqlite3"
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": str(DB_PATH),
     }
-}
-
+} 
+ """
 # =========================================================
 # Database local
 # =========================================================
-""" 
+
 if os.getenv("LIARA"):
     DB_DIR = Path("/usr/src/app/database")
     DB_DIR.mkdir(parents=True, exist_ok=True)
@@ -131,7 +126,7 @@ DATABASES = {
         "NAME": str(DB_PATH),
     }
 }
- """
+
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -157,8 +152,15 @@ USE_TZ = True
 
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+
+# این پوشه برای فایل‌هایی است که خودتان می‌سازید (مثل CSSهای خودتان)
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+# این پوشه فقط برای زمان دپلوی (collectstatic) است
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
 
 
 MEDIA_URL = "/media/"

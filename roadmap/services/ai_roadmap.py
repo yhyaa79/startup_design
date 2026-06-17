@@ -10,21 +10,10 @@ from roadmap.models import Activity
 from roadmap.services.profile_data import _collect_profile_data
 
 
-# ═══════════════════════════════════════════════════════════════
-# تنظیمات API
-# ═══════════════════════════════════════════════════════════════
+TIMEOUT = 120
 
-TIMEOUT = 120  # ثانیه
-
-# ═══════════════════════════════════════════════════════════════
-# تابع کمکی ارتباط با API
-# ═══════════════════════════════════════════════════════════════
 
 def _call_gpt_api(messages: list, max_tokens: int = 4000) -> str:
-    """
-    ارسال درخواست به API و دریافت پاسخ مدل.
-    """
-
     if not settings.GAPGPT_API_KEY:
         raise ValueError(
             "API Key تنظیم نشده است. "
@@ -71,42 +60,23 @@ def _call_gpt_api(messages: list, max_tokens: int = 4000) -> str:
 
 
 def _parse_json_response(response_text: str) -> dict:
-    """
-    پارس کردن پاسخ JSON از مدل.
-    در صورتی که پاسخ داخل بلوک کد باشد، ابتدا آن را استخراج می‌کند.
-    """
-    # حتل کردن بلوک‌های کد markdown
     text = response_text.strip()
-    
-    # بررسی بلوک کد ```json ... ```
+
     json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', text)
     if json_match:
         text = json_match.group(1)
-    
-    # بررسی بلوک کد ``` ... ```
+
     code_match = re.search(r'```\s*([\s\S]*?)\s*```', text)
     if code_match:
         text = code_match.group(1)
-    
+
     try:
         return json.loads(text)
     except json.JSONDecodeError as e:
         raise ValueError(f"خطا در پارس JSON: {str(e)}\n\nمتن دریافتی:\n{text}")
 
 
-
-
-
-
-# ═══════════════════════════════════════════════════════════════
-# فایل prompt مربوط به هدف
-# ═══════════════════════════════════════════════════════════════
-
 def _load_goal_prompt(goal: str) -> str:
-    """
-    بارگذاری فایل راهنمای هدف کاربر از مسیر roadmap/prompts.
-    """
-
     goal_map = {
         "استعداد درخشان": "estedad_darakhshan.md",
         "۴۰ امتیازی": "40_emtiaz.md",
@@ -120,7 +90,6 @@ def _load_goal_prompt(goal: str) -> str:
     if not filename:
         return ""
 
-    # چون این فایل داخل roadmap/services است، prompts داخل roadmap/prompts قرار می‌گیرد
     prompt_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),
         "prompts",
@@ -134,15 +103,11 @@ def _load_goal_prompt(goal: str) -> str:
         return ""
 
 
-# ═══════════════════════════════════════════════════════════════
-# محاسبه پیشرفت
-# ═══════════════════════════════════════════════════════════════
-
 def _calculate_progress(profile_data: dict, goal: str) -> dict:
     """
     محاسبه درصد پیشرفت کاربر بر اساس اطلاعات پروفایل و هدف.
+    (بدون تغییر نسبت به نسخه قبلی)
     """
-
     progress = {
         "overall_percent": 0,
         "completed_items": [],
@@ -160,7 +125,6 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
     if goal == "استعداد درخشان":
         score = 0
         score_details = {}
-
         current_degree = ""
         current_stage = ""
 
@@ -180,22 +144,18 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
             min_score = 95
 
         article_score = 0
-
         for article in articles:
             index = article.get("index", "")
             impact_factor = article.get("impact_factor") or 0
-
             if index in ["ISI / Web of Science", "ISI + Scopus"]:
                 base_score = 25
                 if impact_factor and impact_factor > 3:
                     base_score += min(int(impact_factor), 25)
                 article_score += base_score
                 progress["completed_items"].append(f"مقاله ISI: {article.get('title', '')[:50]}")
-
             elif index in ["Scopus", "PubMed", "Medline"]:
                 article_score += 15
                 progress["completed_items"].append(f"مقاله Scopus/PubMed: {article.get('title', '')[:50]}")
-
             else:
                 article_score += 10
                 progress["completed_items"].append(f"مقاله: {article.get('title', '')[:50]}")
@@ -203,33 +163,27 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
         article_score = min(article_score, 50)
         score += article_score
         score_details["مقالات"] = article_score
-
         progress["impact_analysis"]["مقالات"] = {
-            "score": article_score,
-            "max_possible": 50,
+            "score": article_score, "max_possible": 50,
             "impact_percent": min(int((article_score / 50) * 100), 100),
             "description": "مقالات ISI/Scopus بیشترین اثر را دارند.",
         }
 
         if current_degree == "دکتری تخصصی":
-            thesis_score = 10
-            score += thesis_score
-            score_details["پایان‌نامه"] = thesis_score
+            score += 10
+            score_details["پایان‌نامه"] = 10
             progress["completed_items"].append("پایان‌نامه تخصصی")
 
         presentation_score = 0
-
         for pres in presentations:
             level = pres.get("level", "")
             result = pres.get("result", "")
-
             if level == "بین‌المللی":
                 presentation_score += 3
                 progress["completed_items"].append(f"ارائه بین‌المللی: {pres.get('title', '')[:40]}")
             else:
                 presentation_score += 1
                 progress["completed_items"].append(f"ارائه داخلی: {pres.get('title', '')[:40]}")
-
             if result == "برگزیده / جایزه":
                 presentation_score += 2
                 progress["completed_items"].append("مقاله یا ارائه برگزیده در کنگره")
@@ -237,10 +191,8 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
         presentation_score = min(presentation_score, 15)
         score += presentation_score
         score_details["ارائه‌ها"] = presentation_score
-
         progress["impact_analysis"]["ارائه‌ها"] = {
-            "score": presentation_score,
-            "max_possible": 15,
+            "score": presentation_score, "max_possible": 15,
             "impact_percent": min(int((presentation_score / 15) * 100), 100),
             "description": "ارائه در کنگره‌های بین‌المللی اثر بیشتری دارد.",
         }
@@ -249,25 +201,22 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
         research_score = min(proposal_count * 5, 15)
         score += research_score
         score_details["طرح‌های تحقیقاتی"] = research_score
-
         if proposal_count:
             progress["completed_items"].append(f"{proposal_count} طرح تحقیقاتی")
 
         extracurricular = profile.get("extracurricular", "")
-
         if extracurricular:
-            committee_score = 10
-            score += committee_score
-            score_details["کمیته تحقیقات"] = committee_score
+            score += 10
+            score_details["کمیته تحقیقات"] = 10
             progress["completed_items"].append("فعالیت در کمیته یا انجمن علمی")
 
         progress["overall_percent"] = min(int((score / min_score) * 100), 100)
         progress["score_breakdown"] = score_details
-        progress["score_breakdown"]["total_score"] = score
-        progress["score_breakdown"]["min_score"] = min_score
-        progress["score_breakdown"]["degree"] = current_degree
-        progress["score_breakdown"]["stage"] = current_stage
-        progress["score_breakdown"]["remaining_to_goal"] = max(0, min_score - score)
+        progress["score_breakdown"].update({
+            "total_score": score, "min_score": min_score,
+            "degree": current_degree, "stage": current_stage,
+            "remaining_to_goal": max(0, min_score - score),
+        })
 
         if article_score == 0:
             progress["missing_items"].append("انتشار مقاله علمی")
@@ -279,7 +228,6 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
     elif goal in ["۴۰ امتیازی", "40 امتیازی"]:
         score = 0
         score_details = {}
-
         edu_score = 0
         gpa = 0
 
@@ -303,16 +251,11 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
         score_details["آموزشی"] = edu_score
 
         article_score = 0
-
         for article in articles:
             index = article.get("index", "")
             author_rank = article.get("author_rank") or 99
-
             if index in ["ISI / Web of Science", "ISI + Scopus", "PubMed", "Scopus"]:
-                if author_rank == 1:
-                    article_score += 7
-                else:
-                    article_score += 4
+                article_score += 7 if author_rank == 1 else 4
                 progress["completed_items"].append(f"مقاله معتبر: {article.get('title', '')[:40]}")
             else:
                 article_score += 2
@@ -321,65 +264,47 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
         article_score = min(article_score, 15)
 
         pres_score = 0
-
         for pres in presentations:
-            if pres.get("level") == "بین‌المللی":
-                pres_score += 2
-            else:
-                pres_score += 1.5
+            pres_score += 2 if pres.get("level") == "بین‌المللی" else 1.5
             progress["completed_items"].append(f"ارائه علمی: {pres.get('title', '')[:40]}")
-
         pres_score = min(pres_score, 5)
 
         proposal_count = profile.get("proposal_count") or 0
         proposal_score = min(proposal_count * 3, 5)
-
         research_score = min(article_score + pres_score + proposal_score, 20)
         score += research_score
 
-        score_details["مقالات"] = article_score
-        score_details["ارائه‌ها"] = pres_score
-        score_details["طرح‌ها"] = proposal_score
-        score_details["پژوهشی"] = research_score
+        score_details.update({
+            "مقالات": article_score, "ارائه‌ها": pres_score,
+            "طرح‌ها": proposal_score, "پژوهشی": research_score,
+        })
 
         social_score = 0
         extracurricular = profile.get("extracurricular", "")
-
         if extracurricular:
             social_score += 3
             progress["completed_items"].append(f"فعالیت فردی/اجتماعی: {extracurricular[:50]}")
-
         social_score = min(social_score, 10)
         score += social_score
         score_details["فردی-اجتماعی-فرهنگی"] = social_score
 
         min_score = 40
-
         progress["overall_percent"] = min(int((score / min_score) * 100), 100)
         progress["score_breakdown"] = score_details
-        progress["score_breakdown"]["total_score"] = score
-        progress["score_breakdown"]["min_score"] = min_score
-        progress["score_breakdown"]["remaining"] = max(0, min_score - score)
-
+        progress["score_breakdown"].update({
+            "total_score": score, "min_score": min_score,
+            "remaining": max(0, min_score - score),
+        })
         progress["impact_analysis"] = {
-            "آموزشی": {
-                "score": edu_score,
-                "max_possible": 20,
-                "impact_percent": min(int((edu_score / 20) * 100), 100),
-                "description": "معدل و فعالیت‌های آموزشی اثر مهمی دارند.",
-            },
-            "پژوهشی": {
-                "score": research_score,
-                "max_possible": 20,
-                "impact_percent": min(int((research_score / 20) * 100), 100),
-                "description": "مقاله، طرح تحقیقاتی و ارائه علمی بیشترین اثر را دارند.",
-            },
-            "فردی-اجتماعی-فرهنگی": {
-                "score": social_score,
-                "max_possible": 10,
-                "impact_percent": min(int((social_score / 10) * 100), 100),
-                "description": "فعالیت‌های اجتماعی و داوطلبانه امتیاز تکمیلی ایجاد می‌کنند.",
-            },
+            "آموزشی": {"score": edu_score, "max_possible": 20,
+                       "impact_percent": min(int((edu_score / 20) * 100), 100),
+                       "description": "معدل و فعالیت‌های آموزشی اثر مهمی دارند."},
+            "پژوهشی": {"score": research_score, "max_possible": 20,
+                       "impact_percent": min(int((research_score / 20) * 100), 100),
+                       "description": "مقاله، طرح تحقیقاتی و ارائه علمی بیشترین اثر را دارند."},
+            "فردی-اجتماعی-فرهنگی": {"score": social_score, "max_possible": 10,
+                                     "impact_percent": min(int((social_score / 10) * 100), 100),
+                                     "description": "فعالیت‌های اجتماعی و داوطلبانه امتیاز تکمیلی ایجاد می‌کنند."},
         }
 
         if article_score == 0:
@@ -393,20 +318,14 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
 
     elif goal in ["هیات علمی", "هیأت علمی"]:
         score = 0
-
         has_phd = any(edu.get("degree") == "دکتری تخصصی" for edu in educations)
-
         if has_phd:
             score += 20
             progress["completed_items"].append("دارای دکتری تخصصی")
         else:
             progress["missing_items"].append("اتمام دوره تخصصی یا دکتری تخصصی")
 
-        isi_articles = [
-            a for a in articles
-            if a.get("index") in ["ISI / Web of Science", "Scopus", "ISI + Scopus"]
-        ]
-
+        isi_articles = [a for a in articles if a.get("index") in ["ISI / Web of Science", "Scopus", "ISI + Scopus"]]
         if len(isi_articles) >= 3:
             score += 30
             progress["completed_items"].append(f"{len(isi_articles)} مقاله ISI/Scopus")
@@ -418,7 +337,6 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
             progress["missing_items"].append("انتشار مقاله ISI/Scopus")
 
         proposal_count = profile.get("proposal_count") or 0
-
         if proposal_count:
             score += 20
             progress["completed_items"].append(f"{proposal_count} پروپوزال یا طرح تحقیقاتی")
@@ -442,9 +360,7 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
 
     elif goal == "ریسرچ پوزیشن / فلوشیپ خارج":
         score = 0
-
         english_level = profile.get("english_level", "")
-
         if english_level in ["B2", "C1", "C2"]:
             score += 25
             progress["completed_items"].append(f"سطح زبان مناسب: {english_level}")
@@ -456,7 +372,6 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
             progress["missing_items"].append("تقویت زبان انگلیسی")
 
         article_count = len(articles)
-
         if article_count >= 2:
             score += 25
             progress["completed_items"].append(f"{article_count} مقاله منتشرشده")
@@ -480,7 +395,6 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
             progress["missing_items"].append("ارائه در کنفرانس")
 
         proposal_count = profile.get("proposal_count") or 0
-
         if proposal_count:
             score += 15
             progress["completed_items"].append("دارای پروپوزال یا طرح تحقیقاتی")
@@ -491,33 +405,27 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
         progress["score_breakdown"]["score"] = score
 
     else:
-        # حالت عمومی
         score = 0
-
         if articles:
             score += 25
             progress["completed_items"].append("دارای مقاله علمی")
         else:
             progress["missing_items"].append("نوشتن مقاله علمی")
-
         if presentations:
             score += 15
             progress["completed_items"].append("دارای ارائه علمی")
         else:
             progress["missing_items"].append("ارائه در همایش یا کنگره")
-
         if courses:
             score += 20
             progress["completed_items"].append("دارای دوره آموزشی")
         else:
             progress["missing_items"].append("گذراندن دوره‌های آموزشی کلیدی")
-
         if profile.get("software_skills"):
             score += 20
             progress["completed_items"].append("دارای مهارت نرم‌افزاری")
         else:
             progress["missing_items"].append("یادگیری نرم‌افزارهای پژوهشی")
-
         if profile.get("english_level"):
             score += 20
             progress["completed_items"].append("دارای سطح زبان ثبت‌شده")
@@ -530,18 +438,11 @@ def _calculate_progress(profile_data: dict, goal: str) -> dict:
     return progress
 
 
-# ═══════════════════════════════════════════════════════════════
-# دریافت فعالیت‌های موجود برای اجبار مدل به استفاده از دیتابیس
-# ═══════════════════════════════════════════════════════════════
-
 def _get_available_activities_for_prompt() -> list:
     """
-    لیست فعالیت‌های فعال موجود در دیتابیس.
-    مدل باید فقط از همین عنوان‌ها استفاده کند تا StageActivity بدون مشکل ذخیره شود.
+    لیست فعالیت‌های فعال موجود در دیتابیس برای ارائه به AI به عنوان نمونه.
     """
-
     activities = Activity.objects.filter(is_active=True).order_by("category", "title")
-
     return [
         {
             "title": activity.title,
@@ -557,16 +458,11 @@ def _get_available_activities_for_prompt() -> list:
     ]
 
 
-# ═══════════════════════════════════════════════════════════════
-# تولید نقشه راه خام توسط مدل
-# ═══════════════════════════════════════════════════════════════
-
 def generate_roadmap(profile_data: dict, target_goal: str = None) -> dict:
     """
     تولید نقشه راه شخصی‌سازی‌شده با AI.
-    خروجی این تابع ساختار تحلیلی دارد و بعداً به ساختار مدل‌های Django تبدیل می‌شود.
+    AI می‌تواند از فعالیت‌های موجود استفاده کند یا فعالیت‌های جدید بسازد.
     """
-
     profile_json = json.dumps(profile_data, ensure_ascii=False, indent=2)
 
     goal_prompt = ""
@@ -580,124 +476,255 @@ def generate_roadmap(profile_data: dict, target_goal: str = None) -> dict:
     available_activities = _get_available_activities_for_prompt()
     available_activities_json = json.dumps(available_activities, ensure_ascii=False, indent=2)
 
-    system_prompt = """
-تو یک مشاور حرفه‌ای ارشد برای دانشجویان و متخصصان علوم پزشکی هستی.
+    category_choices = ['پژوهشی', 'بالینی', 'آموزشی', 'نرم‌افزاری', 'زبان', 'شبکه‌سازی', 'توسعه‌شخصی', 'سایر']
+    field_choices = ['پزشکی', 'دندان‌پزشکی', 'داروسازی', 'پرستاری', 'فیزیوتراپی', 'سایر', 'عمومی']
+    difficulty_choices = ['آسان', 'متوسط', 'سخت']
+    resume_target_choices = ['article', 'presentation', 'training_course', 'executive_record', 'skill']
 
-وظیفه تو:
-بر اساس پروفایل کاربر، هدف نهایی، تحلیل کمی، فایل راهنمای هدف و فقط با استفاده از فعالیت‌های موجود در دیتابیس، یک نقشه راه شخصی‌سازی‌شده تولید کن.
+    # ─── اطلاعات ساختار پروفایل برای راهنمایی AI ───
+    profile_schema_hint = """
+ساختار مدل‌های پروفایل که هنگام تکمیل فعالیت در دیتابیس ذخیره می‌شوند:
 
-قوانین بسیار مهم:
-1. فقط JSON خالص برگردان.
-2. هیچ توضیحی خارج از JSON ننویس.
-3. عنوان فعالیت‌ها در sub_tasks باید دقیقاً برابر با یکی از title های available_activities باشد.
-4. اگر فعالیت مناسبی در لیست نبود، نزدیک‌ترین فعالیت موجود را انتخاب کن.
-5. از ساختن عنوان فعالیت جدید خودداری کن.
-6. مراحل باید واقع‌بینانه، ترتیبی و قابل اجرا باشند.
-7. تعداد مراحل بین 4 تا 8 مرحله باشد.
-8. هر مرحله بین 2 تا 5 فعالیت داشته باشد.
-"""
+training_courses: {title, category(پژوهشی|بالینی|آموزشی|نرم‌افزاری|زبان|سایر), status(تکمیل‌شده), organizer, date("{today}"), certificate(دارد|ندارد), skills_gained}
+presentations:    {title, event, level(بین‌المللی|ملی|قطبی|دانشگاهی), result(برگزیده / جایزه|ارائه عادی)}
+articles:         {title, journal, year(عدد جلالی مثل 1403), author_rank(عدد), index(ISI / Web of Science|Scopus|PubMed|ISI + Scopus|سایر)}
+executive_records:{title, start_date("{today}"), end_date("")}
+""".strip()
 
-    output_schema = """
-ساختار خروجی JSON دقیقاً به این شکل باشد:
-{
-  "roadmap": {
-    "title": "عنوان نقشه راه",
-    "description": "توضیحات کلی",
+    system_prompt = f"""
+تو یک مشاور حرفه‌ای ارشد برای دانشجویان و متخصصان علوم پزشکی ایران هستی.
+هدف تو ساختن یک نقشه راه دقیق، شخصی و قابل اجرا برای رسیدن کاربر به هدف حرفه‌ای‌اش است.
+
+═══ قوانین خروجی ═══
+1. فقط JSON خالص برگردان. هیچ توضیح، مقدمه یا متنی خارج از JSON ننویس.
+2. تمام مقادیر رشته‌ای باید غیر خالی باشند مگر آنکه در schema مشخص شده باشد.
+
+═══ قوانین طراحی نقشه راه ═══
+3. نقشه راه باید کاملاً بر اساس وضعیت فعلی کاربر طراحی شود:
+   - نقاط قوت موجود را شناسایی و بر آن‌ها بنا کن.
+   - شکاف‌های حیاتی (missing_items) را در اولویت قرار بده.
+   - مراحل را از آسان به سخت و از پایه به تخصصی مرتب کن.
+4. هر مرحله باید یک هدف مشخص و قابل سنجش داشته باشد.
+5. تعداد مراحل: بین ۴ تا ۸ مرحله.
+6. تعداد فعالیت هر مرحله: بین ۲ تا ۵ فعالیت.
+
+═══ قوانین انتخاب فعالیت ═══
+7. ابتدا از existing_activities فعالیت‌هایی انتخاب کن که:
+   - suitable_goals آن‌ها شامل هدف کاربر می‌شود، یا suitable_goals خالی است.
+   - با وضعیت فعلی کاربر و مرحله جاری تناسب دارد.
+   → این فعالیت‌ها را با is_new: false برگردان.
+8. اگر فعالیت مناسبی در existing_activities نبود یا نیاز به فعالیت تخصصی‌تر داشتی:
+   → فعالیت جدید با is_new: true و تمام فیلدهای activity_data بساز.
+9. ترکیب هوشمندانه‌ای از هر دو نوع داشته باش.
+
+═══ قوانین profile_template برای فعالیت‌های جدید ═══
+{profile_schema_hint}
+
+مقدار date در training_courses و start_date در executive_records باید دقیقاً "{{"{{today}}"}}": باشد (رشته literal، بدون تغییر).
+resume_target = "skill" → profile_template باید null باشد.
+""".strip()
+
+    output_schema = f"""
+═══ ساختار JSON خروجی ═══
+{{
+  "roadmap": {{
+    "title": "عنوان نقشه راه متناسب با هدف و تخصص کاربر",
+    "description": "خلاصه‌ای از وضعیت فعلی کاربر و مسیر پیش رو (۲-۳ جمله)",
     "goal": "هدف نهایی",
     "steps": [
-      {
+      {{
         "order": 1,
-        "title": "عنوان مرحله",
-        "description": "توضیحات مرحله",
-        "objectives": "اهداف مرحله",
-        "priority": "critical/high/medium/low",
-        "estimated_duration": "مدت زمان تخمینی",
-        "status": "completed/available/in_progress",
-        "impact_score": 1,
+        "title": "عنوان مرحله - باید گویا و انگیزه‌بخش باشد",
+        "description": "توضیح اینکه این مرحله چه چیزی را می‌سازد و چرا مهم است",
+        "objectives": "اهداف مشخص و قابل سنجش این مرحله",
+        "priority": "critical",
+        "estimated_duration": "مثال: ۶ هفته",
+        "status": "available",
+        "impact_score": 9,
         "sub_tasks": [
-          {
-            "title": "دقیقاً یکی از title های available_activities",
-            "is_done": false,
-            "notes": "توضیح کوتاه درباره چرایی انجام این فعالیت"
-          }
+          {{
+            "is_new": false,
+            "title": "عنوان دقیقاً مطابق existing_activities",
+            "notes": "چرا این فعالیت در این مرحله ضروری است"
+          }},
+          {{
+            "is_new": true,
+            "title": "عنوان توصیفی و منحصر به فرد برای فعالیت جدید",
+            "notes": "چرا این فعالیت در این مرحله ضروری است",
+            "activity_data": {{
+              "description": "توضیح کامل فعالیت و نحوه انجام آن",
+              "category": "یکی از: {category_choices}",
+              "field": "یکی از: {field_choices}",
+              "duration_days": 30,
+              "difficulty_level": "یکی از: {difficulty_choices}",
+              "resume_output": "چه چیزی در رزومه اضافه می‌شود",
+              "prerequisites": "پیش‌نیازهای لازم یا خالی",
+              "resources": "منابع، سایت‌ها یا کتاب‌های پیشنهادی",
+              "resume_target": "یکی از: {resume_target_choices}",
+              "profile_template": {{
+                "model": "training_courses",
+                "data": {{
+                  "title": "عنوان برای ذخیره در پروفایل",
+                  "category": "پژوهشی",
+                  "status": "تکمیل‌شده",
+                  "organizer": "Roadmap",
+                  "date": "{{today}}",
+                  "certificate": "دارد",
+                  "skills_gained": "مهارت‌های کسب‌شده"
+                }}
+              }}
+            }}
+          }}
         ],
         "resources": [
-          {
+          {{
             "title": "عنوان منبع",
             "resource_type": "کتاب/دوره/مقاله/وب‌سایت",
             "url": "",
-            "description": "توضیح"
-          }
+            "description": "چرا این منبع مفید است"
+          }}
         ]
-      }
+      }}
     ]
-  },
-  "quantitative_analysis": {
+  }},
+  "quantitative_analysis": {{
     "overall_percent": 0,
     "total_score": 0,
     "min_score": 0,
     "remaining_score": 0,
-    "sections": {
-      "نام_بخش": {
+    "sections": {{
+      "نام_بخش": {{
         "current_score": 0,
         "max_score": 0,
         "percent_of_total": 0,
         "impact_level": "high/medium/low",
-        "recommendations": ["پیشنهاد ۱", "پیشنهاد ۲"]
-      }
-    }
-  }
-}
-"""
+        "recommendations": ["اقدام اول", "اقدام دوم"]
+      }}
+    }}
+  }}
+}}
+""".strip()
 
     user_prompt = f"""
-اطلاعات پروفایل کاربر:
+═══ پروفایل کاربر ═══
 {profile_json}
 
-هدف:
-{target_goal or "بر اساس پروفایل تعیین شود"}
+═══ هدف نهایی ═══
+{target_goal or "بر اساس فیلد goal در پروفایل تعیین شود"}
 
-فایل راهنمای هدف:
-{goal_prompt}
+═══ راهنمای تخصصی هدف ═══
+{goal_prompt if goal_prompt else "راهنمای خاصی موجود نیست - از اطلاعات پروفایل استفاده کن"}
 
-تحلیل کمی فعلی:
+═══ تحلیل کمی وضعیت فعلی ═══
 {progress_json}
 
-لیست فعالیت‌های مجاز موجود در دیتابیس:
+═══ فعالیت‌های موجود در دیتابیس (existing_activities) ═══
 {available_activities_json}
 
-دستور:
-بر اساس اطلاعات بالا، نقشه راه را بساز.
-تأکید می‌کنم title هر sub_task باید دقیقاً از لیست فعالیت‌های مجاز باشد.
+═══ دستور ═══
+با توجه به تمام اطلاعات بالا:
+
+۱. وضعیت فعلی کاربر را ارزیابی کن (completed_items چیست، missing_items چیست).
+۲. یک نقشه راه مرحله‌به‌مرحله طراحی کن که شکاف‌های موجود را پر کند.
+۳. برای هر مرحله، فعالیت‌هایی انتخاب یا بساز که بیشترین تأثیر را بر رسیدن به هدف دارند.
+۴. مطمئن شو profile_template هر فعالیت جدید با ساختار صحیح مدل متناظر تطبیق دارد.
 
 {output_schema}
-"""
+""".strip()
 
     messages = [
-        {"role": "system", "content": system_prompt.strip()},
-        {"role": "user", "content": user_prompt.strip()},
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
     ]
 
     response_text = _call_gpt_api(messages, max_tokens=6000)
     result = _parse_json_response(response_text)
-
     result["progress"] = progress
 
     return result
 
 
-# ═══════════════════════════════════════════════════════════════
-# تبدیل خروجی AI به ساختار مورد انتظار roadmap_generate_ai
-# ═══════════════════════════════════════════════════════════════
+def _get_or_create_activity(task: dict) -> Activity | None:
+    title = task.get("title", "").strip()
+    if not title:
+        return None
+
+    is_new = task.get("is_new", False)
+
+    if not is_new:
+        activity = Activity.objects.filter(title=title, is_active=True).first()
+        if activity:
+            return activity
+        activity = Activity.objects.filter(title__icontains=title[:20], is_active=True).first()
+        return activity
+
+    activity_data = task.get("activity_data", {})
+    if not activity_data:
+        return None
+
+    valid_categories = ['پژوهشی', 'بالینی', 'آموزشی', 'نرم‌افزاری', 'زبان', 'شبکه‌سازی', 'توسعه‌شخصی', 'سایر']
+    valid_fields = ['پزشکی', 'دندان‌پزشکی', 'داروسازی', 'پرستاری', 'فیزیوتراپی', 'سایر', 'عمومی']
+    valid_difficulties = ['آسان', 'متوسط', 'سخت']
+    valid_resume_targets = ['article', 'presentation', 'training_course', 'executive_record', 'skill']
+
+    category = activity_data.get("category", "سایر")
+    if category not in valid_categories:
+        category = "سایر"
+
+    field = activity_data.get("field", "عمومی")
+    if field not in valid_fields:
+        field = "عمومی"
+
+    difficulty = activity_data.get("difficulty_level", "متوسط")
+    if difficulty not in valid_difficulties:
+        difficulty = "متوسط"
+
+    resume_target = activity_data.get("resume_target", "skill")
+    if resume_target not in valid_resume_targets:
+        resume_target = "skill"
+
+    duration_days = activity_data.get("duration_days", 30)
+    try:
+        duration_days = max(1, min(int(duration_days), 365))
+    except (TypeError, ValueError):
+        duration_days = 30
+
+    profile_template = activity_data.get("profile_template")
+    if resume_target == "skill":
+        profile_template = None
+
+    # ← مهم: مطمئن شو {today} به صورت literal در JSON ذخیره می‌شه
+    # profile_activity_sync.py موقع اجرا آن را جایگزین می‌کند
+    # پس نباید اینجا جایگزین کنیم
+
+    activity, _ = Activity.objects.update_or_create(
+        title=title,
+        defaults={
+            "description": (activity_data.get("description", "") or f"فعالیت {title}")[:500],
+            "category": category,
+            "field": field,
+            "duration_days": duration_days,
+            "difficulty_level": difficulty,
+            "resume_output": activity_data.get("resume_output", title),
+            "prerequisites": activity_data.get("prerequisites", ""),
+            "resources": activity_data.get("resources", ""),
+            "resume_target": resume_target,
+            "profile_template": profile_template,
+            "suitable_goals": [],  # فعالیت‌های AI-generated بدون suitable_goals ذخیره می‌شن
+            "is_active": True,
+        }
+    )
+
+    return activity
+
 
 def _normalize_ai_result_to_django_schema(ai_result: dict, profile_data: dict) -> dict:
     """
-    تبدیل خروجی generate_roadmap به ساختاری که view فعلی شما انتظار دارد.
+    تبدیل خروجی generate_roadmap به ساختاری که view انتظار دارد.
+    فعالیت‌های جدید AI در دیتابیس ذخیره می‌شوند.
     """
-
     roadmap = ai_result.get("roadmap", {})
     steps = roadmap.get("steps", [])
-
     first_name = profile_data.get("profile", {}).get("first_name", "")
 
     normalized = {
@@ -709,24 +736,20 @@ def _normalize_ai_result_to_django_schema(ai_result: dict, profile_data: dict) -
         "quantitative_analysis": ai_result.get("quantitative_analysis", {}),
     }
 
-    valid_activity_titles = set(
-        Activity.objects.filter(is_active=True).values_list("title", flat=True)
-    )
-
     for index, step in enumerate(steps, start=1):
         stage_activities = []
 
         for task in step.get("sub_tasks", []):
-            title = task.get("title", "").strip()
+            # پیدا کردن یا ساختن فعالیت
+            activity = _get_or_create_activity(task)
 
-            # فقط فعالیت‌هایی ذخیره شوند که واقعاً در دیتابیس هستند
-            if title and title in valid_activity_titles:
+            if activity:
                 stage_activities.append({
-                    "title": title,
+                    "title": activity.title,
                     "notes": task.get("notes", "") or step.get("description", ""),
                 })
 
-        # اگر مرحله هیچ فعالیت معتبر نداشت، ذخیره نشود
+        # اگر مرحله هیچ فعالیتی نداشت، ذخیره نشود
         if not stage_activities:
             continue
 
@@ -741,18 +764,12 @@ def _normalize_ai_result_to_django_schema(ai_result: dict, profile_data: dict) -
     return normalized
 
 
-# ═══════════════════════════════════════════════════════════════
-# تابع اصلی مورد استفاده در views.py
-# ═══════════════════════════════════════════════════════════════
-
-
 def generate_ai_roadmap(profile) -> dict:
     """
     تولید رودمپ با AI.
-    اگر خطایی رخ دهد یا خروجی معتبر نباشد، Exception بالا می‌رود
-    و هیچ roadmap پیش‌فرضی ساخته نمی‌شود.
+    فعالیت‌های جدید AI به صورت خودکار در دیتابیس ذخیره می‌شوند.
+    اگر خطایی رخ دهد یا خروجی معتبر نباشد، Exception بالا می‌رود.
     """
-
     profile_data = _collect_profile_data(profile)
 
     target_goal = (
@@ -765,10 +782,6 @@ def generate_ai_roadmap(profile) -> dict:
     normalized = _normalize_ai_result_to_django_schema(ai_result, profile_data)
 
     if not normalized.get("stages"):
-
         raise ValueError("خروجی AI معتبر نیست: هیچ مرحله قابل ذخیره‌ای تولید نشد.")
 
     return normalized
-
-
-

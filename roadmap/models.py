@@ -38,6 +38,16 @@ class Activity(models.Model):
         ('skill', 'مهارت'),
     ]
 
+    GOAL_CHOICES = [
+        ('استعداد درخشان', 'استعداد درخشان'),
+        ('۴۰ امتیازی', '۴۰ امتیازی'),
+        ('هیات علمی', 'هیات علمی'),
+        ('ریسرچ پوزیشن / فلوشیپ خارج', 'ریسرچ پوزیشن / فلوشیپ خارج'),
+        ('عمومی', 'عمومی'),  # مناسب همه اهداف
+    ]
+
+
+
     title = models.CharField('عنوان فعالیت', max_length=300)
     description = models.TextField('توضیح فعالیت')
     category = models.CharField('دسته', max_length=30, choices=CATEGORY_CHOICES)
@@ -67,6 +77,12 @@ class Activity(models.Model):
     prerequisites = models.TextField('پیش‌نیازها', blank=True)
     resources = models.TextField('منابع و مراجع', blank=True)
     is_active = models.BooleanField('فعال', default=True)
+    suitable_goals = models.JSONField(
+        'اهداف مناسب',
+        default=list,
+        blank=True,
+        help_text='لیست اهدافی که این فعالیت برای آن‌ها مناسب است. خالی = مناسب همه اهداف'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

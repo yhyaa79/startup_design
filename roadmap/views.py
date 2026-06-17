@@ -264,7 +264,6 @@ from django.http import JsonResponse, HttpResponseNotAllowed
 
 @login_required
 def stage_activity_toggle(request, stage_activity_id):
-    """تغییر وضعیت فعالیت - فقط یکبار قابل تکمیل"""
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
 
@@ -274,19 +273,12 @@ def stage_activity_toggle(request, stage_activity_id):
         stage__roadmap__profile=request.user.profile
     )
 
-    # اگر قبلاً تکمیل شده، دیگر اجازه تغییر نده
     if stage_activity.is_completed:
         messages.warning(request, 'این فعالیت قبلاً تکمیل شده و دیگر قابل تغییر نیست.')
-
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'message': 'این فعالیت قبلاً تکمیل شده و دیگر قابل تغییر نیست.'
-            }, status=400)
-
+            return JsonResponse({'success': False, 'message': 'قبلاً تکمیل شده.'}, status=400)
         return redirect('roadmap:stage_detail', stage_id=stage_activity.stage.id)
 
-    # فقط تکمیل کن، نه toggle
     stage_activity.is_completed = True
     stage_activity.save()
 
@@ -299,19 +291,21 @@ def stage_activity_toggle(request, stage_activity_id):
         activity=activity
     )
 
-    save_activity_to_profile(profile, activity)
+    save_target = request.POST.get('save_target', '')
+    if save_target and save_target != '__skip__':
+        # مکان ذخیره انتخابی کاربر رو به تابع sync پاس می‌دیم
+        save_activity_to_profile(profile, activity, override_model=save_target)
 
-    messages.success(request, 'وضعیت فعالیت با موفقیت تغییر کرد.')
+    messages.success(request, 'فعالیت با موفقیت تکمیل شد.')
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({
             'success': True,
-            'is_completed': stage_activity.is_completed,
+            'is_completed': True,
             'stage_progress': stage_activity.stage.get_progress()
         })
 
     return redirect('roadmap:stage_detail', stage_id=stage_activity.stage.id)
-
 
 
 from django.contrib.auth.decorators import login_required

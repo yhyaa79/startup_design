@@ -2,6 +2,57 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<!-- ========== CONFIRM MODAL ========== -->
+<div id="activity-confirm-modal" class="acm-overlay" role="dialog" aria-modal="true" aria-labelledby="acm-title">
+    <div class="acm-box">
+
+        <div class="acm-header">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" width="22" height="22">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            <h2 id="acm-title">تأیید تکمیل فعالیت</h2>
+        </div>
+
+        <p class="acm-warning-text">
+            پس از تأیید، وضعیت این فعالیت به <strong>تکمیل‌شده</strong> تغییر می‌کند و
+            <strong>امکان بازگشت به حالت قبل وجود نخواهد داشت.</strong>
+        </p>
+
+        <div class="acm-section">
+            <div class="acm-section-label">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" width="16" height="16">
+                    <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                    <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z" />
+                </svg>
+                محل ذخیره‌سازی در پروفایل
+            </div>
+            <p class="acm-section-hint">انتخاب کنید این فعالیت در کدام بخش از پروفایل شما ثبت شود:</p>
+
+            <div class="acm-save-list" id="acm-save-list">
+                <!-- با JS پر می‌شه -->
+            </div>
+        </div>
+
+        <div class="acm-footer">
+            <button type="button" class="acm-btn acm-btn-cancel" onclick="closeActivityModal()">انصراف</button>
+            <button type="button" class="acm-btn acm-btn-confirm" id="acm-confirm-btn" onclick="submitActivityForm()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" width="16" height="16">
+                    <polyline points="20 6 9 17 4 12" />
+                </svg>
+                تأیید و ذخیره
+            </button>
+        </div>
+
+    </div>
+</div>
+<!-- ========== END MODAL ========== -->
+
+
 <div class="rm-page">
     <div class="rm-page-header rm-page-header-compact">
         <div class="rm-page-header-inner">
@@ -14,7 +65,8 @@
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
                     ویرایش مرحله
                 </a>
                 <a href="{% url 'roadmap:roadmap_detail' %}" class="rm-btn rm-btn-outline">
@@ -58,97 +110,238 @@
         </div>
     </div>
 
-    <div class="">
-
-        <div class="rm-detail-main">
-            <div class="rm-card">
-                <div class="rm-card-header">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="12" />
-                        <line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-                    اطلاعات مرحله
-                </div>
-                <div class="rm-card-body">
-                    {% if stage.description %}
-                    <div class="rm-info-row">
-                        <span class="rm-info-label">توضیحات</span>
-                        <span class="rm-info-val">{{ stage.description }}</span>
-                    </div>
-                    {% endif %}
-                    {% if stage.objectives %}
-                    <div class="rm-info-row">
-                        <span class="rm-info-label">اهداف</span>
-                        <span class="rm-info-val">{{ stage.objectives }}</span>
-                    </div>
-                    {% endif %}
-                </div>
+    <div class="rm-detail-main">
+        <div class="rm-card">
+            <div class="rm-card-header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                اطلاعات مرحله
             </div>
-
-            <div class="rm-card rm-card-mt">
-                <div class="rm-card-header">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14 2 14 8 20 8" /></svg>
-                    فعالیت‌های مرحله
+            <div class="rm-card-body">
+                {% if stage.description %}
+                <div class="rm-info-row">
+                    <span class="rm-info-label">توضیحات</span>
+                    <span class="rm-info-val">{{ stage.description }}</span>
                 </div>
-                <div class="rm-card-body rm-card-body-flush">
-                    {% if stage.stage_activities.all %}
-                    <div class="rm-activity-table-wrap">
-                        <table class="rm-activity-table">
-                            <thead>
-                                <tr>
-                                    <th>عنوان فعالیت</th>
-                                    <th>دسته</th>
-                                    <th>مدت</th>
-                                    <th>خروجی رزومه</th>
-                                    <th>وضعیت</th>
-                                    <th>اقدام</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in stage.stage_activities.all %}
-                                <tr class="{% if item.is_completed %}rm-row-done{% endif %}">
-                                    <td class="rm-td-title">
-                                        {{ item.activity.title }}
-                                        <div class="rm-td-note">{{ item.activity.description }}</div>
-                                    </td>
-                                    <td><span class="tag">{{ item.activity.category }}</span></td>
-                                    <td>{{ item.activity.duration_days }} روز</td>
-                                    <td class="rm-td-muted">{{ item.activity.resume_output }}</td>
-                                    <td>
-                                        {% if item.is_completed %}
-                                        <span class="tag rm-status-done">تکمیل‌شده</span>
-                                        {% else %}
-                                        <span class="tag rm-status-upcoming">در انتظار</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if not item.is_completed %}
-                                        <form method="post" action="{% url 'roadmap:stage_activity_toggle' item.id %}"
-                                            onsubmit="return confirm('مطمئن هستید؟ بعد از تأیید، دیگر امکان تغییر وضعیت این فعالیت وجود نخواهد داشت.');">
-                                            {% csrf_token %}
-                                            <button type="submit">تغییر وضعیت</button>
-                                        </form>
-                                        {% else %}
-                                        <span class="rm-btn-not-activ">غیرفعال</span>
-                                        {% endif %}
-                                    </td>
-
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <div class="rm-card-empty">فعالیتی برای این مرحله ثبت نشده است.</div>
-                    {% endif %}
+                {% endif %}
+                {% if stage.objectives %}
+                <div class="rm-info-row">
+                    <span class="rm-info-label">اهداف</span>
+                    <span class="rm-info-val">{{ stage.objectives }}</span>
                 </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="rm-card rm-card-mt">
+            <div class="rm-card-header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                </svg>
+                فعالیت‌های مرحله
+            </div>
+            <div class="rm-card-body rm-card-body-flush">
+                {% if stage.stage_activities.all %}
+                <div class="rm-activity-table-wrap">
+                    <table class="rm-activity-table">
+                        <thead>
+                            <tr>
+                                <th>عنوان فعالیت</th>
+                                <th>دسته</th>
+                                <th>مدت</th>
+                                <th>خروجی رزومه</th>
+                                <th>وضعیت</th>
+                                <th>اقدام</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in stage.stage_activities.all %}
+                            <tr class="{% if item.is_completed %}rm-row-done{% endif %}">
+                                <td class="rm-td-title">
+                                    {{ item.activity.title }}
+                                    <div class="rm-td-note">{{ item.activity.description }}</div>
+                                </td>
+                                <td><span class="tag">{{ item.activity.category }}</span></td>
+                                <td>{{ item.activity.duration_days }} روز</td>
+                                <td class="rm-td-muted">{{ item.activity.resume_output }}</td>
+                                <td>
+                                    {% if item.is_completed %}
+                                    <span class="tag rm-status-done">تکمیل‌شده</span>
+                                    {% else %}
+                                    <span class="tag rm-status-upcoming">در انتظار</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if not item.is_completed %}
+                                    {# فرم مخفی — بدون onsubmit قدیمی #}
+                                    <form id="form-activity-{{ item.id }}" method="post"
+                                        action="{% url 'roadmap:stage_activity_toggle' item.id %}"
+                                        style="display:none;">
+                                        {% csrf_token %}
+                                        {# فیلد مخفی برای override محل ذخیره — با JS پر می‌شه #}
+                                        <input type="hidden" name="save_target" id="save-target-{{ item.id }}" value="">
+                                    </form>
+
+                                    <!-- جدید - درست -->
+                                    {{ item.activity.profile_template|json_script:item.id|default:"" }}
+                                    <button type="button" class="rm-btn rm-btn-sm rm-btn-primary"
+                                        data-item-id="{{ item.id }}" onclick="openActivityModal({{ item.id }})">
+                                        تغییر وضعیت
+                                    </button>
+
+                                    {% else %}
+                                    <span class="rm-btn-not-activ">غیرفعال</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="rm-card-empty">فعالیتی برای این مرحله ثبت نشده است.</div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+
+
+<!-- ===== SCRIPT ===== -->
+<script>
+    let _currentFormId = null;
+
+    const MODEL_LABELS = {
+        articles: {
+            title: 'مقالات',
+            sub: 'بخش «مقالات علمی» در پروفایل شما'
+        },
+        presentations: {
+            title: 'ارائه‌ها',
+            sub: 'بخش «کنگره‌ها و ارائه‌ها» در پروفایل شما'
+        },
+        executive_records: {
+            title: 'سوابق اجرایی',
+            sub: 'بخش «سوابق اجرایی» در پروفایل شما'
+        },
+        training_courses: {
+            title: 'دوره‌های آموزشی',
+            sub: 'بخش «دوره‌های آموزشی» در پروفایل شما'
+        },
+    };
+
+    function openActivityModal(itemId) {
+        _currentFormId = itemId;
+
+        const scriptTag = document.getElementById(String(itemId));
+        let profileTemplate = null;
+
+        if (scriptTag) {
+            try {
+                profileTemplate = JSON.parse(scriptTag.textContent);
+            } catch (e) {
+                profileTemplate = null;
+            }
+        }
+
+        const list = document.getElementById('acm-save-list');
+        list.innerHTML = '';
+
+        const options = [];
+        const recommendedKey = profileTemplate && profileTemplate.model ? profileTemplate.model : null;
+
+        if (recommendedKey) {
+            const recommendedLabel = MODEL_LABELS[recommendedKey] || {
+                title: recommendedKey,
+                sub: ''
+            };
+            options.push({
+                value: recommendedKey,
+                title: recommendedLabel.title,
+                sub: recommendedLabel.sub,
+                recommended: true,
+            });
+        }
+
+        Object.entries(MODEL_LABELS).forEach(([key, label]) => {
+            if (key === recommendedKey) return;
+            options.push({
+                value: key,
+                title: label.title,
+                sub: label.sub,
+                recommended: false,
+            });
+        });
+
+        options.push({
+            value: '__skip__',
+            title: 'ذخیره نشود',
+            sub: 'این فعالیت در هیچ بخشی از پروفایل ثبت نمی‌شود',
+            skip: true,
+        });
+
+        options.forEach((opt) => {
+            const item = document.createElement('div');
+            item.className = 'acm-save-item' + (opt.skip ? ' acm-skip' : '');
+            item.dataset.value = opt.value;
+
+            item.innerHTML = `
+                <div class="acm-radio-dot"><div class="acm-radio-inner"></div></div>
+                <div class="acm-item-text">
+                    <span class="acm-item-title">
+                        ${opt.recommended ? '✦ پیشنهادی — ' : ''}${opt.title}
+                    </span>
+                    ${opt.sub ? `<span class="acm-item-sub">${opt.sub}</span>` : ''}
+                </div>
+            `;
+
+            item.addEventListener('click', () => selectSaveOption(opt.value));
+            list.appendChild(item);
+        });
+
+        const defaultVal = recommendedKey || '__skip__';
+        selectSaveOption(defaultVal);
+
+        document.getElementById('activity-confirm-modal').classList.add('acm-open');
+    }
+
+    function selectSaveOption(value) {
+        document.querySelectorAll('#acm-save-list .acm-save-item').forEach(el => {
+            el.classList.toggle('acm-selected', el.dataset.value === value);
+        });
+
+        if (_currentFormId !== null) {
+            const inp = document.getElementById('save-target-' + _currentFormId);
+            if (inp) inp.value = value;
+        }
+    }
+
+    function closeActivityModal() {
+        document.getElementById('activity-confirm-modal').classList.remove('acm-open');
+        _currentFormId = null;
+    }
+
+    function submitActivityForm() {
+        if (_currentFormId === null) return;
+        const form = document.getElementById('form-activity-' + _currentFormId);
+        if (form) form.submit();
+    }
+
+    document.getElementById('activity-confirm-modal').addEventListener('click', function (e) {
+        if (e.target === this) closeActivityModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeActivityModal();
+    });
+</script>
+
 
 {% endblock %}
