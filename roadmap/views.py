@@ -1,4 +1,18 @@
 # roadmap/views.py
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.db import transaction
+from django.http import JsonResponse
+from django.urls import reverse
+
+from .models import Roadmap, Stage, StageActivity, Activity
+from .services.ai_roadmap import generate_ai_roadmap
+ 
+from .models import Roadmap, Stage, StageActivity, Activity
+from .services.ai_roadmap import generate_ai_roadmap
+
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseNotAllowed
@@ -308,21 +322,12 @@ def stage_activity_toggle(request, stage_activity_id):
     return redirect('roadmap:stage_detail', stage_id=stage_activity.stage.id)
 
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
-from django.db import transaction
-from django.http import JsonResponse
-from django.urls import reverse
-
-from .models import Roadmap, Stage, StageActivity, Activity
-from .services.ai_roadmap import generate_ai_roadmap
-
 
 @login_required
 def roadmap_generate_ai(request):
-    """
-    ساخت رودمپ با استفاده از AI
-    """
+    if request.method != 'POST':
+        from django.http import HttpResponseNotAllowed
+        return HttpResponseNotAllowed(['POST'])
 
     profile = request.user.profile
 
@@ -330,61 +335,100 @@ def roadmap_generate_ai(request):
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({
                 "success": True,
-                "redirect_url": reverse("roadmap:roadmap_detail")
+                "redirect_url": reverse("roadmap:roadmap_detail"),
             })
         return redirect("roadmap:roadmap_detail")
 
+    # ── پارامترهای مودال ──
+    selected_goal = request.POST.get('goal', '').strip()
+    timeframe = request.POST.get('timeframe', '').strip()
+    timeframe_days = request.POST.get('timeframe_days', '').strip()
+    user_notes = request.POST.get('notes', '').strip()
+
+    # اگه کاربر هدف انتخاب نکرد، هدف پروفایل رو بگیر
+    target_goal = selected_goal or profile.goal or ''
+
     try:
-        roadmap_json = generate_ai_roadmap(profile)
+        timeframe_days_int = int(timeframe_days)
+    except (ValueError, TypeError):
+        timeframe_days_int = 180  # default: 3 تا 6 ماه
+
+    try:
+        roadmap_data = generate_ai_roadmap(
+            profile,
+            target_goal=target_goal,
+            timeframe=timeframe,
+            timeframe_days=timeframe_days_int,
+            user_notes=user_notes,
+        )
 
         with transaction.atomic():
             roadmap = Roadmap.objects.create(
                 profile=profile,
-                title=roadmap_json["title"],
-                description=roadmap_json.get("description", ""),
-                status=roadmap_json.get("status", "فعال"),
+                title=roadmap_data["title"],
+                description=roadmap_data.get("description", ""),
+                status=roadmap_data.get("status", "فعال"),
             )
 
-            for stage_data in roadmap_json.get("stages", []):
-                stage = Stage.objects.create(
-                    roadmap=roadmap,
-                    title=stage_data["title"],
-                    description=stage_data.get("description", ""),
-                    objectives=stage_data.get("objectives", ""),
-                    order=stage_data.get("order", 0),
-                )
+            for stage_data in roadmap_data.get("stages", []):
+                stage_kwargs = {
+                    "roadmap": roadmap,
+                    "title": stage_data["title"],
+                    "description": stage_data.get("description", ""),
+                    "objectives": stage_data.get("objectives", ""),
+                    "order": stage_data.get("order", 0),
+                }
 
-                for order, act in enumerate(stage_data.get("activities", []), start=1):
+                _optional_stage_fields = {
+                    "phase_type": stage_data.get("phase_type", ""),
+                    "priority": stage_data.get("priority", ""),
+                    "milestone": stage_data.get("milestone", ""),
+                    "success_criteria": stage_data.get("success_criteria", []),
+                    "risks": stage_data.get("risks", []),
+                    "recommended_resources": stage_data.get("recommended_resources", []),
+                }
+
+                from django.db.models.fields import Field as DjangoField
+                stage_field_names = {f.name for f in Stage._meta.get_fields()
+                                     if isinstance(f, DjangoField)}
+                for field_name, value in _optional_stage_fields.items():
+                    if field_name in stage_field_names and value is not None:
+                        stage_kwargs[field_name] = value
+
+                stage = Stage.objects.create(**stage_kwargs)
+
+                for activity_item in stage_data.get("activities", []):
                     activity = Activity.objects.filter(
-                        title=act["title"],
+                        title=activity_item["title"],
                         is_active=True,
                     ).first()
 
                     if activity:
-                        StageActivity.objects.create(
-                            stage=stage,
-                            activity=activity,
-                            notes=act.get("notes", ""),
-                            order=order,
-                        )
+                        sa_kwargs = {
+                            "stage": stage,
+                            "activity": activity,
+                            "notes": activity_item.get("notes", ""),
+                            "order": stage_data.get("activities", []).index(activity_item) + 1,
+                        }
+                        StageActivity.objects.create(**sa_kwargs)
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({
                 "success": True,
-                "redirect_url": reverse("roadmap:roadmap_detail")
+                "redirect_url": reverse("roadmap:roadmap_detail"),
             })
-
         return redirect("roadmap:roadmap_detail")
 
-    except Exception:
+    except Exception as e:
+        logger.exception("خطا در تولید رودمپ AI")
+
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({
-                "success": False,
-                "message": "خطا در ساخت نقشه راه"
-            }, status=500)
-
+            return JsonResponse(
+                {"success": False, "message": "خطا در ساخت نقشه راه"},
+                status=500,
+            )
         return redirect("core:home")
-
+    
 
 
 @login_required

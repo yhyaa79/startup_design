@@ -63,328 +63,338 @@
         <!-- ۱. هویتی -->
         <h3>۱. اطلاعات هویتی و ارتباطی</h3>
 
-        <div class="fields-grid col-3">
-            {% if profile.gender %}
-            <div class="field-item">
-                <span class="field-label">جنسیت</span>
-                <span class="field-value">{{ profile.gender }}</span>
-            </div>
-            {% endif %}
-            {% if profile.marital_status %}
-            <div class="field-item">
-                <span class="field-label">وضعیت تأهل</span>
-                <span class="field-value">{{ profile.marital_status }}</span>
-            </div>
-            {% endif %}
-            {% if profile.military_status %}
-            <div class="field-item">
-                <span class="field-label">وضعیت سربازی</span>
-                <span class="field-value">
-                    <span class="badge orange">{{ profile.military_status }}</span>
-                </span>
-            </div>
-            {% endif %}
-        </div>
-
-        <div class="fields-grid" style="margin-top:0.5rem;">
-            {% if profile.website %}
-            <div class="field-item">
-                <span class="field-label">وب‌سایت شخصی</span>
-                <span class="field-value">
-                    <a href="{{ profile.website }}" target="_blank" rel="noopener noreferrer">{{ profile.website }}</a>
-                </span>
-            </div>
-            {% endif %}
-            {% if profile.national_id %}
-            <div class="field-item">
-                <span class="field-label">کد ملی / شماره پاسپورت</span>
-                <span class="field-value">{{ profile.national_id }}</span>
-            </div>
-            {% endif %}
-        </div>
-
-        {% with socials=profile.social_profiles.all %}
-        {% if socials %}
-        <div class="field-item" style="margin-top:0.6rem;">
-            <span class="field-label">شبکه‌های اجتماعی و پروفایل‌های علمی</span>
-            <div class="social-list">
-                {% for s in socials %}
-                {% if s.url %}
-                <a class="social-link" href="{{ s.url }}" target="_blank" rel="noopener noreferrer">
-                    {% if s.social_type == 'LinkedIn' %}🔗
-                    {% elif s.social_type == 'GitHub' %}💻
-                    {% elif s.social_type == 'Google Scholar' %}🎓
-                    {% elif s.social_type == 'ResearchGate' %}🔬
-                    {% elif s.social_type == 'Twitter / X' %}🐦
-                    {% elif s.social_type == 'Instagram' %}📸
-                    {% else %}🌐
-                    {% endif %}
-                    {{ s.social_type }}
-                </a>
+        <div class="form-row">
+            <div class="fields-grid col-3">
+                {% if profile.gender %}
+                <div class="field-item">
+                    <span class="field-label">جنسیت</span>
+                    <span class="field-value">{{ profile.gender }}</span>
+                </div>
                 {% endif %}
-                {% endfor %}
+                {% if profile.marital_status %}
+                <div class="field-item">
+                    <span class="field-label">وضعیت تأهل</span>
+                    <span class="field-value">{{ profile.marital_status }}</span>
+                </div>
+                {% endif %}
+                {% if profile.military_status %}
+                <div class="field-item">
+                    <span class="field-label">وضعیت سربازی</span>
+                    <span class="field-value">
+                        <span class="badge orange">{{ profile.military_status }}</span>
+                    </span>
+                </div>
+                {% endif %}
             </div>
+
+            <div class="fields-grid" style="margin-top:0.5rem;">
+                {% if profile.website %}
+                <div class="field-item">
+                    <span class="field-label">وب‌سایت شخصی</span>
+                    <span class="field-value">
+                        <a href="{{ profile.website }}" target="_blank"
+                            rel="noopener noreferrer">{{ profile.website }}</a>
+                    </span>
+                </div>
+                {% endif %}
+                {% if profile.national_id %}
+                <div class="field-item">
+                    <span class="field-label">کد ملی / شماره پاسپورت</span>
+                    <span class="field-value">{{ profile.national_id }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            {% with socials=profile.social_profiles.all %}
+            {% if socials %}
+            <div class="field-item" style="margin-top:0.6rem;">
+                <span class="field-label">شبکه‌های اجتماعی و پروفایل‌های علمی</span>
+                <div class="social-list">
+                    {% for s in socials %}
+                    {% if s.url %}
+                    <a class="social-link" href="{{ s.url }}" target="_blank" rel="noopener noreferrer">
+                        {% if s.social_type == 'LinkedIn' %}🔗
+                        {% elif s.social_type == 'GitHub' %}💻
+                        {% elif s.social_type == 'Google Scholar' %}🎓
+                        {% elif s.social_type == 'ResearchGate' %}🔬
+                        {% elif s.social_type == 'Twitter / X' %}🐦
+                        {% elif s.social_type == 'Instagram' %}📸
+                        {% else %}🌐
+                        {% endif %}
+                        {{ s.social_type }}
+                    </a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% endwith %}
         </div>
-        {% endif %}
-        {% endwith %}
 
         <hr>
 
         <!-- ۲. تحصیلی -->
         <h3>۲. اطلاعات تحصیلی</h3>
 
-        {% with educations=profile.educations.all %}
-        {% if educations %}
-        {% for edu in educations %}
-        <div class="sub-card">
-            <h4>مقطع تحصیلی {{ forloop.counter }}</h4>
-            <div class="fields-grid col-3">
-                {% if edu.field %}
-                <div class="field-item">
-                    <span class="field-label">رشته</span>
-                    <span class="field-value">{{ edu.field }}</span>
+        <div class="form-row">
+            {% with educations=profile.educations.all %}
+            {% if educations %}
+            {% for edu in educations %}
+            <div class="sub-card">
+                <h4>مقطع تحصیلی {{ forloop.counter }}</h4>
+                <div class="fields-grid col-3">
+                    {% if edu.field %}
+                    <div class="field-item">
+                        <span class="field-label">رشته</span>
+                        <span class="field-value">{{ edu.field }}</span>
+                    </div>
+                    {% endif %}
+                    {% if edu.degree %}
+                    <div class="field-item">
+                        <span class="field-label">مقطع</span>
+                        <span class="field-value"><span class="badge">{{ edu.degree }}</span></span>
+                    </div>
+                    {% endif %}
+                    {% if edu.uni_type %}
+                    <div class="field-item">
+                        <span class="field-label">تیپ دانشگاه</span>
+                        <span class="field-value"><span class="badge green">{{ edu.uni_type }}</span></span>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
-                {% if edu.degree %}
-                <div class="field-item">
-                    <span class="field-label">مقطع</span>
-                    <span class="field-value"><span class="badge">{{ edu.degree }}</span></span>
+                <div class="fields-grid col-3" style="margin-top:0.5rem;">
+                    {% if edu.university %}
+                    <div class="field-item">
+                        <span class="field-label">دانشگاه</span>
+                        <span class="field-value">{{ edu.university }}</span>
+                    </div>
+                    {% endif %}
+                    {% if edu.start_date or edu.end_date %}
+                    <div class="field-item">
+                        <span class="field-label">شروع / پایان</span>
+                        <span class="field-value">
+                            {{ edu.start_date|default:"—" }}
+                            {% if edu.end_date %} — {{ edu.end_date }}{% endif %}
+                        </span>
+                    </div>
+                    {% endif %}
+                    {% if edu.gpa %}
+                    <div class="field-item">
+                        <span class="field-label">معدل کل</span>
+                        <span class="field-value">{{ edu.gpa }}</span>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
-                {% if edu.uni_type %}
-                <div class="field-item">
-                    <span class="field-label">تیپ دانشگاه</span>
-                    <span class="field-value"><span class="badge green">{{ edu.uni_type }}</span></span>
+                <div class="fields-grid col-3" style="margin-top:0.5rem;">
+                    {% if edu.stage %}
+                    <div class="field-item">
+                        <span class="field-label">مرحله فعلی</span>
+                        <span class="field-value"><span class="badge purple">{{ edu.stage }}</span></span>
+                    </div>
+                    {% endif %}
+                    {% if edu.current_term %}
+                    <div class="field-item">
+                        <span class="field-label">ترم فعلی</span>
+                        <span class="field-value">{{ edu.current_term }}</span>
+                    </div>
+                    {% endif %}
+                    {% if edu.remaining_terms is not None %}
+                    <div class="field-item">
+                        <span class="field-label">ترم‌های باقیمانده</span>
+                        <span class="field-value">{{ edu.remaining_terms }}</span>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
-            <div class="fields-grid col-3" style="margin-top:0.5rem;">
-                {% if edu.university %}
-                <div class="field-item">
-                    <span class="field-label">دانشگاه</span>
-                    <span class="field-value">{{ edu.university }}</span>
-                </div>
-                {% endif %}
-                {% if edu.start_date or edu.end_date %}
-                <div class="field-item">
-                    <span class="field-label">شروع / پایان</span>
-                    <span class="field-value">
-                        {{ edu.start_date|default:"—" }}
-                        {% if edu.end_date %} — {{ edu.end_date }}{% endif %}
-                    </span>
-                </div>
-                {% endif %}
-                {% if edu.gpa %}
-                <div class="field-item">
-                    <span class="field-label">معدل کل</span>
-                    <span class="field-value">{{ edu.gpa }}</span>
-                </div>
-                {% endif %}
-            </div>
-            <div class="fields-grid col-3" style="margin-top:0.5rem;">
-                {% if edu.stage %}
-                <div class="field-item">
-                    <span class="field-label">مرحله فعلی</span>
-                    <span class="field-value"><span class="badge purple">{{ edu.stage }}</span></span>
-                </div>
-                {% endif %}
-                {% if edu.current_term %}
-                <div class="field-item">
-                    <span class="field-label">ترم فعلی</span>
-                    <span class="field-value">{{ edu.current_term }}</span>
-                </div>
-                {% endif %}
-                {% if edu.remaining_terms is not None %}
-                <div class="field-item">
-                    <span class="field-label">ترم‌های باقیمانده</span>
-                    <span class="field-value">{{ edu.remaining_terms }}</span>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
 
-        {% if profile.service_plan %}
-        <div class="field-item">
-            <span class="field-label">وضعیت طرح نیروی انسانی</span>
-            <span class="field-value"><span class="badge gray">{{ profile.service_plan }}</span></span>
+            {% if profile.service_plan %}
+            <div class="field-item">
+                <span class="field-label">وضعیت طرح نیروی انسانی</span>
+                <span class="field-value"><span class="badge gray">{{ profile.service_plan }}</span></span>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
 
         <hr>
 
         <!-- ۳. پژوهشی -->
         <h3>۳. سوابق پژوهشی</h3>
 
-        <div class="fields-grid">
-            {% if profile.orcid %}
-            <div class="field-item">
-                <span class="field-label">شناسه ORCID</span>
-                <span class="field-value">{{ profile.orcid }}</span>
+        <div class="form-row">
+            <div class="fields-grid">
+                {% if profile.orcid %}
+                <div class="field-item">
+                    <span class="field-label">شناسه ORCID</span>
+                    <span class="field-value">{{ profile.orcid }}</span>
+                </div>
+                {% endif %}
+                {% if profile.proposal_count is not None %}
+                <div class="field-item">
+                    <span class="field-label">تعداد پروپوزال‌ها / وضعیت</span>
+                    <span class="field-value">
+                        {{ profile.proposal_count }}
+                        {% if profile.proposal_status %}
+                        &nbsp;<span class="badge orange">{{ profile.proposal_status }}</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
-            {% if profile.proposal_count is not None %}
-            <div class="field-item">
-                <span class="field-label">تعداد پروپوزال‌ها / وضعیت</span>
-                <span class="field-value">
-                    {{ profile.proposal_count }}
-                    {% if profile.proposal_status %}
-                    &nbsp;<span class="badge orange">{{ profile.proposal_status }}</span>
-                    {% endif %}
+
+            <div class="fields-grid" style="margin-top:0.5rem;">
+                {% if profile.software_skills %}
+                <div class="field-item">
+                    <span class="field-label">مهارت‌های نرم‌افزاری</span>
+                    <span class="field-value multiline">{{ profile.software_skills }}</span>
+                </div>
+                {% endif %}
+                {% if profile.writing_skills %}
+                <div class="field-item">
+                    <span class="field-label">مهارت‌های نگارشی</span>
+                    <span class="field-value multiline">{{ profile.writing_skills }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- مقالات -->
+            {% with articles=profile.articles.all %}
+            {% if articles %}
+            <div class="field-item" style="margin-top:0.9rem;">
+                <span class="field-label">
+                    مقالات چاپ‌شده
                 </span>
-            </div>
-            {% endif %}
-        </div>
-
-        <div class="fields-grid" style="margin-top:0.5rem;">
-            {% if profile.software_skills %}
-            <div class="field-item">
-                <span class="field-label">مهارت‌های نرم‌افزاری</span>
-                <span class="field-value multiline">{{ profile.software_skills }}</span>
-            </div>
-            {% endif %}
-            {% if profile.writing_skills %}
-            <div class="field-item">
-                <span class="field-label">مهارت‌های نگارشی</span>
-                <span class="field-value multiline">{{ profile.writing_skills }}</span>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- مقالات -->
-        {% with articles=profile.articles.all %}
-        {% if articles %}
-        <div class="field-item" style="margin-top:0.9rem;">
-            <span class="field-label" style="font-size:0.75rem;color:#3d4f63;margin-bottom:0.4rem;display:block;">
-                مقالات چاپ‌شده
-            </span>
-            {% for article in articles %}
-            <div class="sub-card">
-                <h4>مقاله {{ forloop.counter }}</h4>
-                {% if article.title %}
-                <div class="field-item" style="margin-bottom:0.45rem;">
-                    <span class="field-label">عنوان</span>
-                    <span class="field-value" style="display:block;">{{ article.title }}</span>
-                </div>
-                {% endif %}
-                <div class="fields-grid col-3">
-                    {% if article.journal %}
-                    <div class="field-item">
-                        <span class="field-label">ژورنال</span>
-                        <span class="field-value">{{ article.journal }}</span>
+                {% for article in articles %}
+                <div class="sub-card">
+                    <h4>مقاله {{ forloop.counter }}</h4>
+                    {% if article.title %}
+                    <div class="field-item" style="margin-bottom:0.45rem;">
+                        <span class="field-label">عنوان</span>
+                        <span class="field-value" style="display:block;">{{ article.title }}</span>
                     </div>
                     {% endif %}
-                    <div class="field-item">
-                        <span class="field-label">IF / چارک</span>
-                        <span class="field-value">
-                            {% if article.impact_factor %}
-                            {{ article.impact_factor }}
-                            {% else %}
-                            <span class="badge gray">—</span>
-                            {% endif %}
-                            {% if article.quartile %}
-                            &nbsp;<span class="badge green">{{ article.quartile }}</span>
-                            {% endif %}
-                        </span>
-                    </div>
-                    <div class="field-item">
-                        <span class="field-label">سال / موقعیت</span>
-                        <span class="field-value">
-                            {% if article.year %}{{ article.year }}{% endif %}
-                            {% if article.author_rank and article.total_authors %}
-                            · نفر {{ article.author_rank }} از {{ article.total_authors }}
-                            {% endif %}
-                        </span>
-                    </div>
-                </div>
-                {% if article.index %}
-                <div class="field-item" style="margin-top:0.45rem;">
-                    <span class="field-label">ایندکس</span>
-                    <span class="field-value"><span class="badge">{{ article.index }}</span></span>
-                </div>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-        {% endwith %}
-
-        <!-- ارائه‌ها -->
-        {% with presentations=profile.presentations.all %}
-        {% if presentations %}
-        <div class="field-item" style="margin-top:0.9rem;">
-            <span class="field-label" style="font-size:0.75rem;color:#3d4f63;margin-bottom:0.4rem;display:block;">
-                ارائه‌ها در کنگره‌ها و رویدادها
-            </span>
-            {% for pres in presentations %}
-            <div class="sub-card">
-                <h4>ارائه {{ forloop.counter }}</h4>
-                {% if pres.title %}
-                <div class="field-item" style="margin-bottom:0.45rem;">
-                    <span class="field-label">عنوان</span>
-                    <span class="field-value">{{ pres.title }}</span>
-                </div>
-                {% endif %}
-                <div class="fields-grid col-3">
-                    {% if pres.event %}
-                    <div class="field-item">
-                        <span class="field-label">کنگره</span>
-                        <span class="field-value">{{ pres.event }}</span>
-                    </div>
-                    {% endif %}
-                    {% if pres.level %}
-                    <div class="field-item">
-                        <span class="field-label">سطح</span>
-                        <span class="field-value">
-                            <span class="badge {% if pres.level == 'بین‌المللی' %}purple{% endif %}">
-                                {{ pres.level }}
+                    <div class="fields-grid col-3">
+                        {% if article.journal %}
+                        <div class="field-item">
+                            <span class="field-label">ژورنال</span>
+                            <span class="field-value">{{ article.journal }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="field-item">
+                            <span class="field-label">IF / چارک</span>
+                            <span class="field-value">
+                                {% if article.impact_factor %}
+                                {{ article.impact_factor }}
+                                {% else %}
+                                <span class="badge gray">—</span>
+                                {% endif %}
+                                {% if article.quartile %}
+                                &nbsp;<span class="badge green">{{ article.quartile }}</span>
+                                {% endif %}
                             </span>
-                        </span>
-                    </div>
-                    {% endif %}
-                    {% if pres.result %}
-                    <div class="field-item">
-                        <span class="field-label">نتیجه</span>
-                        <span class="field-value">
-                            <span class="badge {% if pres.result == 'برگزیده / جایزه' %}green{% else %}gray{% endif %}">
-                                {{ pres.result }}
+                        </div>
+                        <div class="field-item">
+                            <span class="field-label">سال / موقعیت</span>
+                            <span class="field-value">
+                                {% if article.year %}{{ article.year }}{% endif %}
+                                {% if article.author_rank and article.total_authors %}
+                                · نفر {{ article.author_rank }} از {{ article.total_authors }}
+                                {% endif %}
                             </span>
-                        </span>
+                        </div>
+                    </div>
+                    {% if article.index %}
+                    <div class="field-item" style="margin-top:0.45rem;">
+                        <span class="field-label">ایندکس</span>
+                        <span class="field-value"><span class="badge">{{ article.index }}</span></span>
                     </div>
                     {% endif %}
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <!-- ارائه‌ها -->
+            {% with presentations=profile.presentations.all %}
+            {% if presentations %}
+            <div class="field-item" style="margin-top:0.9rem;">
+                <span class="field-label">
+                    ارائه‌ها در کنگره‌ها و رویدادها
+                </span>
+                {% for pres in presentations %}
+                <div class="sub-card">
+                    <h4>ارائه {{ forloop.counter }}</h4>
+                    {% if pres.title %}
+                    <div class="field-item" style="margin-bottom:0.45rem;">
+                        <span class="field-label">عنوان</span>
+                        <span class="field-value">{{ pres.title }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="fields-grid col-3">
+                        {% if pres.event %}
+                        <div class="field-item">
+                            <span class="field-label">کنگره</span>
+                            <span class="field-value">{{ pres.event }}</span>
+                        </div>
+                        {% endif %}
+                        {% if pres.level %}
+                        <div class="field-item">
+                            <span class="field-label">سطح</span>
+                            <span class="field-value">
+                                <span class="badge {% if pres.level == 'بین‌المللی' %}purple{% endif %}">
+                                    {{ pres.level }}
+                                </span>
+                            </span>
+                        </div>
+                        {% endif %}
+                        {% if pres.result %}
+                        <div class="field-item">
+                            <span class="field-label">نتیجه</span>
+                            <span class="field-value">
+                                <span
+                                    class="badge {% if pres.result == 'برگزیده / جایزه' %}green{% else %}gray{% endif %}">
+                                    {{ pres.result }}
+                                </span>
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
         </div>
-        {% endif %}
-        {% endwith %}
 
         <hr>
 
         <!-- ۴. بالینی -->
         <h3>۴. مهارت‌های بالینی و عملی</h3>
 
-        <div class="fields-grid col-3">
-            {% if profile.clinical_certs %}
-            <div class="field-item">
-                <span class="field-label">گواهینامه‌های مهارتی</span>
-                <span class="field-value multiline">{{ profile.clinical_certs }}</span>
+        <div class="form-row">
+            <div class="fields-grid col-3">
+                {% if profile.clinical_certs %}
+                <div class="field-item">
+                    <span class="field-label">گواهینامه‌های مهارتی</span>
+                    <span class="field-value multiline">{{ profile.clinical_certs }}</span>
+                </div>
+                {% endif %}
+                {% if profile.clinical_exp %}
+                <div class="field-item">
+                    <span class="field-label">سوابق کار دانشجویی</span>
+                    <span class="field-value multiline">{{ profile.clinical_exp }}</span>
+                </div>
+                {% endif %}
+                {% if profile.procedures %}
+                <div class="field-item">
+                    <span class="field-label">مهارت‌های پروسیجرال</span>
+                    <span class="field-value multiline">{{ profile.procedures }}</span>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
-            {% if profile.clinical_exp %}
-            <div class="field-item">
-                <span class="field-label">سوابق کار دانشجویی</span>
-                <span class="field-value multiline">{{ profile.clinical_exp }}</span>
-            </div>
-            {% endif %}
-            {% if profile.procedures %}
-            <div class="field-item">
-                <span class="field-label">مهارت‌های پروسیجرال</span>
-                <span class="field-value multiline">{{ profile.procedures }}</span>
-            </div>
-            {% endif %}
         </div>
 
         <hr>
@@ -392,71 +402,73 @@
         <!-- ۵. زبان -->
         <h3>۵. زبان، مهارت‌های نرم و فوق برنامه</h3>
 
-        <div class="fields-grid col-3">
-            {% if profile.native_lang %}
-            <div class="field-item">
-                <span class="field-label">زبان مادری</span>
-                <span class="field-value">{{ profile.native_lang }}</span>
-            </div>
-            {% endif %}
-            {% if profile.english_level or profile.lang_cert %}
-            <div class="field-item">
-                <span class="field-label">انگلیسی</span>
-                <span class="field-value">
-                    {% if profile.english_level %}
-                    <span class="badge green">{{ profile.english_level }}</span>&nbsp;
-                    {% endif %}
-                    {{ profile.lang_cert }}
-                </span>
-            </div>
-            {% endif %}
-            {% if profile.other_langs %}
-            <div class="field-item">
-                <span class="field-label">سایر زبان‌ها</span>
-                <span class="field-value">{{ profile.other_langs }}</span>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- سوابق اجرایی -->
-        {% with records=profile.executive_records.all %}
-        {% if records %}
-        <div class="field-item" style="margin-top:0.9rem;">
-            <span class="field-label" style="font-size:0.75rem;color:#3d4f63;margin-bottom:0.4rem;display:block;">
-                سوابق اجرایی و عضویت در تشکل‌ها
-            </span>
-            {% for rec in records %}
-            <div class="sub-card">
-                <h4>سابقه اجرایی {{ forloop.counter }}</h4>
-                <div class="fields-grid col-3">
-                    {% if rec.title %}
-                    <div class="field-item" style="grid-column: span 2;">
-                        <span class="field-label">سمت</span>
-                        <span class="field-value">{{ rec.title }}</span>
-                    </div>
-                    {% endif %}
-                    {% if rec.start_date or rec.end_date %}
-                    <div class="field-item">
-                        <span class="field-label">دوره</span>
-                        <span class="field-value">
-                            {{ rec.start_date|default:"—" }}
-                            {% if rec.end_date %} — {{ rec.end_date }}{% endif %}
-                        </span>
-                    </div>
-                    {% endif %}
+        <div class="form-row">
+            <div class="fields-grid col-3">
+                {% if profile.native_lang %}
+                <div class="field-item">
+                    <span class="field-label">زبان مادری</span>
+                    <span class="field-value">{{ profile.native_lang }}</span>
                 </div>
+                {% endif %}
+                {% if profile.english_level or profile.lang_cert %}
+                <div class="field-item">
+                    <span class="field-label">انگلیسی</span>
+                    <span class="field-value">
+                        {% if profile.english_level %}
+                        <span class="badge green">{{ profile.english_level }}</span>&nbsp;
+                        {% endif %}
+                        {{ profile.lang_cert }}
+                    </span>
+                </div>
+                {% endif %}
+                {% if profile.other_langs %}
+                <div class="field-item">
+                    <span class="field-label">سایر زبان‌ها</span>
+                    <span class="field-value">{{ profile.other_langs }}</span>
+                </div>
+                {% endif %}
             </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-        {% endwith %}
 
-        {% if profile.extracurricular %}
-        <div class="field-item" style="margin-top:0.5rem;">
-            <span class="field-label">فعالیت‌های فوق برنامه و داوطلبانه</span>
-            <span class="field-value multiline">{{ profile.extracurricular }}</span>
+            <!-- سوابق اجرایی -->
+            {% with records=profile.executive_records.all %}
+            {% if records %}
+            <div class="field-item" style="margin-top:0.9rem;">
+                <span class="field-label">
+                    سوابق اجرایی و عضویت در تشکل‌ها
+                </span>
+                {% for rec in records %}
+                <div class="sub-card">
+                    <h4>سابقه اجرایی {{ forloop.counter }}</h4>
+                    <div class="fields-grid col-3">
+                        {% if rec.title %}
+                        <div class="field-item" style="grid-column: span 2;">
+                            <span class="field-label">سمت</span>
+                            <span class="field-value">{{ rec.title }}</span>
+                        </div>
+                        {% endif %}
+                        {% if rec.start_date or rec.end_date %}
+                        <div class="field-item">
+                            <span class="field-label">دوره</span>
+                            <span class="field-value">
+                                {{ rec.start_date|default:"—" }}
+                                {% if rec.end_date %} — {{ rec.end_date }}{% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            {% if profile.extracurricular %}
+            <div class="field-item" style="margin-top:0.5rem;">
+                <span class="field-label">فعالیت‌های فوق برنامه و داوطلبانه</span>
+                <span class="field-value multiline">{{ profile.extracurricular }}</span>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
 
         <hr>
 
@@ -464,92 +476,96 @@
         <!-- ۶. دوره‌های آموزشی -->
         <h3>۶. دوره‌های آموزشی</h3>
 
-        {% with courses=profile.training_courses.all %}
-        {% if courses %}
-        {% for course in courses %}
-        <div class="sub-card">
-            <h4>دوره {{ forloop.counter }}</h4>
+        <div class="form-row">
+            {% with courses=profile.training_courses.all %}
+            {% if courses %}
+            {% for course in courses %}
+            <div class="sub-card">
+                <h4>دوره {{ forloop.counter }}</h4>
 
-            <div class="fields-grid col-3">
-                {% if course.title %}
-                <div class="field-item">
-                    <span class="field-label">عنوان دوره</span>
-                    <span class="field-value">{{ course.title }}</span>
+                <div class="fields-grid col-3">
+                    {% if course.title %}
+                    <div class="field-item">
+                        <span class="field-label">عنوان دوره</span>
+                        <span class="field-value">{{ course.title }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if course.category %}
+                    <div class="field-item">
+                        <span class="field-label">دسته</span>
+                        <span class="field-value"><span class="badge">{{ course.category }}</span></span>
+                    </div>
+                    {% endif %}
+
+                    {% if course.status %}
+                    <div class="field-item">
+                        <span class="field-label">وضعیت</span>
+                        <span class="field-value"><span class="badge green">{{ course.status }}</span></span>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
 
-                {% if course.category %}
-                <div class="field-item">
-                    <span class="field-label">دسته</span>
-                    <span class="field-value"><span class="badge">{{ course.category }}</span></span>
+                <div class="fields-grid col-3" style="margin-top:0.5rem;">
+                    {% if course.organizer %}
+                    <div class="field-item">
+                        <span class="field-label">برگزارکننده</span>
+                        <span class="field-value">{{ course.organizer }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if course.date %}
+                    <div class="field-item">
+                        <span class="field-label">تاریخ</span>
+                        <span class="field-value">{{ course.date }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if course.certificate %}
+                    <div class="field-item">
+                        <span class="field-label">گواهی</span>
+                        <span class="field-value"><span class="badge purple">{{ course.certificate }}</span></span>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
 
-                {% if course.status %}
-                <div class="field-item">
-                    <span class="field-label">وضعیت</span>
-                    <span class="field-value"><span class="badge green">{{ course.status }}</span></span>
+                {% if course.skills_gained %}
+                <div class="field-item" style="margin-top:0.5rem;">
+                    <span class="field-label">مهارت کسب‌شده</span>
+                    <span class="field-value">{{ course.skills_gained }}</span>
                 </div>
                 {% endif %}
             </div>
-
-            <div class="fields-grid col-3" style="margin-top:0.5rem;">
-                {% if course.organizer %}
-                <div class="field-item">
-                    <span class="field-label">برگزارکننده</span>
-                    <span class="field-value">{{ course.organizer }}</span>
-                </div>
-                {% endif %}
-
-                {% if course.date %}
-                <div class="field-item">
-                    <span class="field-label">تاریخ</span>
-                    <span class="field-value">{{ course.date }}</span>
-                </div>
-                {% endif %}
-
-                {% if course.certificate %}
-                <div class="field-item">
-                    <span class="field-label">گواهی</span>
-                    <span class="field-value"><span class="badge purple">{{ course.certificate }}</span></span>
-                </div>
-                {% endif %}
-            </div>
-
-            {% if course.skills_gained %}
-            <div class="field-item" style="margin-top:0.5rem;">
-                <span class="field-label">مهارت کسب‌شده</span>
-                <span class="field-value">{{ course.skills_gained }}</span>
-            </div>
+            {% endfor %}
             {% endif %}
+            {% endwith %}
         </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
 
         <hr>
 
         <!-- ۶. اهداف -->
         <h3>۶. اهداف و چشم‌انداز</h3>
 
-        {% if profile.goal %}
-        <div class="goal-box">
-            <div class="goal-icon">🎯</div>
-            <div>
-                <div class="goal-text">هدف نهایی: {{ profile.goal }}</div>
-                {% if profile.specialty %}
-                <div class="goal-sub">حوزه تخصصی: {{ profile.specialty }}</div>
-                {% endif %}
+        <div class="form-row">
+            {% if profile.goal %}
+            <div class="goal-box">
+                <div class="goal-icon">🎯</div>
+                <div>
+                    <div class="goal-text">هدف نهایی: {{ profile.goal }}</div>
+                    {% if profile.specialty %}
+                    <div class="goal-sub">حوزه تخصصی: {{ profile.specialty }}</div>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-        {% endif %}
+            {% endif %}
 
-        {% if profile.goal_notes %}
-        <div class="field-item">
-            <span class="field-label">توضیحات تکمیلی</span>
-            <span class="field-value multiline">{{ profile.goal_notes }}</span>
+            {% if profile.goal_notes %}
+            <div class="field-item">
+                <span class="field-label">توضیحات تکمیلی</span>
+                <span class="field-value multiline">{{ profile.goal_notes }}</span>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
 
     </div>
 </div>

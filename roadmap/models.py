@@ -139,6 +139,20 @@ class Stage(models.Model):
         ('تکمیل‌شده', 'تکمیل‌شده'),
     ]
 
+    PHASE_TYPE_CHOICES = [
+        ('foundation', 'پایه‌ریزی'),
+        ('development', 'توسعه'),
+        ('advancement', 'پیشرفت'),
+        ('excellence', 'تعالی'),
+    ]
+    
+    PRIORITY_CHOICES = [
+        ('critical', 'بحرانی'),
+        ('high', 'بالا'),
+        ('medium', 'متوسط'),
+        ('low', 'پایین'),
+    ]
+
     roadmap = models.ForeignKey(Roadmap, on_delete=models.CASCADE, related_name='stages')
     title = models.CharField('عنوان مرحله', max_length=300)
     description = models.TextField('توضیح مرحله', blank=True)
@@ -147,6 +161,44 @@ class Stage(models.Model):
     order = models.PositiveSmallIntegerField('ترتیب', default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    phase_type = models.CharField(
+        'نوع فاز',
+        max_length=20,
+        choices=[('foundation','پایه‌ریزی'),('development','توسعه'),
+                 ('advancement','پیشرفت'),('excellence','تعالی')],
+        default='development',
+        blank=True,
+    )
+    priority = models.CharField(
+        'اولویت',
+        max_length=10,
+        choices=[('critical','بحرانی'),('high','بالا'),('medium','متوسط'),('low','پایین')],
+        default='medium',
+        blank=True,
+    )
+    milestone = models.TextField(
+        'نقطه عطف (معیار تکمیل)',
+        blank=True,
+        help_text='خروجی ملموسی که نشان‌دهنده تکمیل این مرحله است',
+    )
+    success_criteria = models.JSONField(
+        'معیارهای موفقیت',
+        default=list,
+        blank=True,
+        help_text='لیست معیارهای قابل سنجش برای تکمیل مرحله',
+    )
+    risks = models.JSONField(
+        'ریسک‌ها',
+        default=list,
+        blank=True,
+        help_text='ریسک‌های احتمالی این مرحله',
+    )
+    recommended_resources = models.JSONField(
+        'منابع پیشنهادی',
+        default=list,
+        blank=True,
+        help_text='منابع پیشنهادی AI برای این مرحله',
+    )
 
     class Meta:
         verbose_name = 'مرحله'

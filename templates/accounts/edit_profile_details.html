@@ -37,117 +37,116 @@
         <!-- ==================== ۱. اطلاعات هویتی ==================== -->
         <h3 class="heder-form-edit">۱. اطلاعات هویتی و ارتباطی</h3>
 
-        <div class="row-2">
-            <div class="field-group">
-                <label>نام *</label>
-                {{ form.first_name }}
-                {{ form.first_name.errors }}
-            </div>
-            <div class="field-group">
-                <label>نام خانوادگی *</label>
-                {{ form.last_name }}
-                {{ form.last_name.errors }}
-            </div>
-        </div>
-
-        <div class="row-3">
-            <div class="field-group">
-                <label>جنسیت *</label>
-                {{ form.gender }}
-                {{ form.gender.errors }}
-            </div>
-            <div class="field-group">
-                <label>وضعیت تأهل</label>
-                {{ form.marital_status }}
-            </div>
-            <div class="field-group">
-                <label>وضعیت سربازی</label>
-                {{ form.military_status }}
-            </div>
-        </div>
-
-        <div class="field-group">
-            <label>عنوان شغلی</label>
-            {{ form.job_title }}
-        </div>
-
-        <div class="row-2">
-            <div class="field-group">
-                <label>تاریخ تولد *</label>
-                {{ form.birth_date }}
-                {{ form.birth_date.errors }}
-            </div>
-            <div class="field-group">
-                <label>کشور</label>
-                {{ form.country }}
-            </div>
-        </div>
-
-        <div class="row-2">
-            <div class="field-group">
-                <label>استان / شهر</label>
-                {{ form.city }}
-            </div>
-            <div class="field-group">
-                <label>شماره موبایل *</label>
-                {{ form.phone }}
-                {{ form.phone.errors }}
-            </div>
-        </div>
-
-        <div class="row-2">
-            <div class="field-group">
-                <label>ایمیل</label>
-                {{ form.email }}
-            </div>
-            <div class="field-group">
-                <label>وب‌سایت شخصی</label>
-                {{ form.website }}
-            </div>
-        </div>
-
-        <div class="row-2">
-            <div class="field-group">
-                <label>کد ملی / شماره پاسپورت</label>
-                {{ form.national_id }}
-            </div>
-            <div class="field-group">
-                <label>شناسه ORCID</label>
-                {{ form.orcid }}
-            </div>
-        </div>
-
-        <!-- شبکه‌های اجتماعی -->
-        <h4>شبکه‌های اجتماعی و پروفایل‌های علمی</h4>
-        {{ social_formset.management_form }}
-        <div id="socialContainer">
-            {% for sf in social_formset %}
-            <div class="repeatable-item">
-                {% if sf.instance.pk %}
-                <div class="checkbox-delete">
-                    <p>حذف</p>
-                    {{ sf.DELETE }}
+        <div class="form-row">
+            <div class="row-2">
+                <div class="field-group">
+                    <label>نام *</label>
+                    {{ form.first_name }}
+                    {{ form.first_name.errors }}
                 </div>
-                {% endif %}
-                <div class="row-2">
-                    <div class="field-group">
-                        <label>نوع شبکه</label>
-                        {{ sf.social_type }}
-                    </div>
-                    <div class="field-group">
-                        <label>لینک پروفایل</label>
-                        {{ sf.url }}
-                    </div>
+                <div class="field-group">
+                    <label>نام خانوادگی *</label>
+                    {{ form.last_name }}
+                    {{ form.last_name.errors }}
                 </div>
-                {% for hidden in sf.hidden_fields %}{{ hidden }}{% endfor %}
             </div>
-            {% endfor %}
+
+            <div class="row-3">
+                <div class="field-group">
+                    <label>جنسیت *</label>
+                    {{ form.gender }}
+                    {{ form.gender.errors }}
+                </div>
+                <div class="field-group">
+                    <label>وضعیت تأهل</label>
+                    {{ form.marital_status }}
+                </div>
+                <div class="field-group">
+                    <label>وضعیت سربازی</label>
+                    {{ form.military_status }}
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>عنوان شغلی</label>
+                {{ form.job_title }}
+            </div>
+
+            <div class="row-2">
+                <div class="field-group">
+                    <label>تاریخ تولد *</label>
+                    {{ form.birth_date }}
+                    {{ form.birth_date.errors }}
+                </div>
+                <div class="field-group">
+                    <label>کشور</label>
+                    {{ form.country }}
+                </div>
+            </div>
+
+            <div class="row-2">
+                <div class="field-group">
+                    <label>استان / شهر</label>
+                    {{ form.city }}
+                </div>
+                <div class="field-group">
+                    <label>شماره موبایل *</label>
+                    {{ form.phone }}
+                    {{ form.phone.errors }}
+                </div>
+            </div>
+
+            <div class="row-2">
+                <div class="field-group">
+                    <label>ایمیل</label>
+                    {{ form.email }}
+                </div>
+                <div class="field-group">
+                    <label>وب‌سایت شخصی</label>
+                    {{ form.website }}
+                </div>
+            </div>
+
+            <div class="row-2">
+                <div class="field-group">
+                    <label>کد ملی / شماره پاسپورت</label>
+                    {{ form.national_id }}
+                </div>
+                <div class="field-group">
+                    <label>شناسه ORCID</label>
+                    {{ form.orcid }}
+                </div>
+            </div>
+
+            <!-- شبکه‌های اجتماعی -->
+            <h4>شبکه‌های اجتماعی و پروفایل‌های علمی</h4>
+            {{ social_formset.management_form }}
+            <div id="socialContainer">
+                {% for sf in social_formset %}
+                <div class="repeatable-item">
+                    {% if sf.instance.pk %}
+                    <div class="checkbox-delete">
+                        <p>حذف</p>
+                        {{ sf.DELETE }}
+                    </div>
+                    {% endif %}
+                    <div class="row-2">
+                        <div class="field-group">
+                            <label>نوع شبکه</label>
+                            {{ sf.social_type }}
+                        </div>
+                        <div class="field-group">
+                            <label>لینک پروفایل</label>
+                            {{ sf.url }}
+                        </div>
+                    </div>
+                    {% for hidden in sf.hidden_fields %}{{ hidden }}{% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="btn-add-form" onclick="addFormsetRow('socialContainer', 'social_profiles')">+ افزودن پروفایل</button>
+
         </div>
-        <button type="button" class="btn-add-form" onclick="addFormsetRow('socialContainer', 'social_profiles')">+
-            افزودن
-            پروفایل</button>
-
-
 
         <hr>
         <!-- ==================== ۲. تحصیلی ==================== -->

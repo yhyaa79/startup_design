@@ -1,15 +1,36 @@
 <!-- templates/roadmap/stage_create.html -->
 {% extends 'base.html' %}
+
+{% block title %}مرحله جدید{% endblock %}
+{% block topbar_title %}ایجاد مرحله جدید{% endblock %}
+
 {% block content %}
+
+
+<div class="div-hidden">
+  {% block topbar_actions %}
+  <button type="submit" form="create-form" class="rm-btn rm-btn-primary">
+    ثبت مرحله
+  </button>
+
+
+
+  <a href="{% url 'roadmap:roadmap_detail' %}" class="rm-btn rm-btn-outline">
+    بازگشت
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  </a>
+  {% endblock %}
+</div>
+
 
 <div class="rm-page">
   <div class="rm-page-header rm-page-header-compact">
     <div class="rm-page-header-inner">
       <div class="rm-header-left">
-        <span class="rm-eyebrow">{{ roadmap.title }}</span>
-        <h1 class="rm-page-title">ایجاد مرحله جدید</h1>
+        <span class="rm-page-title">{{ roadmap.title }}</span>
       </div>
-      <a href="{% url 'roadmap:roadmap_detail' %}" class="rm-btn rm-btn-outline">بازگشت</a>
     </div>
   </div>
 
@@ -20,7 +41,7 @@
         اطلاعات مرحله
       </div>
       <div class="rm-card-body">
-        <form method="post" class="rm-form">
+        <form method="post" class="rm-form" id="create-form">
           {% csrf_token %}
           {% for field in form %}
             <div class="rm-field">
@@ -34,10 +55,6 @@
               {% endif %}
             </div>
           {% endfor %}
-          <div class="rm-form-actions">
-            <button type="submit" class="rm-btn rm-btn-primary">ثبت مرحله</button>
-            <a href="{% url 'roadmap:roadmap_detail' %}" class="rm-btn rm-btn-outline">انصراف</a>
-          </div>
         </form>
       </div>
     </div>

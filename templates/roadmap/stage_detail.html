@@ -1,11 +1,15 @@
 <!-- templates/roadmap/stage_detail.html -->
+
 {% extends 'base.html' %}
+
+{% block title %}جزئیات مراحل{% endblock %}
+{% block topbar_title %}جزئیات مرحله نقشه راه{% endblock %}
+
 {% block content %}
 
 <!-- ========== CONFIRM MODAL ========== -->
 <div id="activity-confirm-modal" class="acm-overlay" role="dialog" aria-modal="true" aria-labelledby="acm-title">
     <div class="acm-box">
-
         <div class="acm-header">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2" width="22" height="22">
@@ -32,9 +36,7 @@
             </div>
             <p class="acm-section-hint">انتخاب کنید این فعالیت در کدام بخش از پروفایل شما ثبت شود:</p>
 
-            <div class="acm-save-list" id="acm-save-list">
-                <!-- با JS پر می‌شه -->
-            </div>
+            <div class="acm-save-list" id="acm-save-list"></div>
         </div>
 
         <div class="acm-footer">
@@ -47,11 +49,8 @@
                 تأیید و ذخیره
             </button>
         </div>
-
     </div>
 </div>
-<!-- ========== END MODAL ========== -->
-
 
 <div class="rm-page">
     <div class="rm-page-header rm-page-header-compact">
@@ -79,15 +78,15 @@
             </div>
         </div>
 
-        <div class="fields-grid col-4">
+        <div class="sd-stats-grid">
             <div class="rm-stat-card">
                 <span class="rm-stat-label">وضعیت مرحله</span>
                 {% if stage.get_progress == 100 %}
-                <span class="rm-stat-value">تکمیل‌شده</span>
+                <span class="rm-stat-value sd-status-done">تکمیل‌شده</span>
                 {% elif stage.id == active_stage.id %}
-                <span class="rm-stat-value">در حال انجام</span>
+                <span class="rm-stat-value sd-status-active">در حال انجام</span>
                 {% else %}
-                <span class="rm-stat-value">در انتظار</span>
+                <span class="rm-stat-value sd-status-upcoming">در انتظار</span>
                 {% endif %}
             </div>
             <div class="rm-stat-card">
@@ -97,9 +96,6 @@
             <div class="rm-stat-card rm-stat-card-progress">
                 <span class="rm-stat-label">پیشرفت</span>
                 <div class="rm-progress-wrap">
-                    <div class="rm-progress-bar-track">
-                        <div class="rm-progress-bar-fill" style="width: {{ progress }}%;"></div>
-                    </div>
                     <span class="rm-progress-pct">{{ progress }}%</span>
                 </div>
             </div>
@@ -107,10 +103,25 @@
                 <span class="rm-stat-label">مدت زمان</span>
                 <span class="rm-stat-value">{{ duration }} <small>روز</small></span>
             </div>
+            {% if stage.phase_type %}
+            <div class="rm-stat-card">
+                <span class="rm-stat-label">نوع فاز</span>
+                <span class="rm-stat-value">{{ stage.get_phase_type_display }}</span>
+            </div>
+            {% endif %}
+            {% if stage.priority %}
+            <div class="rm-stat-card">
+                <span class="rm-stat-label">اولویت</span>
+                <span class="rm-stat-value">{{ stage.get_priority_display }}</span>
+            </div>
+            {% endif %}
         </div>
     </div>
 
-    <div class="rm-detail-main">
+
+    <!-- Main Content -->
+    <div class="sd-main">
+        <!-- Overview Card -->
         <div class="rm-card">
             <div class="rm-card-header">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -123,28 +134,150 @@
             </div>
             <div class="rm-card-body">
                 {% if stage.description %}
-                <div class="rm-info-row">
-                    <span class="rm-info-label">توضیحات</span>
-                    <span class="rm-info-val">{{ stage.description }}</span>
+                <div class="sd-info-section">
+                    <span class="sd-info-label">توضیحات</span>
+                    <p class="sd-info-text">{{ stage.description }}</p>
                 </div>
                 {% endif %}
+
                 {% if stage.objectives %}
-                <div class="rm-info-row">
-                    <span class="rm-info-label">اهداف</span>
-                    <span class="rm-info-val">{{ stage.objectives }}</span>
+                <div class="sd-info-section">
+                    <span class="sd-info-label">اهداف مرحله</span>
+                    <p class="sd-info-text">{{ stage.objectives }}</p>
                 </div>
                 {% endif %}
             </div>
         </div>
 
+        <!-- Success Criteria -->
+        {% if stage.success_criteria %}
+        <div class="rm-card rm-card-mt">
+            <div class="rm-card-header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M9 11l3 3L22 4" />
+                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                معیارهای موفقیت
+            </div>
+            <div class="rm-card-body">
+                <ul class="sd-criteria-list">
+                    {% for criterion in stage.success_criteria %}
+                    <li class="sd-criteria-item">{{ criterion }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Milestone -->
+        {% if stage.milestone %}
+        <div class="rm-card rm-card-mt">
+            <div class="rm-card-header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+                نقطه عطف (معیار تکمیل)
+            </div>
+            <div class="rm-card-body">
+                <div class="sd-milestone-box">
+                    <p class="sd-milestone-text">{{ stage.milestone }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Risks -->
+        {% if stage.risks %}
+        <div class="rm-card rm-card-mt">
+            <div class="rm-card-header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path
+                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                ریسک‌های احتمالی
+            </div>
+            <div class="rm-card-body">
+                <ul class="sd-risks-list">
+                    {% for risk in stage.risks %}
+                    <li class="sd-risk-item">{{ risk }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recommended Resources -->
+        {% if stage.recommended_resources %}
+        <div class="rm-card rm-card-mt">
+            <div class="rm-card-header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                </svg>
+                منابع پیشنهادی
+            </div>
+            <div class="rm-card-body">
+                <div class="sd-resources-grid">
+                    {% for resource in stage.recommended_resources %}
+                    <div class="sd-resource-card">
+                        <div class="sd-resource-header">
+                            {% if resource.type == 'وب‌سایت' %}
+                            <svg class="sd-resource-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="2" y1="12" x2="22" y2="12" />
+                                <path
+                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                            </svg>
+                            {% elif resource.type == 'نرم‌افزار' %}
+                            <svg class="sd-resource-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                                <line x1="2" y1="17" x2="22" y2="17" />
+                                <line x1="6" y1="21" x2="6" y2="17" />
+                                <line x1="10" y1="21" x2="10" y2="17" />
+                                <line x1="14" y1="21" x2="14" y2="17" />
+                                <line x1="18" y1="21" x2="18" y2="17" />
+                            </svg>
+                            {% else %}
+                            <svg class="sd-resource-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+                                <polyline points="13 2 13 9 20 9" />
+                            </svg>
+                            {% endif %}
+                            <span class="sd-resource-type">{{ resource.type }}</span>
+                        </div>
+                        <h4 class="sd-resource-title">{{ resource.title }}</h4>
+                        {% if resource.description %}
+                        <p class="sd-resource-desc">{{ resource.description }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Activities Table -->
         <div class="rm-card rm-card-mt">
             <div class="rm-card-header">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
+                    <line x1="12" y1="13" x2="8" y2="13" />
+                    <line x1="12" y1="17" x2="8" y2="17" />
                 </svg>
                 فعالیت‌های مرحله
+                <span class="sd-activity-count">{{ stage.stage_activities.all|length }}</span>
             </div>
             <div class="rm-card-body rm-card-body-flush">
                 {% if stage.stage_activities.all %}
@@ -164,37 +297,34 @@
                             {% for item in stage.stage_activities.all %}
                             <tr class="{% if item.is_completed %}rm-row-done{% endif %}">
                                 <td class="rm-td-title">
-                                    {{ item.activity.title }}
+                                    <strong>{{ item.activity.title }}</strong>
+                                    {% if item.activity.description %}
                                     <div class="rm-td-note">{{ item.activity.description }}</div>
+                                    {% endif %}
                                 </td>
-                                <td><span class="tag">{{ item.activity.category }}</span></td>
-                                <td>{{ item.activity.duration_days }} روز</td>
+                                <td><span class="tag tag-category">{{ item.activity.category }}</span></td>
+                                <td class="sd-td-duration">{{ item.activity.duration_days }} روز</td>
                                 <td class="rm-td-muted">{{ item.activity.resume_output }}</td>
                                 <td>
                                     {% if item.is_completed %}
-                                    <span class="tag rm-status-done">تکمیل‌شده</span>
+                                    <span class="tag rm-status-done">✓ تکمیل‌شده</span>
                                     {% else %}
                                     <span class="tag rm-status-upcoming">در انتظار</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if not item.is_completed %}
-                                    {# فرم مخفی — بدون onsubmit قدیمی #}
                                     <form id="form-activity-{{ item.id }}" method="post"
                                         action="{% url 'roadmap:stage_activity_toggle' item.id %}"
                                         style="display:none;">
                                         {% csrf_token %}
-                                        {# فیلد مخفی برای override محل ذخیره — با JS پر می‌شه #}
                                         <input type="hidden" name="save_target" id="save-target-{{ item.id }}" value="">
                                     </form>
-
-                                    <!-- جدید - درست -->
                                     {{ item.activity.profile_template|json_script:item.id|default:"" }}
                                     <button type="button" class="rm-btn rm-btn-sm rm-btn-primary"
                                         data-item-id="{{ item.id }}" onclick="openActivityModal({{ item.id }})">
                                         تغییر وضعیت
                                     </button>
-
                                     {% else %}
                                     <span class="rm-btn-not-activ">غیرفعال</span>
                                     {% endif %}
@@ -210,11 +340,10 @@
             </div>
         </div>
     </div>
+
+
 </div>
 
-
-
-<!-- ===== SCRIPT ===== -->
 <script>
     let _currentFormId = null;
 
@@ -342,6 +471,5 @@
         if (e.key === 'Escape') closeActivityModal();
     });
 </script>
-
 
 {% endblock %}

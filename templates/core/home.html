@@ -23,68 +23,36 @@
                         <circle cx="12" cy="12" r="10" />
                         <polyline points="12 6 12 12 16 14" />
                     </svg>
-                    پیشرفت ها
+                    پیشرفت‌ها
                 </div>
+
                 <div class="stats-row">
-                    <div class="stat-box" style="--percent: 40;">
+                    {% for stat in dashboard_stats %}
+                    <div class="stat-box" style="--percent: {{ stat.percent }};">
                         <div class="rsd-ps-score-ring-wrap">
                             <svg class="rsd-ps-ring" viewBox="0 0 80 80">
                                 <circle class="rsd-ps-ring-bg" cx="40" cy="40" r="32" />
                                 <circle class="rsd-ps-ring-fill" cx="40" cy="40" r="32" />
                             </svg>
                             <div class="rsd-ps-ring-text">
-                                <span class="rsd-ps-ring-val">40٪</span>
-                                <span class="rsd-ps-ring-sub">تکمیل پروفایل</span>
+                                <span class="rsd-ps-ring-val">{{ stat.value }}</span>
+                                <span class="rsd-ps-ring-sub">{{ stat.label }}</span>
                             </div>
                         </div>
+                        {% if stat.sub %}
+                        <div class="rsd-ps-ring-note">{{ stat.sub }}</div>
+                        {% endif %}
                     </div>
-
-
-                    <div class="stat-box" style="--percent: 20;">
-                        <div class="rsd-ps-score-ring-wrap">
-                            <svg class="rsd-ps-ring" viewBox="0 0 80 80">
-                                <circle class="rsd-ps-ring-bg" cx="40" cy="40" r="32" />
-                                <circle class="rsd-ps-ring-fill" cx="40" cy="40" r="32" />
-                            </svg>
-                            <div class="rsd-ps-ring-text">
-                                <span class="rsd-ps-ring-val">20٪</span>
-                                <span class="rsd-ps-ring-sub">ادامه مسیر</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-box" style="--percent: 70;">
-                        <div class="rsd-ps-score-ring-wrap">
-                            <svg class="rsd-ps-ring" viewBox="0 0 80 80">
-                                <circle class="rsd-ps-ring-bg" cx="40" cy="40" r="32" />
-                                <circle class="rsd-ps-ring-fill" cx="40" cy="40" r="32" />
-                            </svg>
-                            <div class="rsd-ps-ring-text">
-                                <span class="rsd-ps-ring-val">70٪</span>
-                                <span class="rsd-ps-ring-sub">تکمیل پروفایل</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-box" style="--percent: 50;">
-                        <div class="rsd-ps-score-ring-wrap">
-                            <svg class="rsd-ps-ring" viewBox="0 0 80 80">
-                                <circle class="rsd-ps-ring-bg" cx="40" cy="40" r="32" />
-                                <circle class="rsd-ps-ring-fill" cx="40" cy="40" r="32" />
-                            </svg>
-                            <div class="rsd-ps-ring-text">
-                                <span class="rsd-ps-ring-val">50٪</span>
-                                <span class="rsd-ps-ring-sub">تکمیل پروفایل</span>
-                            </div>
-                        </div>
-                    </div>
-
+                    {% empty %}
+                    <p style="color: var(--text-muted); font-size: 13px;">اطلاعاتی برای نمایش وجود ندارد.</p>
+                    {% endfor %}
                 </div>
 
                 <br>
 
                 <!-- Weak point alert -->
-                <div class="rsd-ps-card rsd-ps-alert">
+                {% if weak_point %}
+                <div class="rsd-ps-card rsd-ps-alert rsd-ps-alert--{{ weak_point.0 }}">
                     <div class="rsd-ps-alert-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                             <path
@@ -93,12 +61,23 @@
                     </div>
                     <div>
                         <div class="rsd-ps-alert-title">نقطه ضعف شناسایی‌شده</div>
-                        <div class="rsd-ps-alert-desc">اقدامات اورژانسی (۴۵٪) نیاز به تمرین بیشتر دارد. شرکت در
-                            سیمولاتور اورژانس توصیه می‌شود.</div>
+                        <div class="rsd-ps-alert-desc">{{ weak_point.1 }} — {{ weak_point.2 }}</div>
                     </div>
                 </div>
+                {% else %}
+                <div class="rsd-ps-card rsd-ps-alert rsd-ps-alert--success">
+                    <div class="rsd-ps-alert-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="rsd-ps-alert-title">پروفایل در وضعیت خوبی است</div>
+                        <div class="rsd-ps-alert-desc">همه بخش‌های اصلی تکمیل شده‌اند. به مسیر خود ادامه دهید.</div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
-
 
 
 
@@ -205,13 +184,100 @@
                 <p>هنوز نقشه راهی برای شما تعریف نشده است.</p>
                 <p>ابتدا از کامل بودن پروفایل خود اطمینان حاصل کنید بعد گزینه "ایجاد نقشه راه" را انتخاب کنید</p>
                 {% if user.is_authenticated and not user.profile.first_name and not user.profile.last_name and not user.profile.job_title %}
-                    برای ساخت رود مپ حرفه‌ای لطفاً اول پروفایل خود را بسازید
+                برای ساخت رود مپ حرفه‌ای لطفاً اول پروفایل خود را بسازید
                 {% else %}
-                    <!-- لینک با intercept جاوااسکریپت -->
+                <!-- لینک با intercept جاوااسکریپت -->
                 <!-- لینک بدون href معمولی -->
-                <a href="#" id="roadmapLink" class="rm-btn rm-btn-primary" onclick="handleRoadmapClick(event)">
+                <!-- لینک باز کردن مودال -->
+                <a href="#" id="roadmapLink" class="rm-btn rm-btn-primary" onclick="openRoadmapModal(event)">
                     ایجاد نقشه راه
                 </a>
+
+                <!-- ══════════════ ROADMAP MODAL ══════════════ -->
+                <div id="roadmapModal" class="rm-modal-overlay" style="display:none;" onclick="closeOnOverlay(event)">
+                    <div class="rm-modal-box">
+
+                        <button class="rm-modal-close" onclick="closeRoadmapModal()">&#10005;</button>
+                        <h2 class="rm-modal-title">ساخت نقشه راه حرفه‌ای</h2>
+                        <p class="rm-modal-subtitle">چند اطلاعات کوتاه تا رودمپ شخصی‌سازی‌شده برات بسازیم</p>
+
+                        <!-- هدف -->
+                        <div class="rm-field-group">
+                            <label class="rm-label">هدف حرفه‌ای <span class="rm-required">*</span></label>
+                            <select id="rmGoal" class="rm-select">
+                                {% for value, label in goal_choices %}
+                                <option value="{{ value }}" {% if value == user.profile.goal %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if user.profile.goal %}
+                            <p class="rm-hint">هدف فعلی پروفایل شما:
+                                <strong>{{ user.profile.get_goal_display }}</strong></p>
+                            {% endif %}
+                        </div>
+
+                        <!-- بازه زمانی -->
+                        <div class="rm-field-group">
+                            <label class="rm-label">بازه زمانی مورد نظر <span class="rm-required">*</span></label>
+                            <div class="rm-time-options">
+                                <label class="rm-time-card">
+                                    <input type="radio" name="rmTimeframe" value="under_3_months" data-days="90">
+                                    <span class="rm-time-label">
+                                        <strong>کمتر از ۳ ماه</strong>
+                                        <small>مناسب اهداف فوری و کوتاه‌مدت</small>
+                                    </span>
+                                </label>
+                                <label class="rm-time-card">
+                                    <input type="radio" name="rmTimeframe" value="3_to_6_months" data-days="180"
+                                        checked>
+                                    <span class="rm-time-label">
+                                        <strong>۳ تا ۶ ماه</strong>
+                                        <small>متوازن — پیشنهاد ما برای اکثر کاربران</small>
+                                    </span>
+                                </label>
+                                <label class="rm-time-card">
+                                    <input type="radio" name="rmTimeframe" value="6_to_12_months" data-days="365">
+                                    <span class="rm-time-label">
+                                        <strong>۶ ماه تا ۱ سال</strong>
+                                        <small>مناسب اهداف جامع و بلندمدت</small>
+                                    </span>
+                                </label>
+                                <label class="rm-time-card">
+                                    <input type="radio" name="rmTimeframe" value="1_to_2_years" data-days="730">
+                                    <span class="rm-time-label">
+                                        <strong>۱ تا ۲ سال</strong>
+                                        <small>برنامه‌ریزی استراتژیک بلندمدت</small>
+                                    </span>
+                                </label>
+                                <label class="rm-time-card">
+                                    <input type="radio" name="rmTimeframe" value="over_2_years" data-days="900">
+                                    <span class="rm-time-label">
+                                        <strong>بیشتر از ۲ سال</strong>
+                                        <small>رودمپ جامع تخصصی</small>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- توضیحات دلبخواهی -->
+                        <div class="rm-field-group">
+                            <label class="rm-label">نکات اضافه <span class="rm-optional">(اختیاری)</span></label>
+                            <textarea id="rmNotes" class="rm-textarea" rows="3"
+                                placeholder="هر نکته‌ای که فکر می‌کنی در ساخت رودمپت مهمه بنویس — مثلاً: دو روز در هفته وقت دارم، یا مهلت امتحان جامع دارم..."></textarea>
+                        </div>
+
+                        <!-- دکمه ارسال -->
+                        <div class="rm-modal-actions">
+                            <button class="rm-btn rm-btn-secondary" onclick="closeRoadmapModal()">انصراف</button>
+                            <button class="rm-btn rm-btn-primary" id="rmSubmitBtn" onclick="submitRoadmapModal()">
+                                <span id="rmBtnText">ساخت نقشه راه</span>
+                                <span id="rmBtnSpinner" style="display:none;">در حال پردازش...</span>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
                 {% endif %}
             </div>
             {% endif %}
@@ -615,28 +681,28 @@
         <div class="processing-animation">
             <div class="brain-icon">
                 <svg viewBox="0 0 100 100" width="80" height="80">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.3"/>
-                    <circle cx="50" cy="50" r="35" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.5"/>
-                    <circle cx="50" cy="50" r="25" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.7"/>
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.3" />
+                    <circle cx="50" cy="50" r="35" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.5" />
+                    <circle cx="50" cy="50" r="25" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.7" />
                     <circle cx="50" cy="50" r="15" fill="#4A90D9">
-                        <animate attributeName="r" values="15;18;15" dur="1s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="1;0.7;1" dur="1s" repeatCount="indefinite"/>
+                        <animate attributeName="r" values="15;18;15" dur="1s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="1;0.7;1" dur="1s" repeatCount="indefinite" />
                     </circle>
                     <circle cx="20" cy="30" r="3" fill="#4A90D9">
-                        <animate attributeName="cy" values="30;20;30" dur="1.5s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/>
+                        <animate attributeName="cy" values="30;20;30" dur="1.5s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite" />
                     </circle>
                     <circle cx="80" cy="40" r="3" fill="#4A90D9">
-                        <animate attributeName="cy" values="40;30;40" dur="1.8s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="0;1;0" dur="1.8s" repeatCount="indefinite"/>
+                        <animate attributeName="cy" values="40;30;40" dur="1.8s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0;1;0" dur="1.8s" repeatCount="indefinite" />
                     </circle>
                     <circle cx="30" cy="70" r="3" fill="#4A90D9">
-                        <animate attributeName="cy" values="70;60;70" dur="1.3s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="0;1;0" dur="1.3s" repeatCount="indefinite"/>
+                        <animate attributeName="cy" values="70;60;70" dur="1.3s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0;1;0" dur="1.3s" repeatCount="indefinite" />
                     </circle>
                     <circle cx="70" cy="65" r="3" fill="#4A90D9">
-                        <animate attributeName="cy" values="65;75;65" dur="1.6s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite"/>
+                        <animate attributeName="cy" values="65;75;65" dur="1.6s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite" />
                     </circle>
                 </svg>
             </div>
@@ -665,124 +731,114 @@
     </div>
 </div>
 
-<style>
-.processing-modal {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.3s ease;
-}
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-.processing-content {
-    background: white;
-    border-radius: 20px;
-    padding: 40px 50px;
-    text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    animation: slideUp 0.4s ease;
-    max-width: 400px;
-    width: 90%;
-}
-
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px) scale(0.95); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.processing-animation {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-}
-
-.brain-icon { animation: pulse 2s ease-in-out infinite; }
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50%       { transform: scale(1.05); }
-}
-
-.processing-text h3 {
-    color: #2c3e50;
-    font-size: 1.3rem;
-    margin: 0 0 8px 0;
-    font-weight: 600;
-}
-
-.processing-text p {
-    color: #7f8c8d;
-    font-size: 0.95rem;
-    margin: 4px 0;
-}
-
-.progress-bar {
-    width: 100%;
-    height: 6px;
-    background: #ecf0f1;
-    border-radius: 3px;
-    overflow: hidden;
-    margin-top: 10px;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #4A90D9, #67B26F, #4A90D9);
-    background-size: 200% 100%;
-    border-radius: 3px;
-    animation: progressMove 1.5s ease-in-out infinite;
-}
-
-@keyframes progressMove {
-    0%   { width: 0%;   background-position: 0%   50%; }
-    50%  { width: 70%;  background-position: 100% 50%; }
-    100% { width: 100%; background-position: 0%   50%; }
-}
-</style>
 
 <script>
-async function handleRoadmapClick(event) {
-    event.preventDefault();
+    async function handleRoadmapClick(event) {
+        event.preventDefault();
 
-    document.getElementById('processingModal').style.display = 'flex';
+        document.getElementById('processingModal').style.display = 'flex';
 
-    try {
-        const response = await fetch("{% url 'roadmap:roadmap_generate_ai' %}", {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
+        try {
+            const response = await fetch("{% url 'roadmap:roadmap_generate_ai' %}", {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                document.getElementById('processingModal').style.display = 'none';
+                document.getElementById('errorModal').style.display = 'flex';
             }
-        });
 
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-            window.location.href = data.redirect_url;
-        } else {
+        } catch (error) {
             document.getElementById('processingModal').style.display = 'none';
             document.getElementById('errorModal').style.display = 'flex';
         }
-
-    } catch (error) {
-        document.getElementById('processingModal').style.display = 'none';
-        document.getElementById('errorModal').style.display = 'flex';
     }
-}
 
-function closeErrorModal() {
-    document.getElementById('errorModal').style.display = 'none';
-}
+    function closeErrorModal() {
+        document.getElementById('errorModal').style.display = 'none';
+    }
+</script>
+
+
+
+
+<!-- ══════════════ JavaScript ══════════════ -->
+<script>
+    function openRoadmapModal(e) {
+        e.preventDefault();
+        document.getElementById('roadmapModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeRoadmapModal() {
+        document.getElementById('roadmapModal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    function closeOnOverlay(e) {
+        if (e.target.id === 'roadmapModal') closeRoadmapModal();
+    }
+
+    function submitRoadmapModal() {
+        const goal = document.getElementById('rmGoal').value;
+        const timeframeInput = document.querySelector('input[name="rmTimeframe"]:checked');
+        const notes = document.getElementById('rmNotes').value.trim();
+
+        if (!goal) {
+            alert('لطفاً هدف حرفه‌ای را انتخاب کنید.');
+            return;
+        }
+        if (!timeframeInput) {
+            alert('لطفاً بازه زمانی را انتخاب کنید.');
+            return;
+        }
+
+        // بستن مودال فرم و نمایش مودال پردازش
+        closeRoadmapModal();
+        document.getElementById('processingModal').style.display = 'flex';
+
+        const formData = new FormData();
+        formData.append('goal', goal);
+        formData.append('timeframe', timeframeInput.value);
+        formData.append('timeframe_days', timeframeInput.dataset.days);
+        formData.append('notes', notes);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch("{% url 'roadmap:roadmap_generate_ai' %}", {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData,
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    document.getElementById('processingModal').style.display = 'none';
+                    document.getElementById('errorModal').style.display = 'flex';
+                }
+            })
+            .catch(() => {
+                document.getElementById('processingModal').style.display = 'none';
+                document.getElementById('errorModal').style.display = 'flex';
+            });
+    }
+
+    function resetSubmitBtn() {
+        document.getElementById('rmBtnText').style.display = 'inline';
+        document.getElementById('rmBtnSpinner').style.display = 'none';
+        document.getElementById('rmSubmitBtn').disabled = false;
+    }
 </script>
 
 

@@ -1,5 +1,10 @@
 <!-- templates/roadmap/roadmap_detail.html -->
+
 {% extends 'base.html' %}
+
+{% block title %}رودمپ{% endblock %}
+{% block topbar_title %}نقشه راه{% endblock %}
+
 {% block content %}
 
 <div class="rm-page">
@@ -8,19 +13,16 @@
             <div class="rm-header-left">
                 <h1 class="rm-page-title">{{ roadmap.title }} <span class="tag-lurge">{{ roadmap.status }}</span></h1>
                 <p class="rm-page-desc">{{ roadmap.description|default:"بدون توضیح" }}</p>
-
             </div>
             <div class="rm-header-actions">
                 <a href="{% url 'roadmap:roadmap_edit' roadmap.id %}" class="rm-btn rm-btn-outline">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                     ویرایش رودمپ
                 </a>
                 <a href="{% url 'roadmap:stage_create' roadmap.id %}" class="rm-btn rm-btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" /></svg>
                     افزودن مرحله
@@ -51,8 +53,7 @@
 
     <div class="rm-body">
         <div class="rm-section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
             مراحل رودمپ
             <span class="title-badge">{{ stages|length }} مرحله</span>
@@ -66,8 +67,7 @@
             <div class="rm-step {{ step_class }}">
                 <div class="rm-step-aside">
                     <div class="rm-step-node {{ node_class }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                             <polyline points="20 6 9 17 4 12" /></svg>
                     </div>
                     {% if not forloop.last %}<div class="rm-step-line"></div>{% endif %}
@@ -76,65 +76,69 @@
                     <div class="rm-step-header">
                         <div class="rm-step-meta">
                             <span class="rm-step-num">مرحله {{ stage.order }}</span>
-                            <span class="rm-step-period">{{ stage.get_total_duration }} روز</span>
-                        </div>
-                        <span class="tag {{ status_class }}">{{ status_label }}</span>
-                    </div>
-
-                    <div class="rm-step-details">
-                        <div class="rm-step-details-right">
-                            <div class="rm-step-title">{{ stage.title }}</div>
-                            <div class="rm-step-desc">{{ stage.description|default:"بدون توضیح" }}</div>
-
-                            <div class="rm-step-tags">
-                                {% for item in stage.stage_activities.all|slice:":3" %}
-                                <span class="tag">{{ item.activity.category }}</span>
-                                {% endfor %}
-                            </div>
-
-                            <div class="rm-step-progress">
-                                <div class="rm-progress-bar-track rm-progress-sm">
-                                    <div class="rm-progress-bar-fill rm-fill-done"
-                                        style="width: {{ stage.get_progress }}%;">
-                                    </div>
-                                </div>
-                                <span class="rm-progress-label">{{ stage.get_progress }}%</span>
-                            </div>
-                        </div>
-                        <div class="rm-step-details-left">
-                            <p class="rm-p-title">چک لیست</p>
-                            <div class="rm-checklist-list">
-                                {% for item in stage.stage_activities.all|slice:":4" %}
-                                <span
-                                    class="rm-checklist {% if item.is_completed %}rm-checklist-done{% endif %}">{{ item.activity.title }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                    <hr class="rm-step-hr">
-                    <div class="rm-step-footer">
-                        <div class="rm-resume_output-chips">
-                            <p class="rm-p-title">اهداف</p>
-                            <div class="rm-activity-chips">
-                                {% for item in stage.stage_activities.all|slice:":4" %}
-                                <span
-                                    class="rm-chip">{{ item.activity.resume_output }}</span>
-                                {% endfor %}
-                                {% if stage.stage_activities.all|length > 4 %}
-                                <span class="rm-chip">+{{ stage.stage_activities.all|length|add:"-4" }} بیشتر</span>
+                            <span class="rm-step-period">
+                                {% if stage.get_total_duration %}
+                                {{ stage.get_total_duration }} روز
                                 {% endif %}
-                            </div>
+                            </span>
                         </div>
+                        <div class="rm-step-badges">
+                            <span class="tag {{ status_class }}">{{ status_label }}</span>
+                            {% if stage.phase_type %}
+                            <span class="tag tag-phase">{{ stage.get_phase_type_display }}</span>
+                            {% endif %}
+                            {% if stage.priority %}
+                            <span class="tag tag-priority tag-priority-{{ stage.priority }}">
+                                <svg class="priority-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                                {{ stage.get_priority_display }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="rm-step-title">{{ stage.title }}</div>
+                    <div class="rm-step-desc">{{ stage.description|default:"بدون توضیح" }}</div>
+
+                    <div class="rm-step-tags">
+                        {% for item in stage.stage_activities.all|slice:":3" %}
+                        <span class="tag tag-category">{{ item.activity.category }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="rm-step-progress">
+                        <div class="rm-progress-bar-track rm-progress-sm">
+                            <div class="rm-progress-bar-fill rm-fill-done" style="width: {{ stage.get_progress }}%;"></div>
+                        </div>
+                        <span class="rm-progress-label">{{ stage.get_progress }}%</span>
+                    </div>
+
+                    <div class="rm-step-quick-info">
+                        <div class="rm-quick-item">
+                            <span class="rm-quick-label">فعالیت‌ها</span>
+                            <span class="rm-quick-value">{{ stage.stage_activities.all|length }}</span>
+                        </div>
+                        {% if stage.milestone %}
+                        <div class="rm-quick-item">
+                            <span class="rm-quick-label">معیار تکمیل</span>
+                            <span class="rm-quick-value rm-quick-truncate">{{ stage.milestone }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <hr class="rm-step-hr">
+
+                    <div class="rm-step-footer">
                         <div class="rm-step-actions">
-                            <a href="{% url 'roadmap:stage_detail' stage.id %}"
-                                class="rm-btn rm-btn-xs rm-btn-ghost">جزئیات</a>
-                            <a href="{% url 'roadmap:stage_edit' stage.id %}"
-                                class="rm-btn rm-btn-xs rm-btn-outline">ویرایش</a>
+                            <a href="{% url 'roadmap:stage_detail' stage.id %}" class="rm-btn rm-btn-xs rm-btn-ghost">جزئیات</a>
+                            <a href="{% url 'roadmap:stage_edit' stage.id %}" class="rm-btn rm-btn-xs rm-btn-outline">ویرایش</a>
                         </div>
                     </div>
                 </div>
             </div>
             {% endwith %}
+
             {% elif stage.id == active_stage_id %}
             {% with node_class="rm-node-active" step_class="rm-active" status_class="rm-status-active" status_label="در حال انجام" %}
             <div class="rm-step {{ step_class }}">
@@ -146,66 +150,83 @@
                     <div class="rm-step-header">
                         <div class="rm-step-meta">
                             <span class="rm-step-num">مرحله {{ stage.order }}</span>
-                            <span class="rm-step-period">{{ stage.get_total_duration }} روز</span>
-                        </div>
-                        <span class="tag {{ status_class }}">{{ status_label }}</span>
-                    </div>
-                    <div class="rm-step-details">
-                        <div class="rm-step-details-right">
-                            <div class="rm-step-title">{{ stage.title }}</div>
-                            <div class="rm-step-desc">{{ stage.description|default:"بدون توضیح" }}</div>
-                            <div class="rm-step-tags">
-                                {% for item in stage.stage_activities.all|slice:":3" %}
-                                <span class="tag">{{ item.activity.category }}</span>
-                                {% endfor %}
-                            </div>
-                            <div class="rm-step-meta-days">
-                                <p class="rm-step-meta-days-p">مهلت باقی مانده:</p>
-                                <span class="rm-step-meta-days-span">{{ stage.get_remaining_days }} روز باقی‌مانده</span>
-                            </div>
-
-                            <div class="rm-step-progress">
-                                <div class="rm-progress-bar-track rm-progress-sm">
-                                    <div class="rm-progress-bar-fill" style="width: {{ stage.get_progress }}%;"></div>
-                                </div>
-                                <span class="rm-progress-label">{{ stage.get_progress }}%</span>
-                            </div>
-                        </div>
-                        <div class="rm-step-details-left">
-                            <p class="rm-p-title">چک لیست</p>
-                            <div class="rm-checklist-list">
-                                {% for item in stage.stage_activities.all|slice:":4" %}
-                                <span
-                                    class="rm-checklist {% if item.is_completed %}rm-checklist-done{% endif %}">{{ item.activity.title }}<p>{{ item.activity.duration_days }} روز</p></span>
-                                    
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                    <hr class="rm-step-hr">
-                    <div class="rm-step-footer">
-                        <div class="rm-resume_output-chips">
-                            <p class="rm-p-title">اهداف</p>
-                            <div class="rm-activity-chips">
-                                {% for item in stage.stage_activities.all|slice:":4" %}
-                                <span
-                                    class="rm-chip">{{ item.activity.resume_output }}</span>
-                                {% endfor %}
-                                {% if stage.stage_activities.all|length > 4 %}
-                                <span class="rm-chip">+{{ stage.stage_activities.all|length|add:"-4" }} بیشتر</span>
+                            <span class="rm-step-period">
+                                {% if stage.get_total_duration %}
+                                {{ stage.get_total_duration }} روز
                                 {% endif %}
-                            </div>
+                            </span>
                         </div>
+                        <div class="rm-step-badges">
+                            <span class="tag {{ status_class }}">{{ status_label }}</span>
+                            {% if stage.phase_type %}
+                            <span class="tag tag-phase">{{ stage.get_phase_type_display }}</span>
+                            {% endif %}
+                            {% if stage.priority %}
+                            <span class="tag tag-priority tag-priority-{{ stage.priority }}">
+                                <svg class="priority-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                                {{ stage.get_priority_display }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="rm-step-title">{{ stage.title }}</div>
+                    <div class="rm-step-desc">{{ stage.description|default:"بدون توضیح" }}</div>
+
+                    <div class="rm-step-tags">
+                        {% for item in stage.stage_activities.all|slice:":3" %}
+                        <span class="tag tag-category">{{ item.activity.category }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="rm-step-alert rm-alert-info">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        <div class="rm-alert-content">
+                            <p class="rm-alert-label">مهلت باقی‌مانده:</p>
+                            <p class="rm-alert-value">{{ stage.get_remaining_days }} روز</p>
+                        </div>
+                    </div>
+
+                    <div class="rm-step-progress">
+                        <div class="rm-progress-bar-track rm-progress-sm">
+                            <div class="rm-progress-bar-fill" style="width: {{ stage.get_progress }}%;"></div>
+                        </div>
+                        <span class="rm-progress-label">{{ stage.get_progress }}%</span>
+                    </div>
+
+                    <div class="rm-step-quick-info">
+                        <div class="rm-quick-item">
+                            <span class="rm-quick-label">فعالیت‌ها</span>
+                            <span class="rm-quick-value">{{ stage.stage_activities.all|length }}</span>
+                        </div>
+                        <div class="rm-quick-item">
+                            <span class="rm-quick-label">تکمیل‌شده</span>
+                            <span class="rm-quick-value">{{ stage.stage_activities.all|dictsort:"is_completed"|length }}</span>
+                        </div>
+                        {% if stage.milestone %}
+                        <div class="rm-quick-item">
+                            <span class="rm-quick-label">معیار تکمیل</span>
+                            <span class="rm-quick-value rm-quick-truncate">{{ stage.milestone }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <hr class="rm-step-hr">
+
+                    <div class="rm-step-footer">
                         <div class="rm-step-actions">
-                            <a href="{% url 'roadmap:stage_detail' stage.id %}"
-                                class="rm-btn rm-btn-xs rm-btn-ghost">جزئیات</a>
-                            <a href="{% url 'roadmap:stage_edit' stage.id %}"
-                                class="rm-btn rm-btn-xs rm-btn-outline">ویرایش</a>
+                            <a href="{% url 'roadmap:stage_detail' stage.id %}" class="rm-btn rm-btn-xs rm-btn-ghost">جزئیات</a>
+                            <a href="{% url 'roadmap:stage_edit' stage.id %}" class="rm-btn rm-btn-xs rm-btn-outline">ویرایش</a>
                         </div>
                     </div>
                 </div>
             </div>
             {% endwith %}
+
             {% else %}
             {% with node_class="rm-node-upcoming" step_class="rm-upcoming" status_class="rm-status-upcoming" status_label="در انتظار" %}
             <div class="rm-step {{ step_class }}">
@@ -217,56 +238,63 @@
                     <div class="rm-step-header">
                         <div class="rm-step-meta">
                             <span class="rm-step-num">مرحله {{ stage.order }}</span>
-                            <span class="rm-step-period">{{ stage.get_total_duration }} روز</span>
-                        </div>
-                        <span class="tag {{ status_class }}">{{ status_label }}</span>
-                    </div>
-
-                    <div class="rm-step-details">
-                        <div class="rm-step-details-right">
-                            <div class="rm-step-title">{{ stage.title }}</div>
-                            <div class="rm-step-desc">{{ stage.description|default:"بدون توضیح" }}</div>
-                            <div class="rm-step-tags">
-                                {% for item in stage.stage_activities.all|slice:":3" %}
-                                <span class="tag">{{ item.activity.category }}</span>
-                                {% endfor %}
-                            </div>
-                            <div class="rm-step-progress">
-                                <div class="rm-progress-bar-track rm-progress-sm">
-                                    <div class="rm-progress-bar-fill" style="width: {{ stage.get_progress }}%;"></div>
-                                </div>
-                                <span class="rm-progress-label">{{ stage.get_progress }}%</span>
-                            </div>
-
-                        </div>
-                        <div class="rm-step-details-left">
-                            <p class="rm-p-title">چک لیست</p>
-                            <div class="rm-checklist-list">
-                                {% for item in stage.stage_activities.all|slice:":4" %}
-                                <span
-                                    class="rm-checklist {% if item.is_completed %}rm-checklist-done{% endif %}">{{ item.activity.title }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                    <hr class="rm-step-hr">
-                    <div class="rm-step-footer">
-                        <div class="rm-resume_output-chips">
-                            <p class="rm-p-title">اهداف</p>
-                            <div class="rm-activity-chips">
-                                {% for item in stage.stage_activities.all|slice:":4" %}
-                                <span class="rm-chip">{{ item.activity.resume_output }}</span>
-                                {% endfor %}
-                                {% if stage.stage_activities.all|length > 4 %}
-                                <span class="rm-chip">+{{ stage.stage_activities.all|length|add:"-4" }} بیشتر</span>
+                            <span class="rm-step-period">
+                                {% if stage.get_total_duration %}
+                                {{ stage.get_total_duration }} روز
                                 {% endif %}
-                            </div>
+                            </span>
                         </div>
+                        <div class="rm-step-badges">
+                            <span class="tag {{ status_class }}">{{ status_label }}</span>
+                            {% if stage.phase_type %}
+                            <span class="tag tag-phase">{{ stage.get_phase_type_display }}</span>
+                            {% endif %}
+                            {% if stage.priority %}
+                            <span class="tag tag-priority tag-priority-{{ stage.priority }}">
+                                <svg class="priority-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                                {{ stage.get_priority_display }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="rm-step-title">{{ stage.title }}</div>
+                    <div class="rm-step-desc">{{ stage.description|default:"بدون توضیح" }}</div>
+
+                    <div class="rm-step-tags">
+                        {% for item in stage.stage_activities.all|slice:":3" %}
+                        <span class="tag tag-category">{{ item.activity.category }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="rm-step-progress">
+                        <div class="rm-progress-bar-track rm-progress-sm">
+                            <div class="rm-progress-bar-fill" style="width: {{ stage.get_progress }}%;"></div>
+                        </div>
+                        <span class="rm-progress-label">{{ stage.get_progress }}%</span>
+                    </div>
+
+                    <div class="rm-step-quick-info">
+                        <div class="rm-quick-item">
+                            <span class="rm-quick-label">فعالیت‌ها</span>
+                            <span class="rm-quick-value">{{ stage.stage_activities.all|length }}</span>
+                        </div>
+                        {% if stage.milestone %}
+                        <div class="rm-quick-item">
+                            <span class="rm-quick-label">معیار تکمیل</span>
+                            <span class="rm-quick-value rm-quick-truncate">{{ stage.milestone }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <hr class="rm-step-hr">
+
+                    <div class="rm-step-footer">
                         <div class="rm-step-actions">
-                            <a href="{% url 'roadmap:stage_detail' stage.id %}"
-                                class="rm-btn rm-btn-xs rm-btn-ghost">جزئیات</a>
-                            <a href="{% url 'roadmap:stage_edit' stage.id %}"
-                                class="rm-btn rm-btn-xs rm-btn-outline">ویرایش</a>
+                            <a href="{% url 'roadmap:stage_detail' stage.id %}" class="rm-btn rm-btn-xs rm-btn-ghost">جزئیات</a>
+                            <a href="{% url 'roadmap:stage_edit' stage.id %}" class="rm-btn rm-btn-xs rm-btn-outline">ویرایش</a>
                         </div>
                     </div>
                 </div>
@@ -277,8 +305,7 @@
         </div>
         {% else %}
         <div class="rm-empty">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
                 <rect x="9" y="3" width="6" height="4" rx="1" /></svg>
             <p>هنوز مرحله‌ای تعریف نشده است.</p>
