@@ -1,4 +1,3 @@
-<!-- templates/roadmap/stage_create.html -->
 {% extends 'base.html' %}
 
 {% block title %}مرحله جدید{% endblock %}
@@ -6,15 +5,9 @@
 
 {% block content %}
 
-
-<div class="div-hidden">
+<!-- <div class="div-hidden">
   {% block topbar_actions %}
-  <button type="submit" form="create-form" class="rm-btn rm-btn-primary">
-    ثبت مرحله
-  </button>
-
-
-
+  <button type="submit" form="create-form" class="rm-btn rm-btn-primary">ثبت مرحله</button>
   <a href="{% url 'roadmap:roadmap_detail' %}" class="rm-btn rm-btn-outline">
     بازگشت
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -23,42 +16,191 @@
   </a>
   {% endblock %}
 </div>
-
-
+ -->
 <div class="rm-page">
   <div class="rm-page-header rm-page-header-compact">
     <div class="rm-page-header-inner">
       <div class="rm-header-left">
         <span class="rm-page-title">{{ roadmap.title }}</span>
+        <p class="rm-page-desc">اطلاعات مرحله جدید را وارد کنید.</p>
       </div>
     </div>
   </div>
 
   <div class="rm-body">
-    <div class="rm-card">
-      <div class="rm-card-header">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-        اطلاعات مرحله
+    <form method="post" class="rm-form" id="create-form">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="rm-form-errors">
+        {% for error in form.non_field_errors %}
+        <div class="rm-error-text">{{ error }}</div>
+        {% endfor %}
       </div>
-      <div class="rm-card-body">
-        <form method="post" class="rm-form" id="create-form">
-          {% csrf_token %}
-          {% for field in form %}
-            <div class="rm-field">
-              <label class="rm-label">{{ field.label }}</label>
-              {{ field }}
-              {% if field.help_text %}
-                <div class="rm-field-hint">{{ field.help_text }}</div>
-              {% endif %}
-              {% if field.errors %}
-                <div class="rm-field-error">{{ field.errors }}</div>
-              {% endif %}
+      {% endif %}
+
+      <!-- اطلاعات پایه -->
+      <div class="rm-card">
+        <div class="rm-card-header">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          اطلاعات پایه مرحله
+        </div>
+        <div class="rm-card-body">
+
+          <div class="rm-form-group">
+            <label for="{{ form.title.id_for_label }}" class="rm-form-label">{{ form.title.label }}</label>
+            {{ form.title }}
+            {% if form.title.errors %}<div class="rm-field-errors">{% for e in form.title.errors %}<div class="rm-error-text">{{ e }}</div>{% endfor %}</div>{% endif %}
+          </div>
+
+          <div class="rm-form-group">
+            <label for="{{ form.description.id_for_label }}" class="rm-form-label">{{ form.description.label }}</label>
+            {{ form.description }}
+            {% if form.description.errors %}<div class="rm-field-errors">{% for e in form.description.errors %}<div class="rm-error-text">{{ e }}</div>{% endfor %}</div>{% endif %}
+          </div>
+
+          <div class="rm-form-group">
+            <label for="{{ form.objectives.id_for_label }}" class="rm-form-label">{{ form.objectives.label }}</label>
+            {{ form.objectives }}
+            {% if form.objectives.help_text %}<small class="rm-form-help">{{ form.objectives.help_text }}</small>{% endif %}
+            {% if form.objectives.errors %}<div class="rm-field-errors">{% for e in form.objectives.errors %}<div class="rm-error-text">{{ e }}</div>{% endfor %}</div>{% endif %}
+          </div>
+
+          <div class="rm-form-row">
+            <div class="rm-form-group">
+              <label for="{{ form.order.id_for_label }}" class="rm-form-label">{{ form.order.label }}</label>
+              {{ form.order }}
+              {% if form.order.errors %}<div class="rm-field-errors">{% for e in form.order.errors %}<div class="rm-error-text">{{ e }}</div>{% endfor %}</div>{% endif %}
             </div>
-          {% endfor %}
-        </form>
+
+            <div class="rm-form-group">
+              <label for="{{ form.status.id_for_label }}" class="rm-form-label">{{ form.status.label }}</label>
+              {{ form.status }}
+              {% if form.status.errors %}<div class="rm-field-errors">{% for e in form.status.errors %}<div class="rm-error-text">{{ e }}</div>{% endfor %}</div>{% endif %}
+            </div>
+          </div>
+
+        </div>
       </div>
-    </div>
+
+      <!-- دسته‌بندی و اولویت -->
+      <div class="rm-card rm-card-mt">
+        <div class="rm-card-header">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          دسته‌بندی و اولویت
+        </div>
+        <div class="rm-card-body">
+
+          <div class="rm-form-row">
+            <div class="rm-form-group">
+              <label for="{{ form.phase_type.id_for_label }}" class="rm-form-label">{{ form.phase_type.label }}</label>
+              {{ form.phase_type }}
+              {% if form.phase_type.errors %}<div class="rm-field-errors">{% for e in form.phase_type.errors %}<div class="rm-error-text">{{ e }}</div>{% endfor %}</div>{% endif %}
+            </div>
+
+            <div class="rm-form-group">
+              <label for="{{ form.priority.id_for_label }}" class="rm-form-label">{{ form.priority.label }}</label>
+              {{ form.priority }}
+              {% if form.priority.errors %}<div class="rm-field-errors">{% for e in form.priority.errors %}<div class="rm-error-text">{{ e }}</div>{% endfor %}</div>{% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- نقطه عطف و معیارهای موفقیت -->
+      <div class="rm-card rm-card-mt">
+        <div class="rm-card-header">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          نقطه عطف و معیارهای موفقیت
+        </div>
+        <div class="rm-card-body">
+
+          <div class="rm-form-group">
+            <label for="{{ form.milestone.id_for_label }}" class="rm-form-label">{{ form.milestone.label }}</label>
+            {{ form.milestone }}
+            {% if form.milestone.help_text %}<small class="rm-form-help">{{ form.milestone.help_text }}</small>{% endif %}
+            {% if form.milestone.errors %}<div class="rm-field-errors">{% for e in form.milestone.errors %}<div class="rm-error-text">{{ e }}</div>{% endfor %}</div>{% endif %}
+          </div>
+
+          <div class="rm-form-group">
+            <label class="rm-form-label">معیارهای موفقیت</label>
+            <small class="rm-form-help">هر معیار را در یک خط بنویسید.</small>
+            <textarea id="success_criteria_text" class="rm-form-input" rows="4"
+              placeholder="مثال:&#10;حداقل ۲ مقاله مطالعه شود&#10;خلاصه‌نویسی انجام شود">{% if form.instance.success_criteria %}{% for item in form.instance.success_criteria %}{{ item }}
+{% endfor %}{% endif %}</textarea>
+            <input type="hidden" name="success_criteria_raw" id="success_criteria_raw" value="{{ form.instance.success_criteria|default:'[]' }}">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ریسک‌ها -->
+      <div class="rm-card rm-card-mt">
+        <div class="rm-card-header">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          ریسک‌های احتمالی
+        </div>
+        <div class="rm-card-body">
+          <div class="rm-form-group">
+            <small class="rm-form-help">هر ریسک را در یک خط بنویسید.</small>
+            <textarea id="risks_text" class="rm-form-input" rows="4"
+              placeholder="مثال:&#10;کمبود وقت&#10;دسترسی نداشتن به منابع">{% if form.instance.risks %}{% for item in form.instance.risks %}{{ item }}
+{% endfor %}{% endif %}</textarea>
+            <input type="hidden" name="risks_raw" id="risks_raw" value="{{ form.instance.risks|default:'[]' }}">
+          </div>
+        </div>
+      </div>
+
+      <!-- منابع پیشنهادی -->
+      <div class="rm-card rm-card-mt">
+        <div class="rm-card-header">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          منابع پیشنهادی
+        </div>
+        <div class="rm-card-body">
+          <div class="rm-form-group">
+            <small class="rm-form-help">هر منبع را در یک خط بنویسید (نام کتاب، لینک، و غیره).</small>
+            <textarea id="resources_text" class="rm-form-input" rows="4"
+              placeholder="مثال:&#10;کتاب پاتوفیزیولوژی گایتون&#10;https://pubmed.ncbi.nlm.nih.gov/">{% if form.instance.recommended_resources %}{% for item in form.instance.recommended_resources %}{{ item }}
+{% endfor %}{% endif %}</textarea>
+            <input type="hidden" name="recommended_resources_raw" id="recommended_resources_raw" value="{{ form.instance.recommended_resources|default:'[]' }}">
+          </div>
+        </div>
+      </div>
+
+      <div class="rm-form-actions rm-card-mt">
+        <button type="submit" class="rm-btn rm-btn-primary">ثبت مرحله</button>
+        <a href="{% url 'roadmap:roadmap_detail' %}" class="rm-btn rm-btn-outline">انصراف</a>
+      </div>
+
+    </form>
   </div>
 </div>
+
+<script>
+  // تبدیل textarea های چندخطی به JSON قبل از ارسال فرم
+  document.getElementById('create-form').addEventListener('submit', function () {
+    function textareaToJson(textareaId, hiddenId) {
+      const text = document.getElementById(textareaId).value.trim();
+      const lines = text ? text.split('\n').map(l => l.trim()).filter(Boolean) : [];
+      document.getElementById(hiddenId).value = JSON.stringify(lines);
+    }
+    textareaToJson('success_criteria_text', 'success_criteria_raw');
+    textareaToJson('risks_text', 'risks_raw');
+    textareaToJson('resources_text', 'recommended_resources_raw');
+  });
+</script>
 
 {% endblock %}

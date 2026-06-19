@@ -46,15 +46,6 @@
                 داشبورد
             </a>
 
-            <a class="nav-item {% if request.resolver_match.namespace == 'roadmap' and request.resolver_match.url_name == 'roadmap_detail' %}active{% endif %}"
-                href="{% url 'roadmap:roadmap_detail' %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                </svg>
-                نقشه راه
-            </a>
-
             {% if user.is_authenticated %}
             <a class="nav-item {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' %}active{% endif %}"
                 href="{% url 'accounts:profile' pk=request.user.profile.pk %}">
@@ -66,6 +57,14 @@
             </a>
             {% endif %}
 
+            <a class="nav-item {% if request.resolver_match.namespace == 'roadmap' and request.resolver_match.url_name == 'roadmap_detail' %}active{% endif %}"
+                href="{% url 'roadmap:roadmap_detail' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+                نقشه راه
+            </a>
 
             <a class="nav-item" href="#">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
