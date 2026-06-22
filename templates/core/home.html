@@ -181,14 +181,15 @@
             </div>
             {% else %}
             <div class="roadmap-card">
-                <p>هنوز نقشه راهی برای شما تعریف نشده است.</p>
-                <p>ابتدا از کامل بودن پروفایل خود اطمینان حاصل کنید بعد گزینه "ایجاد نقشه راه" را انتخاب کنید</p>
+                <p class="rm-hint">هنوز نقشه راهی برای شما تعریف نشده است.</p>
+                <p class="rm-hint">ابتدا از کامل بودن پروفایل خود اطمینان حاصل کنید بعد گزینه "ایجاد نقشه راه" را انتخاب کنید</p>
                 {% if user.is_authenticated and not user.profile.first_name and not user.profile.last_name and not user.profile.job_title %}
                 برای ساخت رود مپ حرفه‌ای لطفاً اول پروفایل خود را بسازید
                 {% else %}
                 <!-- لینک با intercept جاوااسکریپت -->
                 <!-- لینک بدون href معمولی -->
                 <!-- لینک باز کردن مودال -->
+                 <br>
                 <a href="#" id="roadmapLink" class="rm-btn rm-btn-primary" onclick="openRoadmapModal(event)">
                     ایجاد نقشه راه
                 </a>

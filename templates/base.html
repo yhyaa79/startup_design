@@ -46,9 +46,9 @@
                 داشبورد
             </a>
 
-            {% if user.is_authenticated %}
+            {% if user.is_authenticated and user.profile %}
             <a class="nav-item {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' %}active{% endif %}"
-                href="{% url 'accounts:profile' pk=request.user.profile.pk %}">
+                href="{% url 'accounts:profile' pk=user.profile.pk %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                     <circle cx="9" cy="7" r="4" />
@@ -56,6 +56,7 @@
                 پروفایل
             </a>
             {% endif %}
+
 
             <a class="nav-item {% if request.resolver_match.namespace == 'roadmap' and request.resolver_match.url_name == 'roadmap_detail' %}active{% endif %}"
                 href="{% url 'roadmap:roadmap_detail' %}">
@@ -302,6 +303,13 @@
             </div>
         </footer>
     </div>
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
 
     <script src="{% static 'js/script.js' %}"></script>
 </body>

@@ -43,12 +43,21 @@ from .models import RoadmapActivity
 logger = logging.getLogger(__name__)
 
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.utils import timezone
+from django.contrib import messages
+
 @login_required
 def roadmap_detail(request):
     try:
         roadmap = request.user.profile.roadmap
     except Roadmap.DoesNotExist:
-        return redirect('roadmap:roadmap_create')
+        messages.error(
+            request,
+            'رودمپ هنوز ساخته نشده است. برای ساخت رودمپ از گزینه "ایجاد نقشه راه" استفاده کنید.'
+        )
+        return redirect('core:home')
 
     stages = roadmap.stages.prefetch_related(
         'stage_activities__activity'
@@ -74,7 +83,6 @@ def roadmap_detail(request):
         if should_reset_following_stages:
             s.updated_at = now
             s.save(update_fields=['updated_at'])
-
 
     context = {
         'roadmap': roadmap,

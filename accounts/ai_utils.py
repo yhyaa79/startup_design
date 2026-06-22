@@ -190,15 +190,36 @@ def _parse_json_response(response_text: str) -> dict:
 # تابع اصلی: استخراج پروفایل از متن
 # ═══════════════════════════════════════════════════════════════
 
+
 def extract_profile_from_text(text: str) -> dict:
+    """
+    استخراج داده‌های ساختاریافته پروفایل از متن خام فارسی با استفاده از LLM.
+    
+    Args:
+        text: متن خام شامل اطلاعات پروفایل کاربر
+    
+    Returns:
+        دیکشنری با ساختار زیر:
+        {
+            "profile": {...},
+            "social_profiles": [...],
+            "educations": [...],
+            "articles": [...],
+            "presentations": [...],
+            "executive_records": [...],
+            "training_courses": [...]
+        }
+    """
+    import re
+    
     system_prompt = """تو یک دستیار هوشمند برای استخراج اطلاعات از متن‌های فارسی هستیت.
 وظیفت این است که متن زیر را بخوانی و اطلاعات موجود در آن را به صورت ساختاریافته استخراج کنی.
 
 قوانین مهم:
 1. فقط اطلاعاتی را استخراج کن که صراحتاً در متن ذکر شده‌اند.
 2. اگر اطلاعاتی وجود ندارد، آن فیلد را خالی ("") یا null بگذار.
-3. تاریخ‌ها را به صورت جلالی بنویس (مثال: 1402/03/15).
-4. اعداد را به صورت انگلیسی بنویس.
+3. تاریخ‌ها را به صورت جلالی بنویس (مثال: ۱۴۰۲/۰۳/۱۵).
+4. اعداد را به صورت انگلیسی بنویس (مثال: 1402 نه ۱۴۰۲).
 5. فقط و فقط یک شیء JSON خالص برگردان، بدون هیچ توضیح اضافی."""
 
     user_prompt = f"""لطفاً اطلاعات زیر را از متن استخراج کن و به صورت JSON برگردان:
@@ -208,43 +229,55 @@ def extract_profile_from_text(text: str) -> dict:
 خروجی باید دقیقاً با این ساختار باشد:
 {{
   "profile": {{
-    "first_name": "",
-    "last_name": "",
-    "gender": "",
-    "marital_status": "",
-    "military_status": "",
-    "job_title": "",
-    "birth_date": "",
-    "country": "",
-    "city": "",
-    "phone": "",
-    "email": "",
-    "website": "",
-    "national_id": "",
-    "orcid": "",
-    "proposal_count": null,
-    "proposal_status": "",
-    "software_skills": "",
-    "writing_skills": "",
-    "clinical_certs": "",
-    "clinical_exp": "",
-    "procedures": "",
-    "native_lang": "",
-    "english_level": "",
-    "lang_cert": "",
-    "other_langs": "",
-    "extracurricular": "",
-    "goal": "",
-    "specialty": "",
-    "goal_notes": "",
-    "service_plan": ""
+    "first_name": "نام",
+    "last_name": "نام خانوادگی",
+    "gender": "مرد یا زن",
+    "marital_status": "مجرد یا متأهل یا خالی",
+    "military_status": "معاف یا طرح پزشکی یا سرباز یا پایان خدمت یا خالی",
+    "job_title": "عنوان شغلی",
+    "birth_date": "تاریخ تولد جلالی",
+    "country": "کشور",
+    "city": "شهر",
+    "phone": "شماره تلفن",
+    "email": "ایمیل",
+    "website": "وب‌سایت",
+    "national_id": "کد ملی",
+    "orcid": "شناسه ORCID",
+    "proposal_count": عدد یا null,
+    "proposal_status": "همه در جریان یا همه خاتمه‌یافته یا ترکیبی یا خالی",
+    "software_skills": "مهارت‌های نرم‌افزاری",
+    "writing_skills": "مهارت‌های نگارشی",
+    "clinical_certs": "گواهینامه‌های بالینی",
+    "clinical_exp": "سوابق بالینی",
+    "procedures": "مهارت‌های پروسیجرال",
+    "native_lang": "زبان مادری",
+    "english_level": "A1 یا A2 یا B1 یا B2 یا C1 یا C2 یا خالی",
+    "lang_cert": "مدرک زبان",
+    "other_langs": "سایر زبان‌ها",
+    "extracurricular": "فعالیت‌های فوق برنامه",
+    "goal": "استعداد درخشان یا ۴۰ امتیازی یا هیات علمی یا ریسرچ پوزیشن / فلوشیپ خارج",
+    "specialty": "حوزه تخصصی",
+    "goal_notes": "توضیحات اهداف",
+    "service_plan": "مشمول نیستم یا در حال گذراندن یا پایان یافته یا خالی"
   }},
-  "social_profiles": [],
-  "educations": [],
-  "articles": [],
-  "presentations": [],
-  "executive_records": [],
-  "training_courses": []
+  "social_profiles": [
+    {{"social_type": "LinkedIn یا GitHub یا Google Scholar یا ResearchGate یا Dribbble یا Twitter / X یا Instagram یا سایر", "url": "لینک"}}
+  ],
+  "educations": [
+    {{"field": "پزشکی یا دندان‌پزشکی یا داروسازی یا پرستاری یا فیزیوتراپی یا سایر", "degree": "کارشناسی یا کارشناسی ارشد یا دکتری عمومی یا دکتری تخصصی", "university": "نام دانشگاه", "uni_type": "تیپ ۱ یا تیپ ۲ یا تیپ ۳ یا خالی", "start_date": "تاریخ شروع جلالی", "end_date": "تاریخ پایان جلالی", "stage": "علوم پایه یا فیزیوپات یا استاژری یا اینترنی یا فارغ‌التحصیل یا خالی", "current_term": عدد یا null, "remaining_terms": عدد یا null, "gpa": عدد یا null}}
+  ],
+  "articles": [
+    {{"title": "عنوان مقاله", "journal": "نام ژورنال", "impact_factor": عدد یا null, "quartile": "Q1 یا Q2 یا Q3 یا Q4 یا خالی", "year": عدد یا null, "author_rank": عدد یا null, "total_authors": عدد یا null, "index": "ISI / Web of Science یا Scopus یا PubMed یا ISI + Scopus یا سایر یا خالی"}}
+  ],
+  "presentations": [
+    {{"title": "عنوان ارائه", "event": "نام رویداد", "level": "بین‌المللی یا ملی یا قطبی یا دانشگاهی یا خالی", "result": "برگزیده / جایزه یا ارائه عادی یا خالی"}}
+  ],
+  "executive_records": [
+    {{"title": "عنوان سمت", "start_date": "تاریخ شروع جلالی", "end_date": "تاریخ پایان جلالی"}}
+  ],
+  "training_courses": [
+    {{"title": "عنوان دوره", "category": "پژوهشی یا بالینی یا آموزشی یا نرم‌افزاری یا زبان یا سایر یا خالی", "status": "تکمیل‌شده یا در حال گذراندن یا ناتمام یا خالی", "organizer": "برگزارکننده", "date": "تاریخ جلالی", "certificate": "دارد یا ندارد یا خالی", "skills_gained": "مهارت‌های کسب‌شده"}}
+  ]
 }}"""
 
     messages = [
@@ -252,13 +285,10 @@ def extract_profile_from_text(text: str) -> dict:
         {"role": "user", "content": user_prompt},
     ]
 
-    response_text = _call_gpt_api(messages, max_tokens=2000)
-    return _parse_json_response(response_text)
-
-
-
-
-
+    response_text = _call_gpt_api(messages, max_tokens=4000)
+    result = _parse_json_response(response_text)
+    
+    return result
 
 
 
