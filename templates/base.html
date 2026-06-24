@@ -2,19 +2,51 @@
 
 {% load static %}
 
+
+
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}پلتفرم خرید و فروش{% endblock %}</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ══ SEO ══ -->
+    <title>ResumeMD — نقشه راه حرفه‌ای دانشجویان پزشکی ایران</title>
+    <meta name="description"
+        content="ResumeMD پلتفرم مدیریت رزومه و نقشه راه حرفه‌ای ویژه دانشجویان پزشکی، دندان‌پزشکی و داروسازی است. ساخت رزومه پزشکی، برنامه‌ریزی برای استعداد درخشان، هیئت علمی و فلوشیپ خارج." />
+    <meta name="keywords"
+        content="رزومه پزشکی، نقشه راه پزشکی، استعداد درخشان، هیئت علمی، فلوشیپ خارج، دانشجوی پزشکی، رودمپ پزشکی، برنامه‌ریزی حرفه‌ای پزشک، مقاله ISI پزشکی، ResumeMD" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="ResumeMD" />
+    <link rel="canonical" href="https://resumemd.ir/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ResumeMD — نقشه راه حرفه‌ای دانشجویان پزشکی" />
+    <meta property="og:description" content="رزومه‌ات را بساز، مسیرت را برنامه‌ریزی کن، به هدفت برس." />
+    <meta property="og:url" content="https://resumemd.ir/" />
+    <meta property="og:locale" content="fa_IR" />
+
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <script src="{% static 'js/script-head.js' %}"></script>
-</head>
+
+    <!-- Schema.org -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "ResumeMD",
+            "url": "https://resumemd.ir",
+            "description": "پلتفرم مدیریت رزومه و نقشه راه حرفه‌ای ویژه دانشجویان پزشکی",
+            "inLanguage": "fa"
+        }
+    </script>
+
+
 
 <body>
-
+    {% if user.is_authenticated %}
     <aside class="sidebar">
         <div class="sidebar-logo">
             <a href="{% url 'core:home' %}" class="logo-mark">
@@ -162,8 +194,9 @@
             {% endif %}
         </div>
     </aside>
-
-    <div class="main">
+    {% endif %}
+    
+    <div class="{% if user.is_authenticated %}main{% else %}main-logout{% endif %}">
         <header class="topbar">
 
             <div class="topbar-page-title-svg">

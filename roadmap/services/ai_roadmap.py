@@ -1,4 +1,4 @@
-# roadmap/services/ai_roadmap.py  (نسخه پیشرفته)
+# roadmap/services/ai_roadmap.py 
 """
 تولید رودمپ حرفه‌ای با AI برای دانشجویان علوم پزشکی ایران.
 

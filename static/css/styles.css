@@ -129,6 +129,8 @@
     padding: 0;
 }
 
+html { scroll-behavior: smooth; }
+
 :root {
     --primary: #5B8DEF;
     --primary-light: #EBF1FD;
@@ -410,6 +412,13 @@ label {
     flex-direction: column;
 }
 
+.main-logout {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
 /* ─── TOPBAR ─── */
 .topbar {
     background: var(--white);
@@ -491,12 +500,11 @@ label {
     font-size: 14px;
     font-weight: 400;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: all 0.2s;
 }
 
 .support-btn:hover {
-    background: var(--primary);
-    color: #fff;
+    box-shadow: 0 2px 8px rgba(91, 140, 239, 0.42);
 }
 
 .support-btn svg {
@@ -7487,7 +7495,7 @@ select:required:focus {
 .rm-time-label strong {
     font-size: 0.95rem;
     color: #222;
-        text-align: center;
+    text-align: center;
 }
 
 .rm-time-label small {

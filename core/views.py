@@ -1,3 +1,6 @@
+# core/views.py
+
+
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from accounts.models import Profile
@@ -7,6 +10,14 @@ from roadmap.models import Roadmap
 class ComingSoonView(TemplateView):
     template_name = 'coming_soon.html'
 
+
+def landing(request):
+    """صفحه ایندکس برای کاربران مهمان"""
+    if request.user.is_authenticated:
+        from django.shortcuts import redirect
+        return redirect('core:home')
+    return render(request, 'core/landing.html')
+    
 
 def _calc_profile_completion(profile):
     """درصد تکمیل پروفایل بر اساس فیلدهای مهم"""
@@ -236,3 +247,5 @@ def about(request):
 
 def contact(request):
     return render(request, 'core/contact.html')
+
+

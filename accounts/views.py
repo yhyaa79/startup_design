@@ -24,13 +24,13 @@ from .forms import (
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('accounts:edit_profile')
+        return redirect('core:home')  # نام app خود را جایگزین کنید
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            next_url = request.GET.get('next', 'accounts:edit_profile')
+            next_url = request.GET.get('next', 'core:home') 
             return redirect(next_url)
     else:
         form = AuthenticationForm()
@@ -42,15 +42,16 @@ def logout_view(request):
     return redirect('accounts:login')
 
 
+
 def register_view(request):
     if request.user.is_authenticated:
-        return redirect('accounts:edit_profile')
+        return redirect('core:home')  
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('accounts:edit_profile')
+            return redirect('accounts:edit_profile_ai') 
     else:
         form = UserCreationForm()
     return render(request, 'accounts/register.html', {'form': form})

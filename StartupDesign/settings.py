@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 
 
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
+
 
 
 SECRET_KEY = os.getenv(
@@ -24,14 +27,17 @@ ALLOWED_HOSTS = os.getenv(
 
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
-
-
 GAPGPT_API_BASE = os.getenv("GAPGPT_API_BASE", "https://api.gapgpt.app/v1")
 GAPGPT_API_KEY = os.getenv("GAPGPT_API_KEY", "")
 GAPGPT_MODEL_NAME = os.getenv("GAPGPT_MODEL_NAME", "gapgpt-qwen-3.5")
-GAPGPT_TIMEOUT = int(os.getenv("GAPGPT_TIMEOUT", "45"))
+# settings.py
+
+# ── تایم‌اوت API ──
+GAPGPT_TIMEOUT = int(os.getenv("GAPGPT_TIMEOUT", "30"))  # 30 ثانیه
+
+# ── تنظیمات Gunicorn برای Liara ──
+GUNICORN_CMD_ARGS = "--workers 2 --timeout 120 --max-requests 1000"
+
 
 
 INSTALLED_APPS = [
@@ -95,24 +101,31 @@ LOGGING = {
 }
 
 # =========================================================
-# Database Liara
+# Database
 # =========================================================
 """ 
-DB_DIR = Path(os.getenv("SQLITE_DIR", "/usr/src/app/database"))
-DB_DIR.mkdir(parents=True, exist_ok=True)
-DB_PATH = DB_DIR / "db.sqlite3"
+from pathlib import Path
+import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+SQLITE_DIR = Path(os.getenv("SQLITE_DIR", "/usr/src/app/database"))
+SQLITE_DIR.mkdir(parents=True, exist_ok=True)
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": str(DB_PATH),
+        "NAME": str(SQLITE_DIR / "db.sqlite3"),
+        "OPTIONS": {
+            "timeout": 20,
+        },
     }
-} 
+}
  """
 # =========================================================
 # Database local
 # =========================================================
-
+ 
 if os.getenv("LIARA"):
     DB_DIR = Path("/usr/src/app/database")
     DB_DIR.mkdir(parents=True, exist_ok=True)
@@ -170,6 +183,5 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-LOGIN_URL = "accounts:login"
-LOGIN_REDIRECT_URL = "accounts:edit_profile"
-LOGOUT_REDIRECT_URL = "accounts:login"
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGIN_URL = '/accounts/login/'
