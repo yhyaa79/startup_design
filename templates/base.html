@@ -115,7 +115,7 @@
                     <line x1="8" y1="2" x2="8" y2="6" />
                     <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
-                رویدادها
+                هاب رویدادهای رزومه ساز
                 <!-- <span class="nav-badge">۳</span> -->
             </a>
 
@@ -130,7 +130,8 @@
                 پروژه‌ها و تحقیقات
             </a>
 
-            <a class="nav-item" href="#">
+            <a class="nav-item {% if request.resolver_match.namespace == 'networking' and request.resolver_match.url_name == 'networking_list' %}active{% endif %}"
+                href="{% url 'networking:networking_list' %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                     <circle cx="9" cy="7" r="4" />

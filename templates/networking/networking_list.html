@@ -1,0 +1,385 @@
+<!-- templates/networking/networking_list.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}شبکه‌سازی{% endblock %}
+{% block topbar_title %}لیست شبکه‌سازی{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/networking.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ════════════════════════════════════════════════════════════════
+     HEADER SECTION
+     ════════════════════════════════════════════════════════════════ -->
+<div class="nw-header">
+    <div class="container">
+        <div class="nw-header-content">
+            <h1 class="nw-header-title">🌐 شبکه‌سازی</h1>
+            <p class="nw-header-subtitle">با متخصصین و استعدادهای درخشان در تماس باشید</p>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     MAIN CONTENT
+     ════════════════════════════════════════════════════════════════ -->
+<div class="container py-5">
+
+    <!-- ──────────────────────────────────────────────────────────
+         FILTER SECTION
+         ────────────────────────────────────────────────────────── -->
+    <div class="nw-filter-wrapper">
+        <div class="nw-filter-card">
+            <div class="nw-filter-header">
+                <span class="nw-filter-icon">🔍</span>
+                <h5 class="nw-filter-title">جستجو و فیلتر</h5>
+            </div>
+
+            <form method="get" class="nw-filter-form">
+                
+                <!-- Search Input -->
+                <div class="nw-form-group nw-search-group">
+                    <label class="nw-form-label">جستجو در نام یا تخصص</label>
+                    <input type="text" 
+                           name="search" 
+                           class="nw-form-input" 
+                           placeholder="نام، تخصص یا شرکت..."
+                           value="{{ search_query|default:'' }}">
+                </div>
+
+                <!-- Professional Goal -->
+                <div class="nw-form-group">
+                    <label class="nw-form-label">هدف حرفه‌ای</label>
+                    <select name="goal" class="nw-form-select">
+                        <option value="">-- همه --</option>
+                        {% for value, label in form.goal.field.choices %}
+                            {% if value %}
+                                <option value="{{ value }}" 
+                                        {% if request.GET.goal|stringformat:'s' == value|stringformat:'s' %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- English Level -->
+                <div class="nw-form-group">
+                    <label class="nw-form-label">سطح انگلیسی</label>
+                    <select name="english_level" class="nw-form-select">
+                        <option value="">-- همه --</option>
+                        {% for value, label in form.english_level.field.choices %}
+                            {% if value %}
+                                <option value="{{ value }}" 
+                                        {% if request.GET.english_level|stringformat:'s' == value|stringformat:'s' %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Gender -->
+                <div class="nw-form-group">
+                    <label class="nw-form-label">جنسیت</label>
+                    <select name="gender" class="nw-form-select">
+                        <option value="">-- همه --</option>
+                        {% for value, label in form.gender.field.choices %}
+                            {% if value %}
+                                <option value="{{ value }}" 
+                                        {% if request.GET.gender|stringformat:'s' == value|stringformat:'s' %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Country -->
+                <div class="nw-form-group">
+                    <label class="nw-form-label">کشور</label>
+                    <select name="country" class="nw-form-select">
+                        <option value="">-- همه --</option>
+                        {% for value, label in form.country.field.choices %}
+                            {% if value %}
+                                <option value="{{ value }}" 
+                                        {% if request.GET.country|stringformat:'s' == value|stringformat:'s' %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Military Status -->
+                <div class="nw-form-group">
+                    <label class="nw-form-label">وضعیت سربازی</label>
+                    <select name="military_status" class="nw-form-select">
+                        <option value="">-- همه --</option>
+                        {% for value, label in form.military_status.field.choices %}
+                            {% if value %}
+                                <option value="{{ value }}" 
+                                        {% if request.GET.military_status|stringformat:'s' == value|stringformat:'s' %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div class="nw-filter-buttons">
+                    <button type="submit" class="nw-btn-search">
+                        <i class="fas fa-search"></i> جستجو
+                    </button>
+                    <a href="{% url 'networking:networking_list' %}" class="nw-btn-reset">
+                        <i class="fas fa-redo"></i> پاک کردن
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ──────────────────────────────────────────────────────────
+         RESULTS INFO
+         ────────────────────────────────────────────────────────── -->
+    {% if search_query or request.GET %}
+    <div class="nw-results-info">
+        <span class="nw-results-label">نتایج جستجو:</span>
+        {% if search_query %}
+            <span class="nw-results-query">{{ search_query }}</span>
+        {% endif %}
+        <span class="nw-results-count">
+            <span class="nw-results-badge">{{ page_obj.paginator.count }} نتیجه</span>
+        </span>
+    </div>
+    {% endif %}
+
+    <!-- ──────────────────────────────────────────────────────────
+         CARDS GRID
+         ────────────────────────────────────────────────────────── -->
+    <div class="nw-grid">
+        {% for profile in profiles %}
+        
+        <div class="nw-card">
+            
+            <!-- Card Header -->
+            <div class="nw-card-header">
+                <div class="nw-card-header-info">
+                    <h5 class="nw-card-name">
+                        {{ profile.first_name }} {{ profile.last_name }}
+                    </h5>
+                    <p class="nw-card-title">
+                        {{ profile.job_title|default:"کاربر" }}
+                    </p>
+                </div>
+                <div class="nw-card-gender">
+                    {% if profile.gender == 'مرد' %}
+                        <i class="fas fa-mars"></i>
+                    {% elif profile.gender == 'زن' %}
+                        <i class="fas fa-venus"></i>
+                    {% else %}
+                        <i class="fas fa-user"></i>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="nw-card-body">
+                
+                <!-- Specialty -->
+                {% if profile.specialty %}
+                <div class="nw-specialty-box">
+                    <span class="nw-specialty-label">🎯 تخصص</span>
+                    <p class="nw-specialty-text">{{ profile.specialty|truncatechars:80 }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Goal -->
+                {% if profile.goal %}
+                <div class="nw-goal-box">
+                    <span class="nw-goal-label">🚀 هدف حرفه‌ای</span>
+                    <p class="nw-goal-text">{{ profile.get_goal_display }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Education -->
+                <div class="nw-info-item">
+                    <span class="nw-info-label">🎓 تحصیلات</span>
+                    {% with edu=profile.educations.first %}
+                        {% if edu %}
+                        <div class="nw-edu-item">
+                            <span class="nw-edu-degree">{{ edu.degree }}</span>
+                            <span class="nw-edu-field">{{ edu.field }}</span>
+                            {% if edu.university %}
+                                <span class="nw-edu-uni">{{ edu.university }}</span>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="nw-info-value muted">ثبت نشده</div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+                <!-- English Level -->
+                {% if profile.english_level %}
+                <div class="nw-info-item">
+                    <span class="nw-info-label">🌍 سطح انگلیسی</span>
+                    <div class="nw-info-value">{{ profile.english_level }}</div>
+                </div>
+                {% endif %}
+
+                <!-- Location -->
+                <div class="nw-info-item">
+                    <span class="nw-info-label">📍 محل سکونت</span>
+                    <div class="nw-info-value">
+                        {% if profile.country %}
+                            {{ profile.country }}
+                            {% if profile.city %} - {{ profile.city }}{% endif %}
+                        {% else %}
+                            <span class="muted">مشخص نشده</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="nw-stats-row">
+                    <div class="nw-stat">
+                        <div class="nw-stat-icon"></div>
+                        <span class="nw-stat-value">{{ profile.articles.count }}</span>
+                        <span class="nw-stat-label">مقاله</span>
+                    </div>
+                    <div class="nw-stat">
+                        <div class="nw-stat-icon"></div>
+                        <span class="nw-stat-value">{{ profile.presentations.count }}</span>
+                        <span class="nw-stat-label">ارائه</span>
+                    </div>
+                    <div class="nw-stat">
+                        <div class="nw-stat-icon"></div>
+                        <span class="nw-stat-value">{{ profile.training_courses.count }}</span>
+                        <span class="nw-stat-label">دوره</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="nw-card-footer">
+                <a href="{% url 'networking:profile_detail' profile.pk %}" class="nw-btn-view">
+                    <i class="fas fa-eye"></i> مشاهده پروفایل
+                </a>
+            </div>
+        </div>
+
+        {% empty %}
+        
+        <!-- Empty State -->
+        <div class="nw-empty-state">
+            <div class="nw-empty-state-icon">🔍</div>
+            <h5 class="nw-empty-state-title">هیچ پروفایلی یافت نشد</h5>
+            <p class="nw-empty-state-text">
+                لطفاً فیلترهای جستجو را تغییر دهید یا دوباره تلاش کنید
+            </p>
+        </div>
+
+        {% endfor %}
+    </div>
+
+    <!-- ──────────────────────────────────────────────────────────
+         PAGINATION
+         ────────────────────────────────────────────────────────── -->
+    {% if page_obj.has_other_pages %}
+    <div class="nw-pagination-wrapper">
+        <nav>
+            <ul class="nw-pagination">
+                
+                <!-- First Page -->
+                {% if page_obj.has_previous %}
+                <li class="nw-pagination-item">
+                    <a class="nw-pagination-link" href="?page=1" title="صفحه اول">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="nw-pagination-item disabled">
+                    <span class="nw-pagination-link">
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                </li>
+                {% endif %}
+
+                <!-- Previous Page -->
+                {% if page_obj.has_previous %}
+                <li class="nw-pagination-item">
+                    <a class="nw-pagination-link" 
+                       href="?page={{ page_obj.previous_page_number }}" 
+                       title="صفحه قبل">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="nw-pagination-item disabled">
+                    <span class="nw-pagination-link">
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+                </li>
+                {% endif %}
+
+                <!-- Page Numbers -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="nw-pagination-item active">
+                        <span class="nw-pagination-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="nw-pagination-item">
+                        <a class="nw-pagination-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Next Page -->
+                {% if page_obj.has_next %}
+                <li class="nw-pagination-item">
+                    <a class="nw-pagination-link" 
+                       href="?page={{ page_obj.next_page_number }}" 
+                       title="صفحه بعد">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="nw-pagination-item disabled">
+                    <span class="nw-pagination-link">
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                </li>
+                {% endif %}
+
+                <!-- Last Page -->
+                {% if page_obj.has_next %}
+                <li class="nw-pagination-item">
+                    <a class="nw-pagination-link" 
+                       href="?page={{ page_obj.paginator.num_pages }}" 
+                       title="صفحه آخر">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="nw-pagination-item disabled">
+                    <span class="nw-pagination-link">
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+                </li>
+                {% endif %}
+
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
