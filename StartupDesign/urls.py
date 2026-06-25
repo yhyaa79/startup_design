@@ -9,6 +9,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls', namespace='accounts')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('roadmap/', include('roadmap.urls', namespace='roadmap')),
+    path('course/', include('course.urls', namespace='course')),
 ]
 
 if settings.DEBUG:

@@ -7,3 +7,5 @@ requests
 psycopg2-binary
 dotenv
 jdatetime
+gunicorn
+Pillow

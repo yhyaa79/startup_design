@@ -99,7 +99,8 @@
                 نقشه راه
             </a>
 
-            <a class="nav-item" href="#">
+            <a class="nav-item {% if request.resolver_match.namespace == 'course' and request.resolver_match.url_name == 'list' %}active{% endif %}"
+                href="{% url 'course:list' %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
                     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 0 4 24V4.5A2.5 2.5 0 0 1 6.5 2z" />

@@ -26,6 +26,9 @@ ALLOWED_HOSTS = os.getenv(
 ).split(",")
 
 
+#ALLOWED_HOSTS = ["153.75.90.123", "127.0.0.1", "localhost"]
+
+
 
 GAPGPT_API_BASE = os.getenv("GAPGPT_API_BASE", "https://api.gapgpt.app/v1")
 GAPGPT_API_KEY = os.getenv("GAPGPT_API_KEY", "")
@@ -51,6 +54,7 @@ INSTALLED_APPS = [
     "roadmap",
     "core",
     "nested_admin",
+    "course",
 ]
 
 
