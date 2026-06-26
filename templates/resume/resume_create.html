@@ -1,0 +1,217 @@
+<!-- templates/resume/resume_create.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}ساخت رزومه جدید{% endblock %}
+
+{% block content %}
+<div class="rs-page" dir="rtl">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+
+        <div class="rs-stepper mb-5">
+          <div class="rs-step rs-active">
+            <span class="rs-step-num">۱</span>
+            <span class="rs-step-label">تنظیمات</span>
+          </div>
+          <div class="rs-step-line"></div>
+          <div class="rs-step">
+            <span class="rs-step-num">۲</span>
+            <span class="rs-step-label">ساخت</span>
+          </div>
+          <div class="rs-step-line"></div>
+          <div class="rs-step">
+            <span class="rs-step-num">۳</span>
+            <span class="rs-step-label">دانلود</span>
+          </div>
+        </div>
+
+        <div class="rs-section-head">
+          <h3 class="rs-page-title mb-1">ساخت رزومه جدید</h3>
+          <p class="rs-page-subtitle mb-4">اطلاعات از پروفایل شما استخراج می‌شود — فقط گزینه‌ها را انتخاب کنید.</p>
+        </div>
+
+        <form method="post" id="resumeForm">
+          {% csrf_token %}
+
+          <div class="card rs-card mb-4">
+            <div class="card-header rs-card-header">
+              <h5 class="rs-card-section-title"><i class="bi bi-info-circle me-2"></i>اطلاعات پایه</h5>
+            </div>
+            <div class="card-body rs-card-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="rs-field-item">
+                    <label class="rs-field-label">{{ form.title.label }}</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                      <div class="invalid-feedback d-block">{{ form.title.errors.0 }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="rs-field-item">
+                    <label class="rs-field-label">{{ form.purpose.label }}</label>
+                    {{ form.purpose }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card rs-card mb-4">
+            <div class="card-header rs-card-header">
+              <h5 class="rs-card-section-title"><i class="bi bi-palette me-2"></i>انتخاب قالب</h5>
+            </div>
+            <div class="card-body rs-card-body">
+              <div class="row g-3">
+                {% for tmpl in templates_info %}
+                <div class="col-md-6 col-lg-3">
+                  <label class="rs-template-card" for="tmpl_{{ tmpl.value }}">
+                    <input
+                      type="radio"
+                      name="template"
+                      id="tmpl_{{ tmpl.value }}"
+                      value="{{ tmpl.value }}"
+                      {% if forloop.first %}checked{% endif %}
+                      class="rs-template-radio"
+                    >
+                    <div class="rs-template-card-inner">
+                      <div class="rs-template-preview" style="background: linear-gradient(135deg, #{{ tmpl.colors.0|slice:'1:' }} 0%, #{{ tmpl.colors.1|slice:'1:' }} 100%);"></div>
+                      <div class="rs-template-swatch">
+                        {% for c in tmpl.colors %}
+                          <span class="rs-template-color" style="background: {{ c }};"></span>
+                        {% endfor %}
+                      </div>
+                      <h6 class="rs-template-title">{{ tmpl.label }}</h6>
+                      <p class="rs-template-desc">{{ tmpl.desc }}</p>
+                      <div class="rs-template-check d-none">
+                        <i class="bi bi-check-circle-fill"></i> انتخاب‌شده
+                      </div>
+                    </div>
+                  </label>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="card rs-card mb-4">
+            <div class="card-header rs-card-header">
+              <h5 class="rs-card-section-title"><i class="bi bi-stars me-2"></i>هوش مصنوعی</h5>
+            </div>
+            <div class="card-body rs-card-body">
+              <div class="form-check form-switch rs-switch-row">
+                {{ form.use_ai }}
+                <label class="form-check-label rs-switch-label ms-2" for="useAI">
+                  {{ form.use_ai.label }}
+                </label>
+              </div>
+              <p class="rs-help-text mb-0">
+                فعال کردن این گزینه باعث می‌شود یک خلاصه حرفه‌ای متناسب با هدف رزومه توسط AI نوشته شود.
+                این بخش چند ثانیه بیشتر زمان می‌برد.
+              </p>
+            </div>
+          </div>
+
+          <div class="card rs-card mb-4">
+            <div class="card-header rs-card-header">
+              <h5 class="rs-card-section-title"><i class="bi bi-layout-text-sidebar me-2"></i>بخش‌های رزومه</h5>
+            </div>
+            <div class="card-body rs-card-body">
+              <p class="rs-help-text">انتخاب کنید کدام بخش‌ها در رزومه نمایش داده شوند:</p>
+              <div class="row g-3">
+                {% for field in form %}
+                  {% if field.name|slice:":8" == "include_" %}
+                  <div class="col-md-4 col-sm-6">
+                    <div class="rs-check-card">
+                      {{ field }}
+                      <label class="form-check-label rs-check-label" for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                      </label>
+                    </div>
+                  </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="card rs-card rs-soft-card mb-4">
+            <div class="card-body rs-card-body">
+              <h6 class="rs-card-section-subtitle"><i class="bi bi-person-check me-2"></i>اطلاعاتی که از پروفایل شما استفاده می‌شود</h6>
+              <div class="row g-3 rs-stats-grid">
+                <div class="col-6 col-md-4 col-lg-3">
+                  <div class="rs-stat-box">
+                    <div class="rs-stat-icon"><i class="bi bi-mortarboard"></i></div>
+                    <div class="rs-stat-value">{{ profile.educations.count }}</div>
+                    <div class="rs-stat-label">سابقه تحصیلی</div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                  <div class="rs-stat-box">
+                    <div class="rs-stat-icon"><i class="bi bi-journal-text"></i></div>
+                    <div class="rs-stat-value">{{ profile.articles.count }}</div>
+                    <div class="rs-stat-label">مقاله</div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                  <div class="rs-stat-box">
+                    <div class="rs-stat-icon"><i class="bi bi-mic"></i></div>
+                    <div class="rs-stat-value">{{ profile.presentations.count }}</div>
+                    <div class="rs-stat-label">ارائه</div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                  <div class="rs-stat-box">
+                    <div class="rs-stat-icon"><i class="bi bi-briefcase"></i></div>
+                    <div class="rs-stat-value">{{ profile.executive_records.count }}</div>
+                    <div class="rs-stat-label">سابقه اجرایی</div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                  <div class="rs-stat-box">
+                    <div class="rs-stat-icon"><i class="bi bi-book"></i></div>
+                    <div class="rs-stat-value">{{ profile.training_courses.count }}</div>
+                    <div class="rs-stat-label">دوره آموزشی</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rs-form-actions">
+            <a href="{% url 'resume:resume_list' %}" class="rs-btn rs-btn-outline-secondary rs-btn-lg">
+              <i class="bi bi-arrow-right me-2"></i>بازگشت
+            </a>
+            <button type="submit" class="rs-btn rs-btn-primary rs-btn-lg rs-btn-wide">
+              <i class="bi bi-magic me-2"></i>ساخت رزومه
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.rs-template-radio').forEach(radio => {
+  radio.addEventListener('change', function () {
+    document.querySelectorAll('.rs-template-card-inner').forEach(card => {
+      card.classList.remove('rs-template-selected');
+      const check = card.querySelector('.rs-template-check');
+      if (check) check.classList.add('d-none');
+    });
+    if (this.checked) {
+      const inner = this.nextElementSibling;
+      inner.classList.add('rs-template-selected');
+      const check = inner.querySelector('.rs-template-check');
+      if (check) check.classList.remove('d-none');
+    }
+  });
+});
+document.querySelector('.rs-template-radio:checked')?.dispatchEvent(new Event('change'));
+</script>
+{% endblock %}

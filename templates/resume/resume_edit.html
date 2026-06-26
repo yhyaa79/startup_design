@@ -1,0 +1,109 @@
+<!-- templates/resume/resume_edit.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}ویرایش رزومه{% endblock %}
+
+{% block content %}
+<div class="rs-page" dir="rtl">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+
+        <div class="rs-page-header rs-page-header-compact">
+          <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'resume:resume_detail' resume.pk %}" class="rs-btn rs-btn-outline-secondary rs-btn-sm">
+              <i class="bi bi-arrow-right"></i>
+            </a>
+            <div>
+              <h3 class="rs-page-title mb-0">ویرایش تنظیمات رزومه</h3>
+              <p class="rs-page-subtitle mb-0">{{ resume.title }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-info rs-alert">
+          <i class="bi bi-info-circle me-2"></i>
+          پس از ذخیره، رزومه بازسازی می‌شود.
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="card rs-card mb-4">
+            <div class="card-body rs-card-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="rs-field-item">
+                    <label class="rs-field-label">{{ form.title.label }}</label>
+                    {{ form.title }}
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="rs-field-item">
+                    <label class="rs-field-label">{{ form.purpose.label }}</label>
+                    {{ form.purpose }}
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="rs-field-item">
+                    <label class="rs-field-label">{{ form.template.label }}</label>
+                    <div class="rs-radio-group">
+                      {% for choice in form.template %}
+                        <div class="form-check rs-radio-item">
+                          {{ choice.tag }}
+                          <label class="form-check-label" for="{{ choice.id_for_label }}">
+                            {{ choice.choice_label }}
+                          </label>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="form-check form-switch rs-switch-row">
+                    {{ form.use_ai }}
+                    <label class="form-check-label rs-switch-label ms-2" for="useAI">{{ form.use_ai.label }}</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card rs-card mb-4">
+            <div class="card-header rs-card-header">
+              <h5 class="rs-card-section-title mb-0">بخش‌های رزومه</h5>
+            </div>
+            <div class="card-body rs-card-body">
+              <div class="row g-3">
+                {% for field in form %}
+                  {% if field.name|slice:":8" == "include_" %}
+                  <div class="col-md-4 col-sm-6">
+                    <div class="rs-check-card">
+                      {{ field }}
+                      <label class="form-check-label rs-check-label" for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                      </label>
+                    </div>
+                  </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="rs-form-actions">
+            <a href="{% url 'resume:resume_detail' resume.pk %}" class="rs-btn rs-btn-outline-secondary rs-btn-lg">
+              انصراف
+            </a>
+            <button type="submit" class="rs-btn rs-btn-primary rs-btn-lg">
+              <i class="bi bi-arrow-clockwise me-2"></i>ذخیره و بازسازی
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

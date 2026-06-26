@@ -9,3 +9,6 @@ dotenv
 jdatetime
 gunicorn
 Pillow
+arabic-reshaper 
+python-bidi
+reportlab

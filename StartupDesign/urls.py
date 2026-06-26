@@ -14,6 +14,7 @@ urlpatterns = [
     path('roadmap/', include('roadmap.urls', namespace='roadmap')),
     path('course/', include('course.urls', namespace='course')),
     path('networking/', include('networking.urls', namespace='networking')),
+    path('resume/', include('resume.urls', namespace='resume')),
 ]
 
 if settings.DEBUG:

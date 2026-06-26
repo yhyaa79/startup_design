@@ -1,0 +1,36 @@
+<!-- templates/resume/resume_confirm_delete.html -->
+{% extends "base.html" %}
+
+{% block title %}حذف رزومه{% endblock %}
+
+{% block content %}
+<div class="rs-page" dir="rtl">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card rs-card rs-danger-card shadow-sm">
+          <div class="card-header rs-danger-header">
+            <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>حذف رزومه</h5>
+          </div>
+          <div class="card-body rs-card-body">
+            <p class="rs-confirm-text mb-2">آیا مطمئن هستید که می‌خواهید این رزومه را حذف کنید؟</p>
+            <p class="rs-confirm-title">{{ resume.title }}</p>
+            <p class="rs-danger-note">این عملیات قابل بازگشت نیست و فایل‌های PDF و Word نیز حذف می‌شوند.</p>
+          </div>
+          <div class="card-footer rs-card-footer rs-footer-actions">
+            <a href="{% url 'resume:resume_detail' resume.pk %}" class="rs-btn rs-btn-outline-secondary">
+              انصراف
+            </a>
+            <form method="post">
+              {% csrf_token %}
+              <button type="submit" class="rs-btn rs-btn-danger">
+                <i class="bi bi-trash me-2"></i>بله، حذف شود
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

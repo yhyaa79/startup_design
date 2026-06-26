@@ -182,103 +182,18 @@
             {% else %}
             <div class="roadmap-card">
                 <p class="rm-hint">هنوز نقشه راهی برای شما تعریف نشده است.</p>
-                <p class="rm-hint">ابتدا از کامل بودن پروفایل خود اطمینان حاصل کنید بعد گزینه "ایجاد نقشه راه" را انتخاب کنید</p>
+                <p class="rm-hint">ابتدا از کامل بودن پروفایل خود اطمینان حاصل کنید بعد گزینه "ایجاد نقشه راه" را انتخاب
+                    کنید</p>
                 {% if user.is_authenticated and not user.profile.first_name and not user.profile.last_name and not user.profile.job_title %}
                 برای ساخت رود مپ حرفه‌ای لطفاً اول پروفایل خود را بسازید
                 {% else %}
                 <!-- لینک با intercept جاوااسکریپت -->
                 <!-- لینک بدون href معمولی -->
                 <!-- لینک باز کردن مودال -->
-                 <br>
+                <br>
                 <a href="#" id="roadmapLink" class="rm-btn rm-btn-primary" onclick="openRoadmapModal(event)">
                     ایجاد نقشه راه
                 </a>
-
-                <!-- ══════════════ ROADMAP MODAL ══════════════ -->
-                <div id="roadmapModal" class="rm-modal-overlay" style="display:none;" onclick="closeOnOverlay(event)">
-                    <div class="rm-modal-box">
-
-                        <button class="rm-modal-close" onclick="closeRoadmapModal()">&#10005;</button>
-                        <h2 class="rm-modal-title">ساخت نقشه راه حرفه‌ای</h2>
-                        <p class="rm-modal-subtitle">چند اطلاعات کوتاه تا رودمپ شخصی‌سازی‌شده برات بسازیم</p>
-
-                        <!-- هدف -->
-                        <div class="rm-field-group">
-                            <label class="rm-label">هدف حرفه‌ای <span class="rm-required">*</span></label>
-                            <select id="rmGoal" class="rm-select">
-                                {% for value, label in goal_choices %}
-                                <option value="{{ value }}" {% if value == user.profile.goal %}selected{% endif %}>
-                                    {{ label }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            {% if user.profile.goal %}
-                            <p class="rm-hint">هدف فعلی پروفایل شما:
-                                <strong>{{ user.profile.get_goal_display }}</strong></p>
-                            {% endif %}
-                        </div>
-
-                        <!-- بازه زمانی -->
-                        <div class="rm-field-group">
-                            <label class="rm-label">بازه زمانی مورد نظر <span class="rm-required">*</span></label>
-                            <div class="rm-time-options">
-                                <label class="rm-time-card">
-                                    <input type="radio" name="rmTimeframe" value="under_3_months" data-days="90">
-                                    <span class="rm-time-label">
-                                        <strong>کمتر از ۳ ماه</strong>
-                                        <small>مناسب اهداف فوری و کوتاه‌مدت</small>
-                                    </span>
-                                </label>
-                                <label class="rm-time-card">
-                                    <input type="radio" name="rmTimeframe" value="3_to_6_months" data-days="180"
-                                        checked>
-                                    <span class="rm-time-label">
-                                        <strong>۳ تا ۶ ماه</strong>
-                                        <small>متوازن — پیشنهاد ما برای اکثر کاربران</small>
-                                    </span>
-                                </label>
-                                <label class="rm-time-card">
-                                    <input type="radio" name="rmTimeframe" value="6_to_12_months" data-days="365">
-                                    <span class="rm-time-label">
-                                        <strong>۶ ماه تا ۱ سال</strong>
-                                        <small>مناسب اهداف جامع و بلندمدت</small>
-                                    </span>
-                                </label>
-                                <label class="rm-time-card">
-                                    <input type="radio" name="rmTimeframe" value="1_to_2_years" data-days="730">
-                                    <span class="rm-time-label">
-                                        <strong>۱ تا ۲ سال</strong>
-                                        <small>برنامه‌ریزی استراتژیک بلندمدت</small>
-                                    </span>
-                                </label>
-                                <label class="rm-time-card">
-                                    <input type="radio" name="rmTimeframe" value="over_2_years" data-days="900">
-                                    <span class="rm-time-label">
-                                        <strong>بیشتر از ۲ سال</strong>
-                                        <small>رودمپ جامع تخصصی</small>
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- توضیحات دلبخواهی -->
-                        <div class="rm-field-group">
-                            <label class="rm-label">نکات اضافه <span class="rm-optional">(اختیاری)</span></label>
-                            <textarea id="rmNotes" class="rm-textarea" rows="3"
-                                placeholder="هر نکته‌ای که فکر می‌کنی در ساخت رودمپت مهمه بنویس — مثلاً: دو روز در هفته وقت دارم، یا مهلت امتحان جامع دارم..."></textarea>
-                        </div>
-
-                        <!-- دکمه ارسال -->
-                        <div class="rm-modal-actions">
-                            <button class="rm-btn rm-btn-secondary" onclick="closeRoadmapModal()">انصراف</button>
-                            <button class="rm-btn rm-btn-primary" id="rmSubmitBtn" onclick="submitRoadmapModal()">
-                                <span id="rmBtnText">ساخت نقشه راه</span>
-                                <span id="rmBtnSpinner" style="display:none;">در حال پردازش...</span>
-                            </button>
-                        </div>
-
-                    </div>
-                </div>
                 {% endif %}
             </div>
             {% endif %}
@@ -287,7 +202,7 @@
 
 
             <!-- Events -->
-<!--             <div class="section-card">
+            <!--             <div class="section-card">
                 <div class="card-header">
                     <div class="card-title">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -733,6 +648,91 @@
 </div>
 
 
+
+<!-- ══════════════ ROADMAP MODAL ══════════════ -->
+<div id="roadmapModal" class="rm-modal-overlay" style="display:none;" onclick="closeOnOverlay(event)">
+    <div class="rm-modal-box">
+
+        <button class="rm-modal-close" onclick="closeRoadmapModal()">&#10005;</button>
+        <h2 class="rm-modal-title">ساخت نقشه راه حرفه‌ای</h2>
+        <p class="rm-modal-subtitle">چند اطلاعات کوتاه تا رودمپ شخصی‌سازی‌شده برات بسازیم</p>
+
+        <!-- هدف -->
+        <div class="rm-field-group">
+            <label class="rm-label">هدف حرفه‌ای <span class="rm-required">*</span></label>
+            <select id="rmGoal" class="rm-select">
+                {% for value, label in goal_choices %}
+                <option value="{{ value }}" {% if value == user.profile.goal %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+            {% if user.profile.goal %}
+            <p class="rm-hint">هدف فعلی پروفایل شما:
+                <strong>{{ user.profile.get_goal_display }}</strong></p>
+            {% endif %}
+        </div>
+
+        <!-- بازه زمانی -->
+        <div class="rm-field-group">
+            <label class="rm-label">بازه زمانی مورد نظر <span class="rm-required">*</span></label>
+            <div class="rm-time-options">
+                <label class="rm-time-card">
+                    <input type="radio" name="rmTimeframe" value="under_3_months" data-days="90">
+                    <span class="rm-time-label">
+                        <strong>کمتر از ۳ ماه</strong>
+                        <small>مناسب اهداف فوری و کوتاه‌مدت</small>
+                    </span>
+                </label>
+                <label class="rm-time-card">
+                    <input type="radio" name="rmTimeframe" value="3_to_6_months" data-days="180" checked>
+                    <span class="rm-time-label">
+                        <strong>۳ تا ۶ ماه</strong>
+                        <small>متوازن — پیشنهاد ما برای اکثر کاربران</small>
+                    </span>
+                </label>
+                <label class="rm-time-card">
+                    <input type="radio" name="rmTimeframe" value="6_to_12_months" data-days="365">
+                    <span class="rm-time-label">
+                        <strong>۶ ماه تا ۱ سال</strong>
+                        <small>مناسب اهداف جامع و بلندمدت</small>
+                    </span>
+                </label>
+                <label class="rm-time-card">
+                    <input type="radio" name="rmTimeframe" value="1_to_2_years" data-days="730">
+                    <span class="rm-time-label">
+                        <strong>۱ تا ۲ سال</strong>
+                        <small>برنامه‌ریزی استراتژیک بلندمدت</small>
+                    </span>
+                </label>
+                <label class="rm-time-card">
+                    <input type="radio" name="rmTimeframe" value="over_2_years" data-days="900">
+                    <span class="rm-time-label">
+                        <strong>بیشتر از ۲ سال</strong>
+                        <small>رودمپ جامع تخصصی</small>
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <!-- توضیحات دلبخواهی -->
+        <div class="rm-field-group">
+            <label class="rm-label">نکات اضافه <span class="rm-optional">(اختیاری)</span></label>
+            <textarea id="rmNotes" class="rm-textarea" rows="3"
+                placeholder="هر نکته‌ای که فکر می‌کنی در ساخت رودمپت مهمه بنویس — مثلاً: دو روز در هفته وقت دارم، یا مهلت امتحان جامع دارم..."></textarea>
+        </div>
+
+        <!-- دکمه ارسال -->
+        <div class="rm-modal-actions">
+            <button class="rm-btn rm-btn-secondary" onclick="closeRoadmapModal()">انصراف</button>
+            <button class="rm-btn rm-btn-primary" id="rmSubmitBtn" onclick="submitRoadmapModal()">
+                <span id="rmBtnText">ساخت نقشه راه</span>
+                <span id="rmBtnSpinner" style="display:none;">در حال پردازش...</span>
+            </button>
+        </div>
+
+    </div>
+</div>
 
 <script>
     async function handleRoadmapClick(event) {
