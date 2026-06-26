@@ -1,0 +1,191 @@
+<!-- file: project/templates/project/project_form.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'project/css/project.css' %}">
+
+<section class="pr-header">
+    <div class="pr-container">
+        <div class="pr-header-content">
+            {% if object %}
+                <h1 class="pr-header-title">ویرایش پروژه</h1>
+                <p class="pr-header-subtitle">اطلاعات پروژه پژوهشی خود را بروزرسانی کنید</p>
+            {% else %}
+                <h1 class="pr-header-title">ثبت پروژه جدید</h1>
+                <p class="pr-header-subtitle">پروژه یا تحقیق خود را برای نمایش و جذب همکار ثبت کنید</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<main class="pr-main">
+    <div class="pr-container pr-container-narrow">
+
+        <form method="post" class="pr-form-card">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="pr-alert pr-alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="pr-form-section">
+                <h2 class="pr-form-section-title">اطلاعات اصلی</h2>
+
+                <div class="pr-form-group">
+                    <label class="pr-form-label">{{ form.title.label }}</label>
+                    {{ form.title }}
+                    {{ form.title.errors }}
+                </div>
+
+                <div class="pr-form-group">
+                    <label class="pr-form-label">{{ form.slug.label }}</label>
+                    {{ form.slug }}
+                    <small class="pr-help-text">برای لینک پروژه استفاده می‌شود. بهتر است کوتاه و خوانا باشد.</small>
+                    {{ form.slug.errors }}
+                </div>
+
+                <div class="pr-form-group">
+                    <label class="pr-form-label">{{ form.short_description.label }}</label>
+                    {{ form.short_description }}
+                    {{ form.short_description.errors }}
+                </div>
+
+                <div class="pr-form-group">
+                    <label class="pr-form-label">{{ form.description.label }}</label>
+                    {{ form.description }}
+                    {{ form.description.errors }}
+                </div>
+            </div>
+
+            <div class="pr-form-section">
+                <h2 class="pr-form-section-title">دسته‌بندی و وضعیت</h2>
+
+                <div class="pr-form-grid">
+                    <div class="pr-form-group">
+                        <label class="pr-form-label">{{ form.category.label }}</label>
+                        {{ form.category }}
+                        {{ form.category.errors }}
+                    </div>
+
+                    <div class="pr-form-group">
+                        <label class="pr-form-label">{{ form.status.label }}</label>
+                        {{ form.status }}
+                        {{ form.status.errors }}
+                    </div>
+
+                    <div class="pr-form-group">
+                        <label class="pr-form-label">{{ form.collaboration_status.label }}</label>
+                        {{ form.collaboration_status }}
+                        {{ form.collaboration_status.errors }}
+                    </div>
+
+                    <div class="pr-form-group">
+                        <label class="pr-form-label">{{ form.visibility.label }}</label>
+                        {{ form.visibility }}
+                        {{ form.visibility.errors }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="pr-form-section">
+                <h2 class="pr-form-section-title">جزئیات علمی</h2>
+
+                <div class="pr-form-grid">
+                    <div class="pr-form-group">
+                        <label class="pr-form-label">{{ form.field.label }}</label>
+                        {{ form.field }}
+                        {{ form.field.errors }}
+                    </div>
+
+                    <div class="pr-form-group">
+                        <label class="pr-form-label">{{ form.keywords.label }}</label>
+                        {{ form.keywords }}
+                        {{ form.keywords.errors }}
+                    </div>
+                </div>
+
+                <div class="pr-form-group">
+                    <label class="pr-form-label">{{ form.methodology.label }}</label>
+                    {{ form.methodology }}
+                    {{ form.methodology.errors }}
+                </div>
+
+                <div class="pr-form-group">
+                    <label class="pr-form-label">{{ form.required_skills.label }}</label>
+                    {{ form.required_skills }}
+                    {{ form.required_skills.errors }}
+                </div>
+
+                <div class="pr-form-group">
+                    <label class="pr-form-label">{{ form.expected_output.label }}</label>
+                    {{ form.expected_output }}
+                    {{ form.expected_output.errors }}
+                </div>
+            </div>
+
+            <div class="pr-form-section">
+                <h2 class="pr-form-section-title">اطلاعات اجرایی</h2>
+
+                <div class="pr-form-grid">
+                    <div class="pr-form-group">
+                        <label class="pr-form-label">{{ form.supervisor.label }}</label>
+                        {{ form.supervisor }}
+                        {{ form.supervisor.errors }}
+                    </div>
+
+                    <div class="pr-form-group">
+                        <label class="pr-form-label">{{ form.institution.label }}</label>
+                        {{ form.institution }}
+                        {{ form.institution.errors }}
+                    </div>
+
+                    <div class="pr-form-group">
+                        <label class="pr-form-label">{{ form.ethics_code.label }}</label>
+                        {{ form.ethics_code }}
+                        {{ form.ethics_code.errors }}
+                    </div>
+
+                    <div class="pr-form-group">
+                        <label class="pr-form-label">{{ form.capacity.label }}</label>
+                        {{ form.capacity }}
+                        {{ form.capacity.errors }}
+                    </div>
+
+                    <div class="pr-form-group">
+                        <label class="pr-form-label">{{ form.start_date.label }}</label>
+                        {{ form.start_date }}
+                        {{ form.start_date.errors }}
+                    </div>
+
+                    <div class="pr-form-group">
+                        <label class="pr-form-label">{{ form.estimated_end_date.label }}</label>
+                        {{ form.estimated_end_date }}
+                        {{ form.estimated_end_date.errors }}
+                    </div>
+                </div>
+
+                <label class="pr-checkbox-row">
+                    {{ form.is_active }}
+                    <span>پروژه فعال باشد</span>
+                </label>
+            </div>
+
+            <div class="pr-form-actions">
+                <button type="submit" class="pr-btn pr-btn-primary">
+                    {% if object %}ذخیره تغییرات{% else %}ثبت پروژه{% endif %}
+                </button>
+
+                <a href="{% url 'project:list' %}" class="pr-btn pr-btn-muted">انصراف</a>
+            </div>
+
+        </form>
+
+    </div>
+</main>
+
+{% endblock %}

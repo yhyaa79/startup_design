@@ -1,0 +1,200 @@
+<!-- templates/project/project_list.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'project/css/project.css' %}">
+
+<section class="pr-header">
+    <div class="pr-container">
+        <div class="pr-header-content">
+            <h1 class="pr-header-title">پروژه‌ها و تحقیقات</h1>
+            <p class="pr-header-subtitle">
+                مشاهده، جستجو و همکاری در پروژه‌های پژوهشی دانشجویان علوم پزشکی
+            </p>
+
+            <div class="pr-header-actions">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'project:create' %}" class="pr-btn pr-btn-light">ثبت پروژه جدید</a>
+                    <a href="{% url 'project:my_projects' %}" class="pr-btn pr-btn-outline-light">پروژه‌های من</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<main class="pr-main">
+    <div class="pr-container">
+
+        <section class="pr-filter-card">
+            <div class="pr-filter-header">
+                <span class="pr-filter-icon">🔎</span>
+                <h2 class="pr-filter-title">فیلتر و جستجو</h2>
+            </div>
+
+            <form method="get" class="pr-filter-form">
+                <div class="pr-form-group pr-search-group">
+                    <label class="pr-form-label">جستجو</label>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ q }}"
+                        class="pr-form-input"
+                        placeholder="عنوان، کلیدواژه، حوزه، دانشگاه..."
+                    >
+                </div>
+
+                <div class="pr-form-group">
+                    <label class="pr-form-label">دسته‌بندی</label>
+                    <select name="category" class="pr-form-select">
+                        <option value="">همه دسته‌ها</option>
+                        {% for value,label in category_choices %}
+                            <option value="{{ value }}" {% if selected_category == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="pr-form-group">
+                    <label class="pr-form-label">وضعیت پروژه</label>
+                    <select name="status" class="pr-form-select">
+                        <option value="">همه وضعیت‌ها</option>
+                        {% for value,label in status_choices %}
+                            <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="pr-form-group">
+                    <label class="pr-form-label">همکاری</label>
+                    <select name="collaboration" class="pr-form-select">
+                        <option value="">همه</option>
+                        {% for value,label in collaboration_choices %}
+                            <option value="{{ value }}" {% if selected_collaboration == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="pr-filter-buttons">
+                    <button type="submit" class="pr-btn pr-btn-primary">جستجو</button>
+                    <a href="{% url 'project:list' %}" class="pr-btn pr-btn-muted">حذف فیلتر</a>
+                </div>
+            </form>
+        </section>
+
+        <div class="pr-results-info">
+            <span class="pr-results-label">نتایج:</span>
+            <span class="pr-results-badge">{{ total_projects }} پروژه</span>
+            {% if q %}
+                <span class="pr-results-query">برای «{{ q }}»</span>
+            {% endif %}
+        </div>
+
+        {% if projects %}
+            <section class="pr-grid">
+                {% for project in projects %}
+                    <article class="pr-card">
+                        <div class="pr-card-header">
+                            <div class="pr-card-title-box">
+                                <h3 class="pr-card-title">
+                                    <a href="{{ project.get_absolute_url }}">{{ project.title }}</a>
+                                </h3>
+
+                                <p class="pr-card-owner">
+                                    {{ project.owner_profile.first_name }} {{ project.owner_profile.last_name }}
+                                    {% if project.institution %}
+                                        · {{ project.institution }}
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            {% if project.is_featured %}
+                                <span class="pr-featured-badge">ویژه</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="pr-card-body">
+                            <p class="pr-card-description">{{ project.short_description }}</p>
+
+                            <div class="pr-tags">
+                                <span class="pr-tag pr-tag-blue">{{ project.get_category_display }}</span>
+                                <span class="pr-tag pr-tag-purple">{{ project.get_status_display }}</span>
+                                <span class="pr-tag pr-tag-green">{{ project.get_collaboration_status_display }}</span>
+                            </div>
+
+                            {% if project.field %}
+                                <div class="pr-info-row">
+                                    <span class="pr-info-label">حوزه:</span>
+                                    <span class="pr-info-value">{{ project.field }}</span>
+                                </div>
+                            {% endif %}
+
+                            {% if project.keywords %}
+                                <div class="pr-keywords">
+                                    {{ project.keywords }}
+                                </div>
+                            {% endif %}
+
+                            <div class="pr-stats-row">
+                                <div class="pr-stat">
+                                    <span class="pr-stat-value">{{ project.members_count }}</span>
+                                    <span class="pr-stat-label">عضو</span>
+                                </div>
+                                <div class="pr-stat">
+                                    <span class="pr-stat-value">{{ project.applications_count }}</span>
+                                    <span class="pr-stat-label">درخواست</span>
+                                </div>
+                                <div class="pr-stat">
+                                    <span class="pr-stat-value">{{ project.views_count }}</span>
+                                    <span class="pr-stat-label">بازدید</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pr-card-footer">
+                            <a href="{{ project.get_absolute_url }}" class="pr-btn pr-btn-primary pr-btn-block">
+                                مشاهده جزئیات
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </section>
+
+            {% if is_paginated %}
+                <nav class="pr-pagination">
+                    {% if page_obj.has_previous %}
+                        <a class="pr-page-link" href="?page={{ page_obj.previous_page_number }}">قبلی</a>
+                    {% endif %}
+
+                    <span class="pr-page-current">
+                        صفحه {{ page_obj.number }} از {{ page_obj.paginator.num_pages }}
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a class="pr-page-link" href="?page={{ page_obj.next_page_number }}">بعدی</a>
+                    {% endif %}
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="pr-empty-state">
+                <div class="pr-empty-icon">📁</div>
+                <h3 class="pr-empty-title">پروژه‌ای یافت نشد</h3>
+                <p class="pr-empty-text">فیلترها را تغییر دهید یا اولین پروژه را ثبت کنید.</p>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'project:create' %}" class="pr-btn pr-btn-primary">ثبت پروژه جدید</a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+    </div>
+</main>
+
+{% endblock %}

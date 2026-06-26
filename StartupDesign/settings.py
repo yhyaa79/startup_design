@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     "nested_admin",
     "course",
     "networking",
-    "resume"
+    "resume",
+    'project',
 ]
 
 

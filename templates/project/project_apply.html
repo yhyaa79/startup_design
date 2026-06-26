@@ -1,0 +1,53 @@
+<!-- file: project/templates/project/project_apply.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'project/css/project.css' %}">
+
+<section class="pr-header">
+    <div class="pr-container">
+        <div class="pr-header-content">
+            <h1 class="pr-header-title">درخواست همکاری</h1>
+            <p class="pr-header-subtitle">{{ project.title }}</p>
+        </div>
+    </div>
+</section>
+
+<main class="pr-main">
+    <div class="pr-container pr-container-narrow">
+
+        <div class="pr-form-card">
+            <div class="pr-apply-project-box">
+                <h2>{{ project.title }}</h2>
+                <p>{{ project.short_description }}</p>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="pr-form-group">
+                    <label class="pr-form-label">{{ form.message.label }}</label>
+                    {{ form.message }}
+                    {{ form.message.errors }}
+                </div>
+
+                <div class="pr-form-group">
+                    <label class="pr-form-label">{{ form.skills.label }}</label>
+                    {{ form.skills }}
+                    {{ form.skills.errors }}
+                </div>
+
+                <div class="pr-form-actions">
+                    <button type="submit" class="pr-btn pr-btn-primary">ارسال درخواست</button>
+                    <a href="{{ project.get_absolute_url }}" class="pr-btn pr-btn-muted">بازگشت</a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</main>
+
+{% endblock %}

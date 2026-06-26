@@ -1,0 +1,217 @@
+<!-- file: project/templates/project/project_detail.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'project/css/project.css' %}">
+
+<section class="pr-detail-header">
+    <div class="pr-container">
+        <div class="pr-detail-header-content">
+            <div class="pr-breadcrumb">
+                <a href="{% url 'project:list' %}">پروژه‌ها</a>
+                <span>/</span>
+                <span>{{ project.title }}</span>
+            </div>
+
+            <h1 class="pr-detail-title">{{ project.title }}</h1>
+
+            <p class="pr-detail-subtitle">{{ project.short_description }}</p>
+
+            <div class="pr-detail-meta">
+                <span>{{ project.get_category_display }}</span>
+                <span>{{ project.get_status_display }}</span>
+                <span>{{ project.get_collaboration_status_display }}</span>
+                <span>{{ project.views_count }} بازدید</span>
+            </div>
+
+            <div class="pr-detail-actions">
+                {% if can_edit %}
+                    <a href="{% url 'project:edit' project.slug %}" class="pr-btn pr-btn-light">ویرایش پروژه</a>
+                    <a href="{% url 'project:delete' project.slug %}" class="pr-btn pr-btn-outline-light">حذف پروژه</a>
+                {% else %}
+                    {% if user.is_authenticated and project.is_open_for_collaboration and not has_applied and not is_member %}
+                        <a href="{% url 'project:apply' project.slug %}" class="pr-btn pr-btn-light">درخواست همکاری</a>
+                    {% elif has_applied %}
+                        <span class="pr-detail-note">درخواست همکاری شما ثبت شده است.</span>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<main class="pr-main">
+    <div class="pr-container">
+
+        <div class="pr-detail-layout">
+
+            <section class="pr-detail-content">
+
+                <div class="pr-panel">
+                    <h2 class="pr-panel-title">توضیحات کامل پروژه</h2>
+                    <div class="pr-text-content">
+                        {{ project.description|linebreaks }}
+                    </div>
+                </div>
+
+                {% if project.methodology %}
+                    <div class="pr-panel">
+                        <h2 class="pr-panel-title">روش انجام / متدولوژی</h2>
+                        <div class="pr-text-content">
+                            {{ project.methodology|linebreaks }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if project.required_skills %}
+                    <div class="pr-panel">
+                        <h2 class="pr-panel-title">مهارت‌های موردنیاز برای همکاری</h2>
+                        <div class="pr-text-content">
+                            {{ project.required_skills|linebreaks }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if project.updates.all %}
+                    <div class="pr-panel">
+                        <h2 class="pr-panel-title">بروزرسانی‌ها</h2>
+
+                        <div class="pr-timeline">
+                            {% for update in project.updates.all %}
+                                <div class="pr-timeline-item">
+                                    <h3 class="pr-timeline-title">{{ update.title }}</h3>
+                                    <span class="pr-timeline-date">{{ update.created_at|date:"Y/m/d" }}</span>
+                                    <p class="pr-timeline-text">{{ update.text|linebreaks }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if project.files.all %}
+                    <div class="pr-panel">
+                        <h2 class="pr-panel-title">فایل‌ها</h2>
+
+                        <div class="pr-file-list">
+                            {% for file in project.files.all %}
+                                <a href="{{ file.file.url }}" class="pr-file-item" target="_blank">
+                                    <span>📎</span>
+                                    <strong>{{ file.title }}</strong>
+                                    <small>{{ file.uploaded_at|date:"Y/m/d" }}</small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+            </section>
+
+            <aside class="pr-detail-sidebar">
+
+                <div class="pr-side-card">
+                    <h3 class="pr-side-title">اطلاعات پروژه</h3>
+
+                    <div class="pr-side-row">
+                        <span>دسته‌بندی</span>
+                        <strong>{{ project.get_category_display }}</strong>
+                    </div>
+
+                    <div class="pr-side-row">
+                        <span>وضعیت</span>
+                        <strong>{{ project.get_status_display }}</strong>
+                    </div>
+
+                    <div class="pr-side-row">
+                        <span>همکاری</span>
+                        <strong>{{ project.get_collaboration_status_display }}</strong>
+                    </div>
+
+                    {% if project.field %}
+                        <div class="pr-side-row">
+                            <span>حوزه تخصصی</span>
+                            <strong>{{ project.field }}</strong>
+                        </div>
+                    {% endif %}
+
+                    {% if project.expected_output %}
+                        <div class="pr-side-row">
+                            <span>خروجی مورد انتظار</span>
+                            <strong>{{ project.expected_output }}</strong>
+                        </div>
+                    {% endif %}
+
+                    {% if project.capacity %}
+                        <div class="pr-side-row">
+                            <span>ظرفیت جذب</span>
+                            <strong>{{ project.capacity }} نفر</strong>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="pr-side-card">
+                    <h3 class="pr-side-title">ثبت‌کننده</h3>
+
+                    <div class="pr-owner-box">
+                        <div class="pr-owner-avatar">
+                            {{ project.owner_profile.first_name|slice:":1" }}
+                        </div>
+
+                        <div>
+                            <strong>
+                                {{ project.owner_profile.first_name }} {{ project.owner_profile.last_name }}
+                            </strong>
+
+                            {% if project.owner_profile.job_title %}
+                                <span>{{ project.owner_profile.job_title }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if project.institution %}
+                        <div class="pr-side-row">
+                            <span>مرکز / دانشگاه</span>
+                            <strong>{{ project.institution }}</strong>
+                        </div>
+                    {% endif %}
+
+                    {% if project.supervisor %}
+                        <div class="pr-side-row">
+                            <span>استاد راهنما</span>
+                            <strong>{{ project.supervisor }}</strong>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if project.keywords %}
+                    <div class="pr-side-card">
+                        <h3 class="pr-side-title">کلیدواژه‌ها</h3>
+                        <p class="pr-keywords pr-keywords-block">{{ project.keywords }}</p>
+                    </div>
+                {% endif %}
+
+                {% if project.members.all %}
+                    <div class="pr-side-card">
+                        <h3 class="pr-side-title">اعضای پروژه</h3>
+
+                        <div class="pr-member-list">
+                            {% for member in project.members.all %}
+                                <div class="pr-member-item">
+                                    <strong>{{ member.profile.first_name }} {{ member.profile.last_name }}</strong>
+                                    <span>{{ member.get_role_display }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+            </aside>
+
+        </div>
+
+    </div>
+</main>
+
+{% endblock %}

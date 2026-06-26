@@ -1,0 +1,38 @@
+<!-- file: project/templates/project/project_confirm_delete.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'project/css/project.css' %}">
+
+<section class="pr-header">
+    <div class="pr-container">
+        <div class="pr-header-content">
+            <h1 class="pr-header-title">حذف پروژه</h1>
+            <p class="pr-header-subtitle">آیا از حذف این پروژه مطمئن هستید؟</p>
+        </div>
+    </div>
+</section>
+
+<main class="pr-main">
+    <div class="pr-container pr-container-narrow">
+
+        <div class="pr-delete-card">
+            <h2 class="pr-delete-title">{{ object.title }}</h2>
+            <p class="pr-delete-text">
+                این عملیات قابل بازگشت نیست و تمام اطلاعات وابسته به این پروژه حذف خواهد شد.
+            </p>
+
+            <form method="post" class="pr-form-actions">
+                {% csrf_token %}
+                <button type="submit" class="pr-btn pr-btn-danger">بله، حذف شود</button>
+                <a href="{{ object.get_absolute_url }}" class="pr-btn pr-btn-muted">انصراف</a>
+            </form>
+        </div>
+
+    </div>
+</main>
+
+{% endblock %}
