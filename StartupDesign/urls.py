@@ -16,6 +16,7 @@ urlpatterns = [
     path('networking/', include('networking.urls', namespace='networking')),
     path('resume/', include('resume.urls', namespace='resume')),
     path('project/', include('project.urls', namespace='project')),
+    path('events/', include('event_hub.urls', namespace='event_hub')),
 ]
 
 if settings.DEBUG:

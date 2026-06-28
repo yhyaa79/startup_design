@@ -11,90 +11,93 @@
   <div class="container py-5">
 
     <div class="rs-page-header">
-      <div>
-        <h2 class="rs-page-title">رزومه‌های من</h2>
-        <p class="rs-page-subtitle">رزومه‌های ساخته‌شده از پروفایل شما</p>
-      </div>
+
+      <h1 class="rs-page-title">رزومه‌های من</h1>
+      <p class="rs-page-subtitle">رزومه‌های ساخته‌شده از پروفایل شما</p>
+      
       <a href="{% url 'resume:resume_create' %}" class="rs-btn rs-btn-primary rs-btn-lg">
         <i class="bi bi-plus-circle me-2"></i>ساخت رزومه جدید
       </a>
     </div>
 
     {% if messages %}
-      <div class="rs-stack-sm">
-        {% for msg in messages %}
-          <div class="alert alert-{{ msg.tags }} alert-dismissible fade show rs-alert" role="alert">
-            {{ msg }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-        {% endfor %}
+    <div class="rs-stack-sm">
+      {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show rs-alert" role="alert">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
+      {% endfor %}
+    </div>
     {% endif %}
 
     {% if resumes %}
-      <div class="row g-4">
-        {% for resume in resumes %}
-        <div class="col-md-6 col-lg-4">
-          <div class="card rs-card rs-resume-card h-100">
-            <div class="rs-resume-card-top rs-resume-stripe-{{ resume.template }}"></div>
+    <div class="rs-grid">
+      {% for resume in resumes %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card rs-card rs-resume-card h-100">
+          <div class="rs-resume-card-top rs-resume-stripe-{{ resume.template }}"></div>
 
-            <div class="card-body rs-card-body">
-              <div class="rs-resume-card-badges">
-                <span class="rs-badge rs-badge-gray">{{ resume.get_template_display }}</span>
-                {% if resume.ai_enhanced %}
-                  <span class="rs-badge rs-badge-orange"><i class="bi bi-stars me-1"></i>AI</span>
-                {% endif %}
-              </div>
-
-              <h5 class="rs-card-title">{{ resume.title }}</h5>
-              <p class="rs-card-meta">
-                <i class="bi bi-tag me-1"></i>{{ resume.get_purpose_display }}
-              </p>
-
-              <div class="rs-inline-badges">
-                {% if resume.pdf_file %}
-                  <span class="rs-badge rs-badge-red">
-                    <i class="bi bi-file-pdf me-1"></i>PDF
-                  </span>
-                {% endif %}
-                {% if resume.docx_file %}
-                  <span class="rs-badge rs-badge-blue">
-                    <i class="bi bi-file-word me-1"></i>Word
-                  </span>
-                {% endif %}
-              </div>
-
-              <p class="rs-card-date">
-                <i class="bi bi-clock me-1"></i>{{ resume.created_at|date:"Y/m/d H:i" }}
-              </p>
+          <div class="card-body rs-card-body">
+            <div class="rs-resume-card-badges">
+              <span class="rs-badge rs-badge-gray">{{ resume.get_template_display }}</span>
+              {% if resume.ai_enhanced %}
+              <span class="rs-badge rs-badge-orange"><i class="bi bi-stars me-1"></i>AI</span>
+              {% endif %}
             </div>
 
-            <div class="card-footer rs-card-footer">
-              <div class="rs-action-row">
-                <a href="{% url 'resume:resume_detail' resume.pk %}" class="rs-btn rs-btn-outline-primary rs-btn-sm rs-flex-1">
-                  <i class="bi bi-eye me-1"></i>مشاهده
-                </a>
-                <a href="{% url 'resume:resume_regenerate' resume.pk %}" class="rs-btn rs-btn-outline-secondary rs-btn-sm" title="بازسازی">
-                  <i class="bi bi-arrow-clockwise"></i>
-                </a>
-                <a href="{% url 'resume:resume_delete' resume.pk %}" class="rs-btn rs-btn-outline-danger rs-btn-sm" title="حذف">
-                  <i class="bi bi-trash"></i>
-                </a>
-              </div>
+            <h5 class="rs-card-title">{{ resume.title }}</h5>
+            <p class="rs-card-meta">
+              <i class="bi bi-tag me-1"></i>{{ resume.get_purpose_display }}
+            </p>
+
+            <div class="rs-inline-badges">
+              {% if resume.pdf_file %}
+              <span class="rs-badge rs-badge-red">
+                <i class="bi bi-file-pdf me-1"></i>PDF
+              </span>
+              {% endif %}
+              {% if resume.docx_file %}
+              <span class="rs-badge rs-badge-blue">
+                <i class="bi bi-file-word me-1"></i>Word
+              </span>
+              {% endif %}
+            </div>
+
+            <p class="rs-card-date">
+              <i class="bi bi-clock me-1"></i>{{ resume.created_at|date:"Y/m/d H:i" }}
+            </p>
+          </div>
+
+          <div class="card-footer rs-card-footer">
+            <div class="rs-action-row">
+              <a href="{% url 'resume:resume_detail' resume.pk %}"
+                class="rs-btn rs-btn-outline-primary rs-btn-sm rs-flex-1">
+                <i class="bi bi-eye me-1"></i>مشاهده
+              </a>
+              <a href="{% url 'resume:resume_regenerate' resume.pk %}" class="rs-btn rs-btn-outline-secondary rs-btn-sm"
+                title="بازسازی">
+                <i class="bi bi-arrow-clockwise"></i>بازسازی
+              </a>
+              <a href="{% url 'resume:resume_delete' resume.pk %}" class="rs-btn rs-btn-outline-danger rs-btn-sm"
+                title="حذف">
+                <i class="bi bi-trash"></i>حذف
+              </a>
             </div>
           </div>
         </div>
-        {% endfor %}
       </div>
+      {% endfor %}
+    </div>
     {% else %}
-      <div class="rs-empty-state">
-        <div class="rs-empty-icon">📄</div>
-        <h4 class="rs-empty-title">هنوز رزومه‌ای نساخته‌اید</h4>
-        <p class="rs-empty-text">اطلاعات پروفایل شما آماده است — همین حالا رزومه بسازید!</p>
-        <a href="{% url 'resume:resume_create' %}" class="rs-btn rs-btn-primary rs-btn-lg mt-2">
-          <i class="bi bi-plus-circle me-2"></i>ساخت اولین رزومه
-        </a>
-      </div>
+    <div class="rs-empty-state">
+      <div class="rs-empty-icon">📄</div>
+      <h4 class="rs-empty-title">هنوز رزومه‌ای نساخته‌اید</h4>
+      <p class="rs-empty-text">اطلاعات پروفایل شما آماده است — همین حالا رزومه بسازید!</p>
+      <a href="{% url 'resume:resume_create' %}" class="rs-btn rs-btn-primary rs-btn-lg mt-2">
+        <i class="bi bi-plus-circle me-2"></i>ساخت اولین رزومه
+      </a>
+    </div>
     {% endif %}
 
   </div>

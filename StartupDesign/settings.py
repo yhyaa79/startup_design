@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "networking",
     "resume",
     'project',
+    'event_hub',
 ]
 
 

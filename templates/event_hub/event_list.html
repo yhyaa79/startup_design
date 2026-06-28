@@ -1,0 +1,51 @@
+<!-- templates/event_hub/event_list.html -->
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <main class="eh-page">
+        <section class="eh-header">
+            <div class="eh-container">
+                <h1 class="eh-title">هاب رویدادهای رزومه‌ساز</h1>
+                <p class="eh-subtitle">فهرست رویدادهای مرتبط با رزومه و رشد پژوهشی برای دانشجویان علوم پزشکی</p>
+            </div>
+        </section>
+
+        <section class="eh-content">
+            <div class="eh-container">
+                <div class="eh-grid">
+                    {% for event in events %}
+                    <article class="eh-card">
+                        <div class="eh-card-inf">
+                            <div class="eh-card-head">
+                                <span class="eh-badge">{{ event.section }}</span>
+                                <span class="eh-meta">{{ event.resume_impact }}</span>
+                            </div>
+
+                            <h2 class="eh-card-title">{{ event.title }}</h2>
+                            <p class="eh-card-desc">{{ event.short_description|truncatechars:200 }}</p>
+
+                            <div class="eh-chip-row">
+                                <span class="eh-chip">{{ event.activity_type }}</span>
+                                <span class="eh-chip">{{ event.difficulty }}</span>
+                            </div>
+                        </div>
+                        <a class="eh-btn" href="{% url 'event_hub:event_detail' event.slug %}">مشاهده جزئیات</a>
+                    </article>
+                    {% empty %}
+                    <div class="eh-empty">
+                        رویدادی برای نمایش وجود ندارد.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
+
+
+{% endblock %}

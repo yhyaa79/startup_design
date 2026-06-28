@@ -1,0 +1,243 @@
+<!-- templates/event_hub/event_detail.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+
+    <main class="eh-page">
+        <section class="eh-header eh-header-detail">
+            <div class="eh-container">
+                <a class="eh-back" href="{% url 'event_hub:event_list' %}">بازگشت به لیست رویدادها</a>
+                <h1 class="eh-title">{{ event.title }}</h1>
+                <p class="eh-subtitle">{{ event.short_description }}</p>
+            </div>
+        </section>
+
+        <section class="eh-content">
+            <div class="eh-container">
+                <div class="eh-detail-layout">
+                    <article class="eh-panel">
+                        <h2 class="eh-section-title">اطلاعات سریع</h2>
+
+                        <dl class="eh-dl">
+                            <div><dt>بخش</dt><dd>{{ event.section }}</dd></div>
+                            <div><dt>تهیه‌کننده</dt><dd>{{ event.compiler }}</dd></div>
+                            <div>
+                                <dt>مخاطبان</dt>
+                                <dd>
+                                    {% if event.audience %}
+                                        <ul class="eh-list">
+                                            {% for item in event.audience %}
+                                            <li>{{ item }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </dd>
+                            </div>
+                            <div><dt>هدف</dt><dd>{{ event.goal }}</dd></div>
+                            <div><dt>اثر در رزومه</dt><dd>{{ event.resume_impact }}</dd></div>
+                            <div><dt>نوع فعالیت</dt><dd>{{ event.activity_type }}</dd></div>
+                        </dl>
+                    </article>
+
+                    <article class="eh-panel">
+                        <h2 class="eh-section-title">معرفی کامل</h2>
+                        <p class="eh-text">{{ event.intro }}</p>
+
+                        <h3 class="eh-subsection-title">مخاطبان پژوهشی</h3>
+                        {% if event.research_audiences %}
+                            <ul class="eh-list">
+                                {% for item in event.research_audiences %}
+                                <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+
+                        <h3 class="eh-subsection-title">مهارت‌های آموخته‌شده</h3>
+                        {% if event.skills_learned %}
+                            <ul class="eh-list">
+                                {% for item in event.skills_learned %}
+                                <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </article>
+                </div>
+
+                <article class="eh-panel eh-panel-full">
+                    <h2 class="eh-section-title">مراحل تکمیل</h2>
+                    <div class="eh-steps">
+                        {% for step in event.completion_steps %}
+                        <div class="eh-step">
+                            <div class="eh-step-head">مرحله {{ step.step }}: {{ step.title }}</div>
+                            
+                            {% if step.word_limit %}
+                                <p class="eh-text"><strong>حد کلمات:</strong> {{ step.word_limit }}</p>
+                            {% endif %}
+
+                            {# بررسی نوع description #}
+                            {% if step.description %}
+                                {% if step.description|is_list %}
+                                    {# اگر description یک لیست است #}
+                                    <ul class="eh-list">
+                                        {% for item in step.description %}
+                                        <li>{{ item }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    {# اگر description یک string است #}
+                                    <p class="eh-text">{{ step.description }}</p>
+                                {% endif %}
+                            {% endif %}
+
+                            {# بخش‌های داخلی (مرحله 4) #}
+                            {% if step.sections %}
+                                <div class="eh-subsections">
+                                    {% for section in step.sections %}
+                                    <div class="eh-subsection">
+                                        <h4>{{ section.title }}</h4>
+                                        {% if section.word_limit %}
+                                            <p class="eh-text"><strong>حد کلمات:</strong> {{ section.word_limit }}</p>
+                                        {% endif %}
+                                        <p class="eh-text">{{ section.description }}</p>
+                                        {% if section.includes %}
+                                            <ul class="eh-list">
+                                                {% for item in section.includes %}
+                                                <li>{{ item }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                        {% if section.notes %}
+                                            <div class="eh-notes">
+                                                <strong>نکات:</strong>
+                                                <ul class="eh-list">
+                                                    {% for note in section.notes %}
+                                                    <li>{{ note }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            {# گزینه‌ها (مرحله 7) #}
+                            {% if step.options %}
+                                <ul class="eh-list">
+                                    {% for option in step.options %}
+                                    <li>{{ option }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+
+                            {# تبعات (مرحله 8) #}
+                            {% if step.implications %}
+                                <div class="eh-implications">
+                                    {% for key, value in step.implications.items %}
+                                    <div class="eh-implication-item">
+                                        <strong>{{ key|title }}:</strong>
+                                        <p class="eh-text">{{ value }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </article>
+
+                <article class="eh-panel eh-panel-full">
+                    <h2 class="eh-section-title">مزایا و نکات کلیدی</h2>
+                    <div class="eh-two-col">
+                        <div>
+                            <h3 class="eh-subsection-title">مزایا</h3>
+                            {% if event.benefits %}
+                                {% if event.benefits.research %}
+                                <div class="eh-benefit-category">
+                                    <strong>پژوهشی:</strong>
+                                    <ul class="eh-list">
+                                        {% for item in event.benefits.research %}
+                                        <li>{{ item }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+
+                                {% if event.benefits.personal_and_professional %}
+                                <div class="eh-benefit-category">
+                                    <strong>فردی و حرفه‌ای:</strong>
+                                    <ul class="eh-list">
+                                        {% for item in event.benefits.personal_and_professional %}
+                                        <li>{{ item }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+
+                                {% if event.benefits.social %}
+                                <div class="eh-benefit-category">
+                                    <strong>اجتماعی:</strong>
+                                    <ul class="eh-list">
+                                        {% for item in event.benefits.social %}
+                                        <li>{{ item }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h3 class="eh-subsection-title">اشتباهات رایج</h3>
+                            {% if event.common_mistakes %}
+                                <ul class="eh-list">
+                                    {% for item in event.common_mistakes %}
+                                    <li>{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+
+                            <h3 class="eh-subsection-title">توصیه‌های کاربردی</h3>
+                            {% if event.practical_recommendations %}
+                                <ul class="eh-list">
+                                    {% for item in event.practical_recommendations %}
+                                    <li>{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+
+                <article class="eh-panel eh-panel-full">
+                    <h2 class="eh-section-title">شرایط و رویدادهای مشابه</h2>
+                    <div class="eh-two-col">
+                        <div>
+                            <h3 class="eh-subsection-title">شرایط و ضوابط</h3>
+                            {% if event.terms_and_conditions %}
+                                <ul class="eh-list">
+                                    {% for item in event.terms_and_conditions %}
+                                    <li>{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h3 class="eh-subsection-title">فرصت‌های مشابه</h3>
+                            {% if event.similar_opportunities %}
+                                <ul class="eh-list">
+                                    {% for item in event.similar_opportunities %}
+                                    <li>{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+{% endblock %}
