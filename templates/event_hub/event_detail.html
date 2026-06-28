@@ -7,13 +7,12 @@
 {% block content %}
 
     <main class="eh-page">
-        <section class="eh-header eh-header-detail">
             <div class="eh-container">
-                <a class="eh-back" href="{% url 'event_hub:event_list' %}">بازگشت به لیست رویدادها</a>
-                <h1 class="eh-title">{{ event.title }}</h1>
-                <p class="eh-subtitle">{{ event.short_description }}</p>
+                <a class="eh-back-detail" href="{% url 'event_hub:event_list' %}">بازگشت به لیست رویدادها</a>
+                <h1 class="eh-title-detail">{{ event.title }}</h1>
+                <p class="eh-subtitle-detail">{{ event.short_description }}</p>
             </div>
-        </section>
+  
 
         <section class="eh-content">
             <div class="eh-container">
@@ -22,7 +21,6 @@
                         <h2 class="eh-section-title">اطلاعات سریع</h2>
 
                         <dl class="eh-dl">
-                            <div><dt>بخش</dt><dd>{{ event.section }}</dd></div>
                             <div><dt>تهیه‌کننده</dt><dd>{{ event.compiler }}</dd></div>
                             <div>
                                 <dt>مخاطبان</dt>

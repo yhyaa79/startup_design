@@ -1,3 +1,5 @@
+# course/data.py
+
 VIDEO_DATABASE = {
     'olampiad_elmi': [
         {

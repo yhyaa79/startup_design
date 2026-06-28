@@ -1,0 +1,72 @@
+<!-- templates/course/course_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }}{% endblock %}
+{% block topbar_title %}جزئیات دوره{% endblock %}
+
+{% block content %}
+<div class="cs-course-detail-page">
+    <section class="cs-course-detail-hero">
+        <div class="cs-course-detail-media">
+            {% if course.thumbnail %}
+            <img src="{{ course.thumbnail }}" alt="{{ course.title }}">
+            {% endif %}
+        </div>
+
+        <div class="cs-course-detail-info">
+            <span class="cs-course-category">{{ course.category_label }}</span>
+            <h1>{{ course.title }}</h1>
+            <p>{{ course.shortDesc }}</p>
+
+            <div class="cs-course-detail-meta">
+                <span>مدرس: {{ course.instructor }}</span>
+                <span>مدت: {{ course.duration|default:"—" }}</span>
+                <span>امتیاز: {{ course.stars }}/5</span>
+            </div>
+
+            <div class="cs-course-detail-price">
+                {% if course.discountPrice %}
+                    <span class="cs-price-main">{{ course.mainPrice }} تومان</span>
+                    <span class="cs-price-discount">{{ course.discountPrice }} تومان</span>
+                {% elif course.mainPrice %}
+                    <span class="cs-price-discount">{{ course.mainPrice }} تومان</span>
+                {% else %}
+                    <span class="cs-price-free">رایگان</span>
+                {% endif %}
+            </div>
+
+            <a href="#" class="cs-buy-btn">خرید دوره</a>
+        </div>
+    </section>
+
+    <section class="cs-course-detail-body">
+        <h2>توضیحات کامل</h2>
+        <p>{{ course.longDesc|linebreaksbr }}</p>
+    </section>
+
+    {% if related %}
+    <section class="cs-course-related">
+        <h2>دوره‌های مرتبط</h2>
+        <div class="cs-course-grid">
+            {% for item in related %}
+            <article class="cs-card-course">
+                <a class="cs-card-course-a" href="{% url 'course:detail' item.id %}">
+                    <div class="cs-card-thumb">
+                        {% if item.thumbnail %}
+                        <img src="{{ item.thumbnail }}" alt="{{ item.title }}" loading="lazy" />
+                        {% else %}
+                        <div class="cs-card-thumb-placeholder">📚</div>
+                        {% endif %}
+                    </div>
+                    <div class="cs-card-body-course">
+                        <div class="cs-card-title-course">{{ item.title }}</div>
+                        <div class="cs-card-desc">{{ item.shortDesc }}</div>
+                    </div>
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

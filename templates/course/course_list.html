@@ -1,6 +1,4 @@
 <!-- templates/course/course_list.html -->
-
-
 {% extends 'base.html' %}
 
 {% block title %}دوره ها{% endblock %}
@@ -10,18 +8,17 @@
 {% block content %}
 
 <div class="">
-    <!-- ── hero ──────────────────────────────────────── -->
-    <section class="hero-course">
-        <div class="hero-content">
-            <span class="hero-eyebrow">بیش از {{ total_count }} دوره تخصصی</span>
+    <section class="cs-hero-course">
+        <div class="cs-hero-content">
+            <span class="cs-hero-eyebrow">بیش از {{ total_count }} دوره تخصصی</span>
             <h1>مسیر علمی‌ات را با جدیت طی کن</h1>
             <p>دوره‌های آموزش و منتورینگ در حوزه‌های پژوهش، نوآوری و المپیادهای علمی</p>
 
-            <form method="get" action="{% url 'course:list' %}" class="search-wrap">
+            <form method="get" action="{% url 'course:list' %}" class="cs-search-wrap">
                 {% if selected_category %}
                 <input type="hidden" name="category" value="{{ selected_category }}" />
                 {% endif %}
-                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                <svg class="cs-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8" />
                     <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -32,15 +29,9 @@
         </div>
     </section>
 
-
-    <!-- ── body ──────────────────────────────────────── -->
-    <div class="page-body">
-
-
-        <!-- main -->
+    <div class="cs-page-body">
         <main>
-            <!-- heading -->
-            <div class="content-head">
+            <div class="cs-content-head">
                 <h2>
                     {% if selected_category %}
                     {% for cat in categories %}{% if cat.key == selected_category %}{{ cat.label }}{% endif %}{% endfor %}
@@ -48,82 +39,75 @@
                     همه دوره‌ها
                     {% endif %}
                     {% if query %}
-                    <span class="query-tag">«{{ query }}» <a
+                    <span class="cs-query-tag">«{{ query }}» <a
                             href="?{% if selected_category %}category={{ selected_category }}{% endif %}">✕</a></span>
                     {% endif %}
                 </h2>
-                <span class="result-count">{{ total_count }} دوره</span>
+                <span class="cs-result-count">{{ total_count }} دوره</span>
             </div>
 
-            <!-- empty -->
             {% if not courses %}
-            <div class="empty">
-                <div class="empty-icon">🔍</div>
+            <div class="cs-empty">
+                <div class="cs-empty-icon">🔍</div>
                 <h3>دوره‌ای یافت نشد</h3>
                 <p>عبارت دیگری امتحان کنید یا دسته‌بندی را تغییر دهید.</p>
             </div>
             {% else %}
-
-            <!-- grid -->
-            <div class="course-grid">
+            <div class="cs-course-grid">
                 {% for c in courses %}
-                <article class="card-course">
-                    <a class="card-course-a" href="{% url 'course:detail' c.id %}">
-
-                        <!-- thumbnail -->
-                        <div class="card-thumb">
+                <article class="cs-card-course">
+                    <a class="cs-card-course-a" href="{% url 'course:detail' c.id %}">
+                        <div class="cs-card-thumb">
                             {% if c.thumbnail %}
                             <img src="{{ c.thumbnail }}" alt="{{ c.title }}" loading="lazy" />
                             {% else %}
-                            <div class="card-thumb-placeholder">📚</div>
+                            <div class="cs-card-thumb-placeholder">📚</div>
                             {% endif %}
                             {% if c.percentage %}
-                            <span class="discount-badge">{{ c.percentage }}% تخفیف</span>
+                            <span class="cs-discount-badge">{{ c.percentage }}% تخفیف</span>
                             {% endif %}
-                            <span class="cat-badge">{{ c.category_label }}</span>
+                            <span class="cs-cat-badge">{{ c.category_label }}</span>
                         </div>
 
-                        <!-- body -->
-                        <div class="card-body-course">
-                            <div class="card-title-course">{{ c.title }}</div>
-                            <div class="card-desc">{{ c.shortDesc }}</div>
-                            <div class="card-meta">
-                                <span class="meta-item">
+                        <div class="cs-card-body-course">
+                            <div class="cs-card-title-course">{{ c.title }}</div>
+                            <div class="cs-card-desc">{{ c.shortDesc }}</div>
+                            <div class="cs-card-meta">
+                                <span class="cs-meta-item">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
                                         <circle cx="12" cy="12" r="10" />
-                                        <polyline points="12 6 12 12 16 14" /></svg>
+                                        <polyline points="12 6 12 12 16 14" />
+                                    </svg>
                                     {{ c.duration|default:"—" }}
                                 </span>
-                                <span class="meta-item">
+                                <span class="cs-meta-item">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
                                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                        <circle cx="12" cy="7" r="4" /></svg>
+                                        <circle cx="12" cy="7" r="4" />
+                                    </svg>
                                     {{ c.instructor }}
                                 </span>
-                                <span class="stars" title="{{ c.stars }} از ۵">
+                                <span class="cs-stars" title="{{ c.stars }} از ۵">
                                     {% for i in "12345" %}{% if forloop.counter <= c.stars %}★{% else %}☆{% endif %}{% endfor %}
                                 </span>
                             </div>
                         </div>
                     </a>
 
-                    <!-- footer -->
-                    <div class="card-footer">
-                        <div class="price-block">
+                    <div class="cs-card-footer">
+                        <div class="cs-price-block">
                             {% if c.discountPrice %}
-                            {% if c.mainPrice %}<span class="price-main">{{ c.mainPrice }} تومان</span>{% endif %}
-                            <span class="price-discount">{{ c.discountPrice }} تومان</span>
+                            {% if c.mainPrice %}<span class="cs-price-main">{{ c.mainPrice }} تومان</span>{% endif %}
+                            <span class="cs-price-discount">{{ c.discountPrice }} تومان</span>
                             {% elif c.mainPrice %}
-                            <span class="price-discount">{{ c.mainPrice }} تومان</span>
+                            <span class="cs-price-discount">{{ c.mainPrice }} تومان</span>
                             {% else %}
-                            <span class="price-free">رایگان</span>
+                            <span class="cs-price-free">رایگان</span>
                             {% endif %}
                         </div>
-                        <a href="{% url 'course:detail' c.id %}">
-                            <button class="btn-enroll">ثبت‌نام</button>
-                        </a>
+                        <a href="{% url 'course:detail' c.id %}" class="cs-btn-enroll">ثبت‌نام</a>
                     </div>
                 </article>
                 {% endfor %}
@@ -131,22 +115,21 @@
             {% endif %}
         </main>
 
-        <!-- sidebar-course -->
-        <aside class="sidebar-course">
-            <div class="sidebar-course-title">دسته‌بندی‌ها</div>
-            <ul class="cat-list">
+        <aside class="cs-sidebar-course">
+            <div class="cs-sidebar-course-title">دسته‌بندی‌ها</div>
+            <ul class="cs-cat-list">
                 {% for cat in categories %}
                 <li>
                     <a href="?category={{ cat.key }}{% if query %}&q={{ query }}{% endif %}"
                         class="{% if selected_category == cat.key %}active{% endif %}">
                         {{ cat.label }}
-                        <span class="badge">{{ cat.count }}</span>
+                        <span class="cs-badge">{{ cat.count }}</span>
                     </a>
                 </li>
                 {% endfor %}
             </ul>
             {% if selected_category %}
-            <a href="{% url 'course:list' %}{% if query %}?q={{ query }}{% endif %}" class="all-link">نمایش همه</a>
+            <a href="{% url 'course:list' %}{% if query %}?q={{ query }}{% endif %}" class="cs-all-link">نمایش همه</a>
             {% endif %}
         </aside>
     </div>

@@ -11,13 +11,16 @@
   <div class="container py-5">
 
     <div class="rs-page-header">
+      <div class="pr-header-content">
+        <h1 class="rs-page-title">رزومه‌های من</h1>
+        <p class="rs-page-subtitle">رزومه‌های ساخته‌شده از پروفایل شما</p>
 
-      <h1 class="rs-page-title">رزومه‌های من</h1>
-      <p class="rs-page-subtitle">رزومه‌های ساخته‌شده از پروفایل شما</p>
-      
-      <a href="{% url 'resume:resume_create' %}" class="rs-btn rs-btn-primary rs-btn-lg">
-        <i class="bi bi-plus-circle me-2"></i>ساخت رزومه جدید
-      </a>
+        <div class="pr-header-actions">
+          <a href="{% url 'resume:resume_create' %}" class="rs-btn rs-btn-primary rs-btn-lg">
+            <i class="bi bi-plus-circle me-2"></i>ساخت رزومه جدید
+          </a>
+        </div>
+      </div>
     </div>
 
     {% if messages %}
