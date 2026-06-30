@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "project",
     "event_hub",
     "activity",
+    "regulation_assessment",
 ]
 
 

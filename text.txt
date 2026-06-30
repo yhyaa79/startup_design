@@ -1,1 +1,19 @@
 value too long for type character varying(50)
+
+
+
+
+
+cd /srv/startup_design_django
+source venv/bin/activate
+
+pip install -r requirements.txt
+
+python manage.py migrate
+
+
+sudo systemctl restart startupdesign
+
+
+sudo journalctl -u startupdesign -f
+sudo journalctl -u startupdesign -n 100

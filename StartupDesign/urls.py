@@ -18,6 +18,7 @@ urlpatterns = [
     path('project/', include('project.urls', namespace='project')),
     path('events/', include('event_hub.urls', namespace='event_hub')),
     path('activity/', include('activity.urls', namespace='activity')),
+    path('regulation_assessment/', include('regulation_assessment.urls', namespace='regulation_assessment')),
 ]
 
 if settings.DEBUG:

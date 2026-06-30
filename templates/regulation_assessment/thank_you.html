@@ -1,0 +1,27 @@
+<!-- templates/regulation_assessment/thank_you.html -->
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تشکر از شما{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static './css/regulation_assessment_styles.css' %}">
+
+
+    <div class="thank-you-container">
+        <div class="success-icon">✓</div>
+        <h1 class="thank-you-h1">درخواست شما ثبت شد!</h1>
+        <p><span class="highlight">دانشجوی گرامی</span></p>
+        <p class="thank-you-p">جهت استفاده از خدمات استارتاپ دیزاین</p>
+        <p class="thank-you-p"><strong>به زودی با شما تماس می‌گیریم</strong></p>
+        <a href="{% url 'regulation_assessment:evaluation_form' %}" class="back-button">بازگشت به صفحه اصلی</a>
+    </div>
+
+
+
+
+    
+{% endblock %}

@@ -1,0 +1,443 @@
+<!-- templates/regulation_assessment/evaluation_form.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ابزار سنجش{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<script>
+    window.SAVE_VIDEO_INTEREST_URL = "{% url 'regulation_assessment:save_video_interest' %}";
+    window.THANK_YOU_URL = "{% url 'regulation_assessment:thank_you' %}";
+</script>
+<script src="{% static 'js/video.js' %}"></script>
+
+<link rel="stylesheet" href="{% static './css/regulation_assessment_styles.css' %}">
+
+    <div id="loading-bar"></div>
+
+    <div class="container">
+
+        <!-- Progress Tracker -->
+        <div class="progress-tracker">
+            <div class="progress-step" id="ps-0">
+                <div class="progress-step-number">۱</div>
+                <div class="progress-step-label">اطلاعات</div>
+            </div>
+            <div class="line-progress-step"></div>
+            <div class="progress-step" id="ps-1">
+                <div class="progress-step-number">۲</div>
+                <div class="progress-step-label">آیین‌نامه</div>
+            </div>
+            <div class="line-progress-step"></div>
+            <div class="progress-step" id="ps-2">
+                <div class="progress-step-number">۳</div>
+                <div class="progress-step-label">نتیجه</div>
+            </div>
+            <div class="line-progress-step"></div>
+            <div class="progress-step" id="ps-3">
+                <div class="progress-step-number">۴</div>
+                <div class="progress-step-label">پیشنهادات</div>
+            </div>
+            <div class="line-progress-step"></div>
+            <div class="progress-step" id="ps-4">
+                <div class="progress-step-number">۵</div>
+                <div class="progress-step-label">دوره‌ها</div>
+            </div>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="step active">
+            <div class="step-header">
+                <div class="step-header-badge">۱</div>
+                <div class="step-header-title">اطلاعات دموگرافیک</div>
+                <!--                 <div class="step-logo">
+                    <img src="images/photo-output.png" alt="">
+                </div> -->
+            </div>
+            <div class="content">
+
+                <p class="section-title">اطلاعات شخصی</p>
+                <p class="section-disc">
+                    لطفاً اطلاعات شخصی و تحصیلی خود را با دقت وارد نمایید. فیلدهای ستاره‌دار الزامی هستند.
+                </p>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>نام <span class="required-mark">*</span></label>
+                        <input type="text" name="firstName" class="form-input required" placeholder="محمد رضا">
+
+                    </div>
+                    <div class="form-group">
+                        <label>نام خانوادگی <span class="required-mark">*</span></label>
+                        <input type="text" name="lastName" class="form-input required" placeholder="نیک رفتار">
+
+                    </div>
+                    <div class="form-group">
+                        <label>شماره همراه <span class="required-mark">*</span></label>
+                        <input type="tel" name="phone" class="form-input required" placeholder="09392287941">
+
+
+                    </div>
+                    <div class="form-group">
+                        <label>ایمیل <span class="required-mark">*</span></label>
+                        <input type="email" name="email" class="form-input required"
+                            placeholder="mohammadrezaNR@gmail.com">
+
+                    </div>
+
+                </div>
+
+                <div class="section-divider"></div>
+                <p class="section-title">اطلاعات تحصیلی</p>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>دانشگاه محل تحصیل</label>
+                        <input type="text" name="university" class="form-input" placeholder="علوم پزشکی تهران">
+
+                    </div>
+                    <div class="form-group">
+                        <label>رشته تحصیلی</label>
+                        <input type="text" name="major" class="form-input" placeholder="پزشکی">
+
+                    </div>
+                    <div class="form-group">
+                        <label>مقطع تحصیلی</label>
+                        <select name="degree" class="form-input">
+
+                            <option value="" disabled selected>انتخاب کنید...</option>
+                            <option value="associate">کاردانی</option>
+                            <option value="bachelor">کارشناسی</option>
+                            <option value="master">کارشناسی ارشد</option>
+                            <option value="general_phd">دکتری عمومی</option>
+                            <option value="specialty_phd">دکتری تخصص/فوق تخصص</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>ترم تحصیلی</label>
+                        <input type="number" name="term" class="form-input" placeholder="ترم 5">
+
+                    </div>
+                </div>
+
+
+                <div class="button-next-step">
+                    <button class="btn-next" onclick="nextStep(0, this)">
+                        تأیید و ادامه
+                        <span>←</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step">
+            <div class="step-header">
+                <div class="step-header-badge">۲</div>
+                <div class="step-header-title">انتخاب آیین‌نامه</div>
+            </div>
+            <div class="content">
+
+                <p class="section-title">آیین‌نامه مورد نظر</p>
+                <p class="section-disc">
+                    آیین‌نامه‌ای که می‌خواهید شرایط آن را بررسی کنید، از لیست زیر انتخاب نمایید.
+                </p>
+
+                <div class="bylaw-select-wrapper">
+                    <label class="bylaw-select-label">انتخاب آیین‌نامه:</label>
+                    <div class="custom-select" id="custom-select">
+                        <div class="custom-select-trigger" id="select-trigger">
+                            <span id="select-placeholder">یک آیین‌نامه انتخاب کنید...</span>
+                            <span class="select-arrow" id="select-arrow">▾</span>
+                        </div>
+                        <div class="custom-select-dropdown" id="select-dropdown">
+                            <div class="custom-select-item" data-value="estedad"
+                                data-desc="آیین‌نامه مربوط به شناسایی و حمایت از استعدادهای برتر دانشگاهی"
+                                data-link="files/estedad_form.pdf">
+                                <!-- <span class="item-icon">🎓</span> -->
+                                <span>بند ک استعداد درخشان</span>
+                            </div>
+                            <div class="custom-select-item" data-value="bonyad"
+                                data-desc="آیین‌نامه مربوط به بنیاد ملی نخبگان و ارائه تسهیلات ویژه"
+                                data-link="files/bonyad.pdf">
+                                <!-- <span class="item-icon">🏆</span> -->
+                                <span>بنیاد ملی نخبگان</span>
+                            </div>
+                            <div class="custom-select-item" data-value="researcher"
+                                data-desc="آیین‌نامه مربوط به انتخاب و معرفی پژوهشگر برتر"
+                                data-link="files/researcher.pdf">
+                                <!-- <span class="item-icon">🔬</span> -->
+                                <span>پژوهشگر برتر</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" id="selected-bylaw">
+
+                <div id="bylaw-info" class="bylaw-info-card"></div>
+
+                <!-- فرم‌ها -->
+
+
+                <div id="form-estedad-test" style="display:none">
+                    <p class="section-title">آزمون ورودی</p>
+                    <div id="form-estedad-test-show">
+                        <p class="section-disc">
+                            برای ورود به قسمت آیین نامه استعداد درخشان شما باید شرایط لازم (معدل بالای ۱۵) را داشته
+                            باشید.
+                        </p>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>مقطع تحصیلی فعلی شما چیست؟<span class="required-mark">*</span></label>
+                                <select class="form-input required" id="degree-select" name="degree">
+                                    <option value="" disabled selected>-- انتخاب کنید --</option>
+                                    <option value="bachelor">کارشناسی</option>
+                                    <option value="master">کارشناسی ارشد</option>
+                                    <option value="general_doctorate">دکتری حرفه ای</option>
+                                    <option value="specialty_doctorate">دکتری تخصصی و فوق تخصصی بالينی</option>
+                                    <option value="PHD">PHD</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>دانشگاه شما در کدام تیپ قرار دارد؟<span class="required-mark">*</span></label>
+                                <select class="form-input required" id="uni-select" name="university_tier">
+                                    <option value="" disabled selected>-- انتخاب کنید --</option>
+                                    <option value="tier1">تیپ ۱</option>
+                                    <option value="tier2">تیپ ۲</option>
+                                    <option value="tier3">تیپ ۳</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>معدل کل دوره تحصیلی شما چقدر است؟<span class="required-mark">*</span></label>
+                                <textarea class="form-input required" id="gpa-input" placeholder="18.54"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>آیا حداقل یکی از این موارد را دارید؟<span class="required-mark"></span></label>
+                                <div class="form-input" style="height: auto; display: grid;">
+                                    <label><input type="checkbox" name="research[]" value="article"> مقاله علمی </label>
+                                    <label><input type="checkbox" name="research[]" value="congress"> ارائه خلاصه مقالات
+                                        در
+                                        کنگره ها و سمینارها</label>
+                                    <label><input type="checkbox" name="research[]" value="committee"> فعالیت در کمیته
+                                        تحقیقات دانشجویی </label>
+                                    <label><input type="checkbox" name="research[]" value="startup"> فعالیت کارآفرینی یا
+                                        اختراع </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <button class="btn-test-estedad" type="button" onclick="submitEstadadTest()">
+                                ارزیابی آزمون
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="score-section">
+                    <div class="progress-container" id="progress-container">
+                        <div class="progress-bar" id="progress-bar"></div>
+                        <div class="progress-text" id="progress-text"></div>
+                    </div>
+
+                    <!-- Modal فرم ثبت مقاله استعداد درخشان -->
+                    <div id="modal-overlay" style="display:none">
+                        <div id="modal-bylaw">
+                            <div class="modal-header">
+                                <p class="modal-title">فرم ثبت مقاله</p>
+                                <p style="margin: 10px 0 0 0;" class="section-disc-form">"در این بخش اطلاعات مقالات علمی
+                                    منتشر
+                                    شده خود را وارد کنید. برای هر مقاله یک فرم جداگانه تکمیل کنید."</p>
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="modal-footer">
+                                    <button id="btn-clear-step" class="btn-clear-step">🗑 پاک کردن این فرم</button>
+
+                                    <button id="btn-add-new" class="add-btn">➕ افزودن فرم جدید</button>
+                                </div>
+
+                                <div class="next-back-btn" id="next-back-btn">
+                                    <button id="back-btn" class="submit-btn">➡︎ مرحله قبلی</button>
+                                    <button id="next-btn" class="submit-btn">مرحله بعدی ⬅︎</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--  بنیاد ملی نخبگان -->
+                    <div id="form-bonyad" style="display:none">
+                        <p class="sub-form-title">این بخش در حال توسعه می باشد و به زودی قابل استفاده است</p>
+                    </div>
+
+                    <!-- پژوهشگر برتر -->
+                    <div id="form-researcher" style="display:none">
+                        <p class="sub-form-title">این بخش در حال توسعه می باشد و به زودی قابل استفاده است</p>
+                    </div>
+                </div>
+
+
+                <div class="button-next-step" id="button-next-step-2" style="display: none;">
+                    <button class="btn-next" id="btn-next-2" onclick="nextStep(1, this)">
+                        تأیید و ادامه
+                        <span>←</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Step 3 -->
+        <div class="step">
+            <div class="step-header">
+                <div class="step-header-badge">۳</div>
+                <div class="step-header-title">نتیجه بررسی آیین‌نامه</div>
+            </div>
+            <div class="content">
+
+                <p class="section-title">خلاصه ارزیابی</p>
+                <p class="section-disc">نتیجه بررسی اطلاعات شما بر اساس آیین‌نامه انتخاب شده در زیر نمایش
+                    داده شده
+                    است.
+                </p>
+
+                <div class="result-box">
+
+                    <div class="result-header-row">
+                        <span class="result-bylaw-label">آیین‌نامه انتخاب‌شده:</span>
+                        <span class="result-bylaw-value" id="result-bylaw">استعداد درخشان</span>
+                    </div>
+
+                    <div class="score-grid">
+                        <div class="score-card">
+                            <div class="score-card-label">حداقل امتیاز</div>
+                            <div class="score-card-value" id="min-score">۸۵</div>
+                        </div>
+                        <div class="score-card highlight" id="your-score-card">
+                            <div class="score-card-label">امتیاز شما</div>
+                            <div class="score-card-value" id="your-score">۳۴</div>
+                        </div>
+                        <div class="score-card" id="remain-score-card">
+                            <div class="score-card-label">امتیاز باقی‌مانده</div>
+                            <div class="score-card-value" id="remain-score">۵۶</div>
+                        </div>
+                    </div>
+
+                    <div class="result-text-box" id="result-text">
+                        بر اساس بررسی اطلاعات شما، امتیاز کسب‌شده از حداقل نمره مورد نیاز کمتر است. برای
+                        دریافت
+                        تأییدیه
+                        این آیین‌نامه لازم است امتیاز خود را از طریق پیشنهادات مرحله بعد افزایش دهید.
+                    </div>
+                </div>
+
+
+                <div class="button-next-step">
+                    <button class="btn-next" onclick="nextStep(2, this)">
+                        مشاهده پیشنهادات
+                        <span>←</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step">
+            <div class="step-header">
+                <div class="step-header-badge">۴</div>
+                <div class="step-header-title">پیشنهادات بهبود رزومه</div>
+            </div>
+            <div class="content">
+
+                <p class="section-title">تحلیل عملکرد</p>
+                <p class="section-disc">بر اساس اطلاعات وارد شده، نقاط ضعف رزومه شما شناسایی شده و راهکارهای
+                    بهبود
+                    ارائه
+                    می‌شود.</p>
+
+                <div class="operation-box">
+                    عملکرد شما در حوزه پژوهش و نشر مقاله نسبت به میانگین دانشجویان پذیرفته‌شده در آیین نامه بند ک
+                    استعداد درخشان پایین‌تر است. تمرکز بر افزایش تعداد مقالات ISI و ثبت اختراع می‌تواند امتیاز شما را به
+                    طور قابل توجهی بهبود بخشد.
+                </div>
+
+                <div class="section-divider"></div>
+
+                <p class="proposals-title">📌 پیشنهادات بهبود</p>
+                <div class="proposals-list"></div>
+
+
+                <div class="button-next-step">
+                    <button class="btn-next" onclick="nextStep(3, this)">
+                        مشاهده دوره‌ها
+                        <span>←</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step">
+            <div class="step-header">
+                <div class="step-header-badge">۵</div>
+                <div class="step-header-title">دوره‌های پیشنهادی</div>
+            </div>
+            <div class="content">
+
+                <p class="section-title">دوره‌های مناسب برای افزایش امتیاز</p>
+                <p class="section-disc">دوره‌های زیر بر اساس نقاط ضعف شناسایی‌شده در رزومه‌تان پیشنهاد
+                    می‌شوند.</p>
+
+                <div class="proposal-videos">
+                    <div class="proposal-videos-list">
+                        <div class="proposal-video">
+                            <div class="proposal-video-play">▶</div>
+                            <div class="proposal-video-title">نگارش مقاله علمی</div>
+                        </div>
+                        <div class="proposal-video">
+                            <div class="proposal-video-play">▶</div>
+                            <div class="proposal-video-title">ثبت اختراع</div>
+                        </div>
+                        <div class="proposal-video">
+                            <div class="proposal-video-play">▶</div>
+                            <div class="proposal-video-title">پژوهش پیشرفته</div>
+                        </div>
+                        <div class="proposal-video">
+                            <div class="proposal-video-play">▶</div>
+                            <div class="proposal-video-title">Scopus & ISI</div>
+                        </div>
+                        <div class="proposal-video">
+                            <div class="proposal-video-play">▶</div>
+                            <div class="proposal-video-title">ارائه علمی</div>
+                        </div>
+                        <div class="proposal-video">
+                            <div class="proposal-video-play">▶</div>
+                            <div class="proposal-video-title">مدیریت پروژه</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="spinner-wrapper">
+            <div class="spinner"></div>
+            <span class="spinner-text">در حال پردازش...</span>
+        </div>
+    </div>
+
+
+
+    
+{% endblock %}
