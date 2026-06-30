@@ -1,459 +1,673 @@
-<!-- templates/roadmap/stage_detail.html -->
-
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}جزئیات مراحل{% endblock %}
-{% block topbar_title %}جزئیات مرحله نقشه راه{% endblock %}
+{% block title %}{{ stage.title }}{% endblock %}
+{% block topbar_title %}{{ stage.title }}{% endblock %}
 
 {% block content %}
 
-<!-- ========== CONFIRM MODAL ========== -->
-<div id="activity-confirm-modal" class="acm-overlay" role="dialog" aria-modal="true" aria-labelledby="acm-title">
+<!-- Modal تأیید -->
+<div id="activity-confirm-modal" class="acm-overlay">
     <div class="acm-box">
         <div class="acm-header">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" width="22" height="22">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
-            <h2 id="acm-title">تأیید تکمیل فعالیت</h2>
+            <h2>تأیید تکمیل فعالیت</h2>
         </div>
 
         <p class="acm-warning-text">
-            پس از تأیید، وضعیت این فعالیت به <strong>تکمیل‌شده</strong> تغییر می‌کند و
-            <strong>امکان بازگشت به حالت قبل وجود نخواهد داشت.</strong>
+            پس از تأیید، وضعیت این فعالیت به <strong>تکمیل‌شده</strong> تغییر می‌کند.
         </p>
 
         <div class="acm-section">
-            <div class="acm-section-label">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2" width="16" height="16">
-                    <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                    <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z" />
-                </svg>
-                محل ذخیره‌سازی در پروفایل
-            </div>
-            <p class="acm-section-hint">انتخاب کنید این فعالیت در کدام بخش از پروفایل شما ثبت شود:</p>
-
+            <label class="acm-section-label">محل ذخیره‌سازی در پروفایل</label>
             <div class="acm-save-list" id="acm-save-list"></div>
         </div>
 
         <div class="acm-footer">
-            <button type="button" class="acm-btn acm-btn-cancel" onclick="closeActivityModal()">انصراف</button>
-            <button type="button" class="acm-btn acm-btn-confirm" id="acm-confirm-btn" onclick="submitActivityForm()">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2" width="16" height="16">
-                    <polyline points="20 6 9 17 4 12" />
-                </svg>
-                تأیید و ذخیره
+            <button type="button" class="acm-btn acm-btn-cancel" onclick="closeActivityModal()">
+                انصراف
+            </button>
+            <button type="button" class="acm-btn acm-btn-confirm" onclick="submitActivityForm()">
+                تأیید
             </button>
         </div>
     </div>
 </div>
 
 <div class="rm-page">
-    <div class="rm-page-header rm-page-header-compact">
-        <div class="rm-page-header-inner">
-            <div class="rm-header-left">
-                <span class="rm-eyebrow">{{ roadmap.title }}</span>
-                <h1 class="rm-page-title">{{ stage.title }}</h1>
-            </div>
-            <div class="rm-header-actions">
-                <a href="{% url 'roadmap:stage_edit' stage.id %}" class="rm-btn rm-btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg>
-                    ویرایش مرحله
-                </a>
-                <a href="{% url 'roadmap:roadmap_detail' %}" class="rm-btn rm-btn-outline">
-                    بازگشت
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2">
-                        <polyline points="15 18 9 12 15 6" />
-                    </svg>
-                </a>
-            </div>
+    <div class="rm-page-header">
+        <div class="rm-header-left">
+            <span class="rm-eyebrow">{{ roadmap.title }}</span>
+            <h1 class="rm-page-title">{{ stage.title }}</h1>
         </div>
-
-        <div class="sd-stats-grid">
-            <div class="rm-stat-card">
-                <span class="rm-stat-label">وضعیت مرحله</span>
-                {% if stage.get_progress == 100 %}
-                <span class="rm-stat-value sd-status-done">تکمیل‌شده</span>
-                {% elif stage.id == active_stage.id %}
-                <span class="rm-stat-value sd-status-active">در حال انجام</span>
-                {% else %}
-                <span class="rm-stat-value sd-status-upcoming">در انتظار</span>
-                {% endif %}
-            </div>
-            <div class="rm-stat-card">
-                <span class="rm-stat-label">ترتیب مرحله</span>
-                <span class="rm-stat-value">{{ stage.order }}</span>
-            </div>
-            <div class="rm-stat-card rm-stat-card-progress">
-                <span class="rm-stat-label">پیشرفت</span>
-                <div class="rm-progress-wrap">
-                    <span class="rm-progress-pct">{{ progress }}%</span>
-                </div>
-            </div>
-            <div class="rm-stat-card">
-                <span class="rm-stat-label">مدت زمان</span>
-                <span class="rm-stat-value">{{ duration }} <small>روز</small></span>
-            </div>
-            {% if stage.phase_type %}
-            <div class="rm-stat-card">
-                <span class="rm-stat-label">نوع فاز</span>
-                <span class="rm-stat-value">{{ stage.get_phase_type_display }}</span>
-            </div>
-            {% endif %}
-            {% if stage.priority %}
-            <div class="rm-stat-card">
-                <span class="rm-stat-label">اولویت</span>
-                <span class="rm-stat-value">{{ stage.get_priority_display }}</span>
-            </div>
-            {% endif %}
+        <div class="rm-header-actions">
+            <a href="{% url 'roadmap:stage_edit' stage.id %}" class="rm-btn rm-btn-primary">
+                ویرایش
+            </a>
+            <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="rm-btn rm-btn-outline">
+                بازگشت
+            </a>
         </div>
     </div>
 
+    <div class="sd-stats-grid">
+        <div class="rm-stat-card">
+            <span class="rm-stat-label">وضعیت</span>
+            <span class="rm-stat-value">
+                {% if stage.get_progress == 100 %}
+                ✓ تکمیل‌شده
+                {% elif stage.id == active_stage.id %}
+                🔄 در حال انجام
+                {% else %}
+                ⏳ در انتظار
+                {% endif %}
+            </span>
+        </div>
+        <div class="rm-stat-card">
+            <span class="rm-stat-label">مرحله</span>
+            <span class="rm-stat-value">{{ stage.order }}</span>
+        </div>
+        <div class="rm-stat-card">
+            <span class="rm-stat-label">پیشرفت</span>
+            <span class="rm-stat-value">{{ progress }}%</span>
+        </div>
+        <div class="rm-stat-card">
+            <span class="rm-stat-label">مدت زمان</span>
+            <span class="rm-stat-value">{{ duration }} روز</span>
+        </div>
+    </div>
 
-    <!-- Main Content -->
     <div class="sd-main">
-        <!-- Overview Card -->
+        {% if stage.description %}
         <div class="rm-card">
             <div class="rm-card-header">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
                 </svg>
-                اطلاعات مرحله
+                توضیحات
             </div>
             <div class="rm-card-body">
-                {% if stage.description %}
-                <div class="sd-info-section">
-                    <span class="sd-info-label">توضیحات</span>
-                    <p class="sd-info-text">{{ stage.description }}</p>
-                </div>
-                {% endif %}
-
-                {% if stage.objectives %}
-                <div class="sd-info-section">
-                    <span class="sd-info-label">اهداف مرحله</span>
-                    <p class="sd-info-text">{{ stage.objectives }}</p>
-                </div>
-                {% endif %}
+                <p>{{ stage.description }}</p>
             </div>
         </div>
+        {% endif %}
 
-        <!-- Success Criteria -->
-        {% if stage.success_criteria %}
-        <div class="rm-card rm-card-mt">
+        {% if stage.objectives %}
+        <div class="rm-card">
             <div class="rm-card-header">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <path d="M9 11l3 3L22 4" />
-                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 11l3 3L22 4"></path>
+                </svg>
+                اهداف
+            </div>
+            <div class="rm-card-body">
+                <p>{{ stage.objectives }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if stage.milestone %}
+        <div class="rm-card">
+            <div class="rm-card-header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                معیار تکمیل
+            </div>
+            <div class="rm-card-body">
+                <p>{{ stage.milestone }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if stage.success_criteria %}
+        <div class="rm-card">
+            <div class="rm-card-header">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 معیارهای موفقیت
             </div>
             <div class="rm-card-body">
                 <ul class="sd-criteria-list">
                     {% for criterion in stage.success_criteria %}
-                    <li class="sd-criteria-item">{{ criterion }}</li>
+                    <li>{{ criterion }}</li>
                     {% endfor %}
                 </ul>
             </div>
         </div>
         {% endif %}
 
-        <!-- Milestone -->
-        {% if stage.milestone %}
-        <div class="rm-card rm-card-mt">
-            <div class="rm-card-header">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                </svg>
-                نقطه عطف (معیار تکمیل)
-            </div>
-            <div class="rm-card-body">
-                <div class="sd-milestone-box">
-                    <p class="sd-milestone-text">{{ stage.milestone }}</p>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Risks -->
         {% if stage.risks %}
-        <div class="rm-card rm-card-mt">
+        <div class="rm-card">
             <div class="rm-card-header">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <path
-                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                    <line x1="12" y1="9" x2="12" y2="13" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
                 </svg>
                 ریسک‌های احتمالی
             </div>
             <div class="rm-card-body">
                 <ul class="sd-risks-list">
                     {% for risk in stage.risks %}
-                    <li class="sd-risk-item">{{ risk }}</li>
+                    <li>{{ risk }}</li>
                     {% endfor %}
                 </ul>
             </div>
         </div>
         {% endif %}
 
-        <!-- Recommended Resources -->
-        {% if stage.recommended_resources %}
-        <div class="rm-card rm-card-mt">
+        <!-- جدول فعالیت‌ها -->
+        <div class="rm-card">
             <div class="rm-card-header">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
                 </svg>
-                منابع پیشنهادی
-            </div>
-            <div class="rm-card-body">
-                <div class="sd-resources-grid">
-                    {% for resource in stage.recommended_resources %}
-                    <div class="sd-resource-card">
-                        <div class="sd-resource-header">
-                            {% if resource.type == 'وب‌سایت' %}
-                            <svg class="sd-resource-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <circle cx="12" cy="12" r="10" />
-                                <line x1="2" y1="12" x2="22" y2="12" />
-                                <path
-                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                            </svg>
-                            {% elif resource.type == 'نرم‌افزار' %}
-                            <svg class="sd-resource-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                                <line x1="2" y1="17" x2="22" y2="17" />
-                                <line x1="6" y1="21" x2="6" y2="17" />
-                                <line x1="10" y1="21" x2="10" y2="17" />
-                                <line x1="14" y1="21" x2="14" y2="17" />
-                                <line x1="18" y1="21" x2="18" y2="17" />
-                            </svg>
-                            {% else %}
-                            <svg class="sd-resource-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
-                                <polyline points="13 2 13 9 20 9" />
-                            </svg>
-                            {% endif %}
-                            <span class="sd-resource-type">{{ resource.type }}</span>
-                        </div>
-                        <h4 class="sd-resource-title">{{ resource.title }}</h4>
-                        {% if resource.description %}
-                        <p class="sd-resource-desc">{{ resource.description }}</p>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Activities Table -->
-        <div class="rm-card rm-card-mt">
-            <div class="rm-card-header">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="12" y1="13" x2="8" y2="13" />
-                    <line x1="12" y1="17" x2="8" y2="17" />
-                </svg>
-                فعالیت‌های مرحله
-                <span class="sd-activity-count">{{ stage.stage_activities.all|length }}</span>
+                فعالیت‌ها
+                <span class="title-badge">{{ activities|length }}</span>
             </div>
             <div class="rm-card-body rm-card-body-flush">
-                {% if stage.stage_activities.all %}
-                <div class="rm-activity-table-wrap">
-                    <table class="rm-activity-table">
-                        <thead>
-                            <tr>
-                                <th>عنوان فعالیت</th>
-                                <th>دسته</th>
-                                <th>مدت</th>
-                                <th>خروجی رزومه</th>
-                                <th>وضعیت</th>
-                                <th>اقدام</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in stage.stage_activities.all %}
-                            <tr class="{% if item.is_completed %}rm-row-done{% endif %}">
-                                <td class="rm-td-title">
-                                    <strong>{{ item.activity.title }}</strong>
-                                    {% if item.activity.description %}
-                                    <div class="rm-td-note">{{ item.activity.description }}</div>
-                                    {% endif %}
-                                </td>
-                                <td><span class="tag tag-category">{{ item.activity.category }}</span></td>
-                                <td class="sd-td-duration">{{ item.activity.duration_days }} روز</td>
-                                <td class="rm-td-muted">{{ item.activity.resume_output }}</td>
-                                <td>
-                                    {% if item.is_completed %}
-                                    <span class="tag rm-status-done">✓ تکمیل‌شده</span>
-                                    {% else %}
-                                    <span class="tag rm-status-upcoming">در انتظار</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if not item.is_completed %}
-                                    <form id="form-activity-{{ item.id }}" method="post"
-                                        action="{% url 'roadmap:stage_activity_toggle' item.id %}"
-                                        style="display:none;">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="save_target" id="save-target-{{ item.id }}" value="">
-                                    </form>
-                                    {{ item.activity.profile_template|json_script:item.id|default:"" }}
-                                    <button type="button" class="rm-btn rm-btn-sm rm-btn-primary"
-                                        data-item-id="{{ item.id }}" onclick="openActivityModal({{ item.id }})">
-                                        تغییر وضعیت
-                                    </button>
-                                    {% else %}
-                                    <span class="rm-btn-not-activ">غیرفعال</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                {% if activities %}
+                <table class="rm-activity-table">
+                    <thead>
+                        <tr>
+                            <th>عنوان</th>
+                            <th>دسته</th>
+                            <th>مدت</th>
+                            <th>وضعیت</th>
+                            <th>اقدام</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in activities %}
+                        <tr class="{% if item.is_completed %}rm-row-done{% endif %}">
+                            <td>
+                                <strong>{{ item.activity.title }}</strong>
+                                {% if item.activity.description %}
+                                <div class="rm-td-note">{{ item.activity.description }}</div>
+                                {% endif %}
+                            </td>
+                            <td><span class="tag">{{ item.activity.get_category_display }}</span></td>
+                            <td>{{ item.activity.duration_days }} روز</td>
+                            <td>
+                                {% if item.is_completed %}
+                                <span class="tag tag-done">✓ تکمیل‌شده</span>
+                                {% else %}
+                                <span class="tag tag-pending">⏳ در انتظار</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'roadmap:stage_activity_detail' item.id %}" class="rm-btn rm-btn-sm rm-btn-primary">
+                                    جزئیات
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
                 {% else %}
-                <div class="rm-card-empty">فعالیتی برای این مرحله ثبت نشده است.</div>
+                <div class="rm-empty-table">
+                    فعالیتی برای این مرحله ثبت نشده است.
+                </div>
                 {% endif %}
             </div>
         </div>
     </div>
-
-
 </div>
+
+<style>
+    .rm-page {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .rm-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+        gap: 2rem;
+    }
+
+    .rm-eyebrow {
+        display: block;
+        font-size: 0.85rem;
+        color: #999;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .rm-page-title {
+        font-size: 2rem;
+        margin: 0;
+        color: #1a1a1a;
+    }
+
+    .rm-header-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .rm-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.95rem;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+    }
+
+    .rm-btn-primary {
+        background: #4f46e5;
+        color: white;
+    }
+
+    .rm-btn-primary:hover {
+        background: #4338ca;
+    }
+
+    .rm-btn-outline {
+        border: 1px solid #e5e7eb;
+        color: #1a1a1a;
+        background: white;
+    }
+
+    .rm-btn-outline:hover {
+        background: #f9fafb;
+    }
+
+    .rm-btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .sd-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .rm-stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        border: 1px solid #e5e7eb;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .rm-stat-label {
+        font-size: 0.85rem;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .rm-stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1a1a1a;
+    }
+
+    .sd-main {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .rm-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+
+    .rm-card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    .rm-card-header svg {
+        width: 20px;
+        height: 20px;
+        color: #4f46e5;
+    }
+
+    .title-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: #f0f4ff;
+        color: #4f46e5;
+        border-radius: 0.25rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: auto;
+    }
+
+    .rm-card-body {
+        padding: 1.5rem;
+    }
+
+    .rm-card-body-flush {
+        padding: 0;
+    }
+
+    .rm-card-body p {
+        margin: 0;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .sd-criteria-list,
+    .sd-risks-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sd-criteria-list li,
+    .sd-risks-list li {
+        padding: 0.75rem;
+        padding-right: 1rem;
+        border-right: 3px solid #10b981;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .sd-risks-list li {
+        border-right-color: #ef4444;
+    }
+
+    .rm-activity-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .rm-activity-table thead {
+        background: #f9fafb;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .rm-activity-table th {
+        padding: 1rem;
+        text-align: right;
+        font-weight: 600;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .rm-activity-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #f3f4f6;
+        color: #333;
+    }
+
+    .rm-activity-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .rm-activity-table tr.rm-row-done {
+        opacity: 0.6;
+        background: #f0fdf4;
+    }
+
+    .rm-td-note {
+        font-size: 0.85rem;
+        color: #999;
+        margin-top: 0.25rem;
+    }
+
+    .tag {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: #f3f4f6;
+        color: #1a1a1a;
+    }
+
+    .tag-done {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .tag-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .rm-btn-disabled {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        background: #e5e7eb;
+        color: #999;
+        font-size: 0.85rem;
+        cursor: not-allowed;
+    }
+
+    .rm-empty-table {
+        text-align: center;
+        padding: 2rem;
+        color: #999;
+    }
+
+
+    .acm-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .acm-overlay.active {
+        display: flex;
+    }
+
+    .acm-box {
+        background: white;
+        border-radius: 0.75rem;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .acm-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .acm-header h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        color: #1a1a1a;
+    }
+
+    .acm-warning-text {
+        padding: 1.5rem;
+        background: #fef2f2;
+        color: #991b1b;
+        border-bottom: 1px solid #e5e7eb;
+        margin: 0;
+    }
+
+    .acm-section {
+        padding: 1.5rem;
+    }
+
+    .acm-section-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1a1a1a;
+    }
+
+    .acm-save-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .acm-save-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .acm-save-item:hover {
+        border-color: #4f46e5;
+        background: #f0f4ff;
+    }
+
+    .acm-save-item.selected {
+        border-color: #4f46e5;
+        background: #f0f4ff;
+    }
+
+    .acm-footer {
+        display: flex;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .acm-btn {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .acm-btn-confirm {
+        background: #4f46e5;
+        color: white;
+    }
+
+    .acm-btn-confirm:hover {
+        background: #4338ca;
+    }
+
+    .acm-btn-cancel {
+        background: #e5e7eb;
+        color: #1a1a1a;
+    }
+
+    .acm-btn-cancel:hover {
+        background: #d1d5db;
+    }
+
+    @media (max-width: 768px) {
+        .rm-page {
+            padding: 1rem;
+        }
+
+        .rm-page-header {
+            flex-direction: column;
+        }
+
+        .rm-header-actions {
+            width: 100%;
+        }
+
+        .rm-btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .sd-stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .rm-activity-table {
+            font-size: 0.9rem;
+        }
+
+        .rm-activity-table th,
+        .rm-activity-table td {
+            padding: 0.75rem;
+        }
+    }
+</style>
 
 <script>
     let _currentFormId = null;
 
-    const MODEL_LABELS = {
-        articles: {
-            title: 'مقالات',
-            sub: 'بخش «مقالات علمی» در پروفایل شما'
-        },
-        presentations: {
-            title: 'ارائه‌ها',
-            sub: 'بخش «کنگره‌ها و ارائه‌ها» در پروفایل شما'
-        },
-        executive_records: {
-            title: 'سوابق اجرایی',
-            sub: 'بخش «سوابق اجرایی» در پروفایل شما'
-        },
-        training_courses: {
-            title: 'دوره‌های آموزشی',
-            sub: 'بخش «دوره‌های آموزشی» در پروفایل شما'
-        },
+    const SAVE_OPTIONS = {
+        'articles': 'مقالات',
+        'presentations': 'ارائه‌ها',
+        'executive_records': 'سوابق اجرایی',
+        'training_courses': 'دوره‌های آموزشی',
+        '__skip__': 'ذخیره نشود',
     };
 
     function openActivityModal(itemId) {
         _currentFormId = itemId;
 
-        const scriptTag = document.getElementById(String(itemId));
-        let profileTemplate = null;
-
-        if (scriptTag) {
-            try {
-                profileTemplate = JSON.parse(scriptTag.textContent);
-            } catch (e) {
-                profileTemplate = null;
-            }
-        }
-
         const list = document.getElementById('acm-save-list');
         list.innerHTML = '';
 
-        const options = [];
-        const recommendedKey = profileTemplate && profileTemplate.model ? profileTemplate.model : null;
-
-        if (recommendedKey) {
-            const recommendedLabel = MODEL_LABELS[recommendedKey] || {
-                title: recommendedKey,
-                sub: ''
-            };
-            options.push({
-                value: recommendedKey,
-                title: recommendedLabel.title,
-                sub: recommendedLabel.sub,
-                recommended: true,
-            });
-        }
-
-        Object.entries(MODEL_LABELS).forEach(([key, label]) => {
-            if (key === recommendedKey) return;
-            options.push({
-                value: key,
-                title: label.title,
-                sub: label.sub,
-                recommended: false,
-            });
-        });
-
-        options.push({
-            value: '__skip__',
-            title: 'ذخیره نشود',
-            sub: 'این فعالیت در هیچ بخشی از پروفایل ثبت نمی‌شود',
-            skip: true,
-        });
-
-        options.forEach((opt) => {
+        Object.entries(SAVE_OPTIONS).forEach(([key, label]) => {
             const item = document.createElement('div');
-            item.className = 'acm-save-item' + (opt.skip ? ' acm-skip' : '');
-            item.dataset.value = opt.value;
+            item.className = 'acm-save-item';
+            item.dataset.value = key;
 
             item.innerHTML = `
-                <div class="acm-radio-dot"><div class="acm-radio-inner"></div></div>
-                <div class="acm-item-text">
-                    <span class="acm-item-title">
-                        ${opt.recommended ? '✦ پیشنهادی — ' : ''}${opt.title}
-                    </span>
-                    ${opt.sub ? `<span class="acm-item-sub">${opt.sub}</span>` : ''}
-                </div>
+                <input type="radio" name="save_option" value="${key}" ${key === '__skip__' ? 'checked' : ''}>
+                <label>${label}</label>
             `;
 
-            item.addEventListener('click', () => selectSaveOption(opt.value));
+            item.addEventListener('click', () => selectOption(key));
             list.appendChild(item);
         });
 
-        const defaultVal = recommendedKey || '__skip__';
-        selectSaveOption(defaultVal);
-
-        document.getElementById('activity-confirm-modal').classList.add('acm-open');
+        document.getElementById('activity-confirm-modal').classList.add('active');
     }
 
-    function selectSaveOption(value) {
-        document.querySelectorAll('#acm-save-list .acm-save-item').forEach(el => {
-            el.classList.toggle('acm-selected', el.dataset.value === value);
+    function selectOption(value) {
+        document.querySelectorAll('.acm-save-item').forEach(el => {
+            el.classList.toggle('selected', el.dataset.value === value);
         });
 
         if (_currentFormId !== null) {
-            const inp = document.getElementById('save-target-' + _currentFormId);
-            if (inp) inp.value = value;
+            document.getElementById('save-target-' + _currentFormId).value = value;
         }
     }
 
     function closeActivityModal() {
-        document.getElementById('activity-confirm-modal').classList.remove('acm-open');
+        document.getElementById('activity-confirm-modal').classList.remove('active');
         _currentFormId = null;
     }
 

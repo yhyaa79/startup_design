@@ -9,7 +9,7 @@ from .models import (
     SocialProfile, Education, Article, Presentation,
     ExecutiveRecord, Profile, TrainingCourse
 )
-from .ai_utils import extract_profile_from_text
+from .ai_utils import extract_profile_from_text, _sanitize_profile_data
 from .file_utils import extract_text_from_file
 from .forms import (
     ProfileForm,
@@ -163,7 +163,7 @@ def edit_profile_ai(request):
                 }
             )
 
-        for field, value in data.get('profile', {}).items():
+        for field, value in _sanitize_profile_data(data.get('profile', {})).items():
             setattr(profile, field, value)
         profile.save()
 

@@ -1,0 +1,193 @@
+<!-- templates/activity/activity_detail_modal.html -->
+
+<div class="at-detail-content">
+    
+    <!-- Header Info -->
+    <div class="at-detail-header">
+        <div class="at-detail-title-section">
+            <h3 class="at-detail-activity-title">{{ activity_log.activity.title }}</h3>
+            <p class="at-detail-category">{{ activity_log.activity.get_category_display }}</p>
+            {% if activity_log.user %}
+            <p class="at-detail-user">
+                <span class="at-detail-user-label">توسط:</span>
+                <span class="at-detail-user-name">{{ activity_log.user.get_full_name }}</span>
+            </p>
+            {% endif %}
+        </div>
+        <div class="at-detail-status-section">
+            <span class="at-status-badge at-status-{{ activity_log.status }}">
+                {{ activity_log.get_status_display }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Description -->
+    {% if activity_log.activity.description %}
+    <div class="at-detail-section">
+        <h4 class="at-section-title">📝 توضیحات</h4>
+        <p class="at-section-content">{{ activity_log.activity.description }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Progress -->
+    <div class="at-detail-section">
+        <h4 class="at-section-title">📊 پیشرفت</h4>
+        <div class="at-progress-box-large">
+            <div class="at-progress-header">
+                <span class="at-progress-label">درصد تکمیل</span>
+                <span class="at-progress-value">{{ activity_log.progress_percentage }}%</span>
+            </div>
+            <div class="at-progress-bar-large">
+                <div 
+                    class="at-progress-fill" 
+                    style="width: {{ activity_log.progress_percentage }}%"
+                ></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="at-detail-section">
+        <h4 class="at-section-title">📅 تایمینگ</h4>
+        <div class="at-timeline-grid">
+            <div class="at-timeline-item">
+                <span class="at-timeline-label">تاریخ شروع</span>
+                <span class="at-timeline-value">{{ activity_log.start_date|date:"d/m/Y" }}</span>
+            </div>
+            <div class="at-timeline-item">
+                <span class="at-timeline-label">تاریخ هدف</span>
+                <span class="at-timeline-value {% if activity_log.is_overdue %}at-timeline-overdue{% endif %}">
+                    {{ activity_log.target_completion_date|date:"d/m/Y" }}
+                </span>
+            </div>
+            {% if activity_log.actual_completion_date %}
+            <div class="at-timeline-item">
+                <span class="at-timeline-label">تاریخ تکمیل</span>
+                <span class="at-timeline-value">{{ activity_log.actual_completion_date|date:"d/m/Y" }}</span>
+            </div>
+            {% endif %}
+            <div class="at-timeline-item">
+                <span class="at-timeline-label">روزهای باقی‌مانده</span>
+                <span class="at-timeline-value">{{ activity_log.get_remaining_days }} روز</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkpoints -->
+    {% if checkpoints %}
+    <div class="at-detail-section">
+        <h4 class="at-section-title">✓ نقاط کنترل ({{ checkpoints.count }})</h4>
+        <div class="at-checkpoints-list">
+            {% for checkpoint in checkpoints %}
+            <div class="at-checkpoint-item {% if checkpoint.is_completed %}at-checkpoint-completed{% endif %}">
+                <div class="at-checkpoint-icon">
+                    {% if checkpoint.is_completed %}✅{% else %}⭕{% endif %}
+                </div>
+                <div class="at-checkpoint-info">
+                    <p class="at-checkpoint-title">{{ checkpoint.title }}</p>
+                    {% if checkpoint.description %}
+                    <p class="at-checkpoint-desc">{{ checkpoint.description }}</p>
+                    {% endif %}
+                    {% if checkpoint.completion_date %}
+                    <p class="at-checkpoint-date">تکمیل: {{ checkpoint.completion_date|date:"d/m/Y" }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Resources -->
+    {% if resources %}
+    <div class="at-detail-section">
+        <h4 class="at-section-title">📚 منابع ({{ resources.count }})</h4>
+        <div class="at-resources-list">
+            {% for resource in resources %}
+            <div class="at-resource-item">
+                <div class="at-resource-icon">
+                    {% if resource.resource_type == 'link' %}🔗
+                    {% elif resource.resource_type == 'file' %}📄
+                    {% elif resource.resource_type == 'book' %}📖
+                    {% elif resource.resource_type == 'course' %}🎓
+                    {% else %}📌{% endif %}
+                </div>
+                <div class="at-resource-info">
+                    <p class="at-resource-title">{{ resource.title }}</p>
+                    <p class="at-resource-type">{{ resource.get_resource_type_display }}</p>
+                    {% if resource.url %}
+                    <a href="{{ resource.url }}" target="_blank" class="at-resource-link">
+                        باز کردن لینک →
+                    </a>
+                    {% endif %}
+                    {% if resource.description %}
+                    <p class="at-resource-desc">{{ resource.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Notes -->
+    {% if activity_log.notes %}
+    <div class="at-detail-section">
+        <h4 class="at-section-title">📌 یادداشت‌ها</h4>
+        <div class="at-notes-detail">{{ activity_log.notes }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Result Summary -->
+    {% if activity_log.result_summary %}
+    <div class="at-detail-section">
+        <h4 class="at-section-title">🎯 خلاصه نتایج</h4>
+        <div class="at-result-detail">{{ activity_log.result_summary }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Meta Info -->
+    <div class="at-detail-section">
+        <h4 class="at-section-title">ℹ️ اطلاعات اضافی</h4>
+        <div class="at-meta-grid">
+            <div class="at-meta-box">
+                <span class="at-meta-label">سطح تاثیر</span>
+                <span class="at-meta-value at-impact-{{ activity_log.activity.impact_level }}">
+                    {{ activity_log.activity.get_impact_level_display }}
+                </span>
+            </div>
+            <div class="at-meta-box">
+                <span class="at-meta-label">سطح دشواری</span>
+                <span class="at-meta-value at-difficulty-{{ activity_log.activity.difficulty_rating }}">
+                    {{ activity_log.activity.get_difficulty_rating_display }}
+                </span>
+            </div>
+            <div class="at-meta-box">
+                <span class="at-meta-label">امتیاز تاثیر</span>
+                <span class="at-meta-value">{{ activity_log.activity.impact_score }}/10</span>
+            </div>
+            <div class="at-meta-box">
+                <span class="at-meta-label">مدت زمان</span>
+                <span class="at-meta-value">{{ activity_log.activity.duration_days }} روز</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+.at-detail-user {
+    font-size: .8rem;
+    color: var(--at-text-muted);
+    margin: .25rem 0 0;
+}
+
+.at-detail-user-label {
+    font-weight: 700;
+}
+
+.at-detail-user-name {
+    font-weight: 600;
+    color: var(--at-accent);
+}
+</style>

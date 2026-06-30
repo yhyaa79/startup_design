@@ -2,285 +2,450 @@
 
 from django.db import models
 from django.contrib.auth.models import User
-from accounts.models import Profile
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.utils import timezone
-
-
-class Activity(models.Model):
-    """فعالیت‌های قابل انجام برای مراحل رود مپ"""
-    CATEGORY_CHOICES = [
-        ('پژوهشی', 'پژوهشی'),
-        ('بالینی', 'بالینی'),
-        ('آموزشی', 'آموزشی'),
-        ('نرم‌افزاری', 'نرم‌افزاری'),
-        ('زبان', 'زبان'),
-        ('شبکه‌سازی', 'شبکه‌سازی'),
-        ('توسعه‌شخصی', 'توسعه‌شخصی'),
-        ('سایر', 'سایر'),
-    ]
-    
-    FIELD_CHOICES = [
-        ('پزشکی', 'پزشکی'),
-        ('دندان‌پزشکی', 'دندان‌پزشکی'),
-        ('داروسازی', 'داروسازی'),
-        ('پرستاری', 'پرستاری'),
-        ('فیزیوتراپی', 'فیزیوتراپی'),
-        ('سایر', 'سایر'),
-        ('عمومی', 'عمومی'),
-    ]
-
-    RESUME_TARGET_CHOICES = [
-        ('article', 'مقاله'),
-        ('presentation', 'ارائه'),
-        ('training_course', 'دوره آموزشی'),
-        ('executive_record', 'سابقه اجرایی'),
-        ('skill', 'مهارت'),
-    ]
-
-    GOAL_CHOICES = [
-        ('استعداد درخشان', 'استعداد درخشان'),
-        ('۴۰ امتیازی', '۴۰ امتیازی'),
-        ('هیات علمی', 'هیات علمی'),
-        ('ریسرچ پوزیشن / فلوشیپ خارج', 'ریسرچ پوزیشن / فلوشیپ خارج'),
-        ('عمومی', 'عمومی'),  # مناسب همه اهداف
-    ]
-
-
-
-    title = models.CharField('عنوان فعالیت', max_length=300)
-    description = models.TextField('توضیح فعالیت')
-    category = models.CharField('دسته', max_length=30, choices=CATEGORY_CHOICES)
-    field = models.CharField('حوزه تخصصی', max_length=30, choices=FIELD_CHOICES)
-    resume_target = models.CharField(
-        max_length=30,
-        choices=RESUME_TARGET_CHOICES,
-        blank=True
-    )
-    profile_template = models.JSONField(
-        blank=True,
-        null=True,
-        help_text="JSON template for saving activity into profile"
-    )
-    duration_days = models.PositiveSmallIntegerField(
-        'مدت زمان (روز)',
-        validators=[MinValueValidator(1), MaxValueValidator(365)],
-        default=7
-    )
-    difficulty_level = models.CharField(
-        'سطح سختی',
-        max_length=10,
-        choices=[('آسان', 'آسان'), ('متوسط', 'متوسط'), ('سخت', 'سخت')],
-        default='متوسط'
-    )
-    resume_output = models.TextField('خروجی رزومه‌ای')
-    prerequisites = models.TextField('پیش‌نیازها', blank=True)
-    resources = models.TextField('منابع و مراجع', blank=True)
-    is_active = models.BooleanField('فعال', default=True)
-    suitable_goals = models.JSONField(
-        'اهداف مناسب',
-        default=list,
-        blank=True,
-        help_text='لیست اهدافی که این فعالیت برای آن‌ها مناسب است. خالی = مناسب همه اهداف'
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = 'فعالیت'
-        verbose_name_plural = 'فعالیت‌ها'
-        ordering = ['category', 'title']
-
-    def __str__(self):
-        return f'{self.title} ({self.category})'
-
+from django.utils.translation import gettext_lazy as _
+import json
 
 class Roadmap(models.Model):
-    """رود مپ شخصی کاربر"""
+    """نقشه راه اصلی کاربر"""
+    
     STATUS_CHOICES = [
-        ('پیش‌نویس', 'پیش‌نویس'),
-        ('فعال', 'فعال'),
-        ('تکمیل‌شده', 'تکمیل‌شده'),
-        ('متوقف‌شده', 'متوقف‌شده'),
+        ('draft', 'پیش‌نویس'),
+        ('active', 'فعال'),
+        ('completed', 'تکمیل‌شده'),
+        ('paused', 'متوقف'),
     ]
-
-    profile = models.OneToOneField(Profile, on_delete=models.CASCADE, related_name='roadmap')
-    title = models.CharField('عنوان رود مپ', max_length=300)
-    description = models.TextField('توضیح رود مپ', blank=True)
-    status = models.CharField('وضعیت', max_length=20, choices=STATUS_CHOICES, default='پیش‌نویس')
+    
+    GOAL_CHOICES = [
+        ('estedad_darakhshan', 'استعداد درخشان'),
+        ('40_emtiaz', '۴۰ امتیازی'),
+        ('heyat_elmi', 'هیات علمی'),
+        ('research_position', 'ریسرچ پوزیشن / فلوشیپ خارج'),
+        ('general', 'بهبود عمومی'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='roadmaps')
+    title = models.CharField(max_length=255, verbose_name='عنوان رودمپ')
+    description = models.TextField(blank=True, null=True, verbose_name='توضیحات')
+    goal = models.CharField(max_length=50, choices=GOAL_CHOICES, verbose_name='هدف')
+    goal_details = models.TextField(blank=True, null=True, verbose_name='جزئیات هدف')
+    
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES, 
+        default='draft',
+        verbose_name='وضعیت'
+    )
+    
+    # تایمینگ
+    duration_days = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(1095)],
+        verbose_name='مدت زمان (روز)'
+    )
+    start_date = models.DateField(auto_now_add=True, verbose_name='تاریخ شروع')
+    target_end_date = models.DateField(verbose_name='تاریخ هدف')
+    
+    # AI
+    ai_generated = models.BooleanField(default=False, verbose_name='تولید شده توسط AI')
+    ai_prompt = models.TextField(blank=True, null=True, verbose_name='prompt AI')
+    ai_analysis = models.JSONField(default=dict, blank=True, verbose_name='تحلیل AI')
+    
+    # امتیازدهی
+    total_score = models.FloatField(default=0, verbose_name='امتیاز کل')
+    score_breakdown = models.JSONField(default=dict, blank=True, verbose_name='تفکیک امتیاز')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
     class Meta:
-        verbose_name = 'رود مپ'
-        verbose_name_plural = 'رود مپ‌ها'
-
+        ordering = ['-created_at']
+        verbose_name = 'نقشه راه'
+        verbose_name_plural = 'نقشه‌های راه'
+    
     def __str__(self):
-        return f'{self.title} - {self.profile.first_name} {self.profile.last_name}'
-
-    def get_total_progress(self):
-        """محاسبه درصد پیشرفت کل رود مپ"""
+        return f"{self.title} - {self.user.get_full_name()}"
+    
+    def get_progress(self):
+        """درصد پیشرفت رودمپ"""
         stages = self.stages.all()
         if not stages:
             return 0
-        total_progress = sum(stage.get_progress() for stage in stages)
-        return int(total_progress / stages.count()) if stages else 0
-
-    def get_total_duration(self):
-        """محاسبه کل مدت زمان رود مپ"""
-        return sum(stage.get_total_duration() for stage in self.stages.all())
+        total = sum(stage.get_progress() for stage in stages)
+        return int(total / stages.count())
+    
+    def get_active_stage(self):
+        """مرحله فعلی"""
+        return self.stages.filter(status='active').first()
+    
+    def get_remaining_days(self):
+        """روزهای باقی‌مانده"""
+        from datetime import date
+        remaining = (self.target_end_date - date.today()).days
+        return max(0, remaining)
 
 
 class Stage(models.Model):
-    """مراحل رود مپ"""
+    """مراحل رودمپ"""
+    
     STATUS_CHOICES = [
-        ('پیش‌رو', 'پیش‌رو'),
-        ('در حال انجام', 'در حال انجام'),
-        ('تکمیل‌شده', 'تکمیل‌شده'),
+        ('upcoming', 'در انتظار'),
+        ('active', 'در حال انجام'),
+        ('completed', 'تکمیل‌شده'),
     ]
-
+    
     PHASE_TYPE_CHOICES = [
-        ('foundation', 'پایه‌ریزی'),
+        ('foundation', 'بنیادی'),
         ('development', 'توسعه'),
-        ('advancement', 'پیشرفت'),
-        ('excellence', 'تعالی'),
+        ('optimization', 'بهینه‌سازی'),
+        ('execution', 'اجرا'),
     ]
     
     PRIORITY_CHOICES = [
-        ('critical', 'بحرانی'),
-        ('high', 'بالا'),
+        ('low', 'کم'),
         ('medium', 'متوسط'),
-        ('low', 'پایین'),
+        ('high', 'زیاد'),
     ]
-
+    
     roadmap = models.ForeignKey(Roadmap, on_delete=models.CASCADE, related_name='stages')
-    title = models.CharField('عنوان مرحله', max_length=300)
-    description = models.TextField('توضیح مرحله', blank=True)
-    status = models.CharField('وضعیت مرحله', max_length=20, choices=STATUS_CHOICES, default='پیش‌رو')
-    objectives = models.TextField('اهداف مرحله')
-    order = models.PositiveSmallIntegerField('ترتیب', default=0)
+    order = models.PositiveIntegerField(verbose_name='ترتیب')
+    
+    title = models.CharField(max_length=255, verbose_name='عنوان مرحله')
+    description = models.TextField(blank=True, null=True, verbose_name='توضیحات')
+    objectives = models.TextField(blank=True, null=True, verbose_name='اهداف')
+    
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='upcoming',
+        verbose_name='وضعیت'
+    )
+    
+    phase_type = models.CharField(
+        max_length=20,
+        choices=PHASE_TYPE_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name='نوع فاز'
+    )
+    
+    priority = models.CharField(
+        max_length=10,
+        choices=PRIORITY_CHOICES,
+        default='medium',
+        verbose_name='اولویت'
+    )
+    
+    # تایمینگ
+    duration_days = models.PositiveIntegerField(verbose_name='مدت زمان (روز)')
+    start_date = models.DateField(verbose_name='تاریخ شروع')
+    end_date = models.DateField(verbose_name='تاریخ پایان')
+    
+    # معیارهای موفقیت
+    milestone = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name='نقطه عطف (معیار تکمیل)'
+    )
+    success_criteria = models.JSONField(default=list, blank=True, verbose_name='معیارهای موفقیت')
+    risks = models.JSONField(default=list, blank=True, verbose_name='ریسک‌های احتمالی')
+    recommended_resources = models.JSONField(default=list, blank=True, verbose_name='منابع پیشنهادی')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    phase_type = models.CharField(
-        'نوع فاز',
-        max_length=20,
-        choices=[('foundation','پایه‌ریزی'),('development','توسعه'),
-                 ('advancement','پیشرفت'),('excellence','تعالی')],
-        default='development',
-        blank=True,
-    )
-    priority = models.CharField(
-        'اولویت',
-        max_length=10,
-        choices=[('critical','بحرانی'),('high','بالا'),('medium','متوسط'),('low','پایین')],
-        default='medium',
-        blank=True,
-    )
-    milestone = models.TextField(
-        'نقطه عطف (معیار تکمیل)',
-        blank=True,
-        help_text='خروجی ملموسی که نشان‌دهنده تکمیل این مرحله است',
-    )
-    success_criteria = models.JSONField(
-        'معیارهای موفقیت',
-        default=list,
-        blank=True,
-        help_text='لیست معیارهای قابل سنجش برای تکمیل مرحله',
-    )
-    risks = models.JSONField(
-        'ریسک‌ها',
-        default=list,
-        blank=True,
-        help_text='ریسک‌های احتمالی این مرحله',
-    )
-    recommended_resources = models.JSONField(
-        'منابع پیشنهادی',
-        default=list,
-        blank=True,
-        help_text='منابع پیشنهادی AI برای این مرحله',
-    )
-
+    
     class Meta:
+        ordering = ['roadmap', 'order']
         verbose_name = 'مرحله'
         verbose_name_plural = 'مراحل'
-        ordering = ['order']
-
+        unique_together = ('roadmap', 'order')
+    
     def __str__(self):
-        return f'{self.roadmap.title} - {self.title}'
-
-    def get_total_duration(self):
-        """محاسبه کل مدت زمان مرحله بر اساس فعالیت‌های انتخاب‌شده"""
-        return sum(item.activity.duration_days for item in self.stage_activities.all())
-
+        return f"مرحله {self.order}: {self.title}"
+    
     def get_progress(self):
-        """محاسبه درصد پیشرفت مرحله"""
-        items = self.stage_activities.all()
-        if not items:
+        """درصد پیشرفت مرحله"""
+        activities = self.stage_activities.all()
+        if not activities:
             return 0
-        completed = items.filter(is_completed=True).count()
-        return int((completed / items.count()) * 100) if items else 0
-
-    def get_resume_outputs(self):
-        """دریافت خروجی‌های رزومه‌ای مرحله"""
-        return [item.activity.resume_output for item in self.stage_activities.all()]
-
+        completed = activities.filter(is_completed=True).count()
+        return int((completed / activities.count()) * 100)
+    
     def get_remaining_days(self):
-        """تعداد روزهای باقی‌مانده از آخرین ویرایش مرحله"""
-        total_duration = self.get_total_duration()
-        passed_days = (timezone.now() - self.updated_at).days
-        remaining_days = total_duration - passed_days
-        return max(remaining_days, 0)
+        """روزهای باقی‌مانده"""
+        from datetime import date
+        remaining = (self.end_date - date.today()).days
+        return max(0, remaining)
+    
+    def get_total_duration(self):
+        """مجموع مدت زمان فعالیت‌ها"""
+        return sum(
+            sa.activity.duration_days 
+            for sa in self.stage_activities.all()
+        )
+
+
+class Activity(models.Model):
+    """فعالیت‌های موجود در سیستم"""
+    
+    CATEGORY_CHOICES = [
+        ('course', 'دوره آموزشی'),
+        ('event', 'رویداد / کنگره'),
+        ('project', 'پروژه'),
+        ('research', 'تحقیق / مقاله'),
+    ]
+    
+    IMPACT_CHOICES = [
+        ('low', 'کم'),
+        ('medium', 'متوسط'),
+        ('high', 'زیاد'),
+    ]
+    
+    DIFFICULTY_CHOICES = [
+        ('easy', 'آسان'),
+        ('medium', 'متوسط'),
+        ('hard', 'دشوار'),
+    ]
+    
+    # شناسایی
+    external_id = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name='شناسه خارجی'
+    )
+    
+    title = models.CharField(max_length=255, verbose_name='عنوان')
+    description = models.TextField(blank=True, null=True, verbose_name='توضیحات')
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        verbose_name='دسته'
+    )
+    
+    # جزئیات
+    duration_days = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(365)],
+        verbose_name='مدت زمان (روز)'
+    )
+    
+    impact_score = models.PositiveIntegerField(
+        default=5,
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        verbose_name='امتیاز تاثیر'
+    )
+    
+    difficulty_rating = models.CharField(
+        max_length=10,
+        choices=DIFFICULTY_CHOICES,
+        default='medium',
+        verbose_name='سطح دشواری'
+    )
+    
+    impact_level = models.CharField(
+        max_length=10,
+        choices=IMPACT_CHOICES,
+        default='medium',
+        verbose_name='سطح تاثیر'
+    )
+    
+    # خروجی
+    resume_output = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='خروجی رزومه'
+    )
+    
+    profile_template = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name='الگو برای پروفایل',
+        help_text='{"model": "articles", "fields": {...}}'
+    )
+    
+    # اضافی
+    organizer = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='برگزارکننده'
+    )
+    
+    level = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name='سطح (دانشگاهی/ملی/بین‌المللی)'
+    )
+    
+    is_active = models.BooleanField(default=True, verbose_name='فعال')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['category', 'title']
+        verbose_name = 'فعالیت'
+        verbose_name_plural = 'فعالیت‌ها'
+    
+    def __str__(self):
+        return f"{self.title} ({self.get_category_display()})"
 
 
 class StageActivity(models.Model):
-    """فعالیت‌های انتخاب‌شده برای هر مرحله"""
-    stage = models.ForeignKey(Stage, on_delete=models.CASCADE, related_name='stage_activities')
-    activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
-    is_completed = models.BooleanField('تکمیل‌شده', default=False)
-    notes = models.TextField('یادداشت‌ها', blank=True)
-    order = models.PositiveSmallIntegerField('ترتیب', default=0)
+    """ارتباط بین مراحل و فعالیت‌ها"""
+    
+    stage = models.ForeignKey(
+        Stage,
+        on_delete=models.CASCADE,
+        related_name='stage_activities'
+    )
+    activity = models.ForeignKey(
+        Activity,
+        on_delete=models.CASCADE,
+        related_name='stage_activities'
+    )
+    
+    order = models.PositiveIntegerField(verbose_name='ترتیب')
+    is_completed = models.BooleanField(default=False, verbose_name='تکمیل‌شده')
+    completion_date = models.DateField(blank=True, null=True, verbose_name='تاریخ تکمیل')
+    
+    # ثبت در پروفایل
+    saved_to_profile = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        choices=[
+            ('articles', 'مقالات'),
+            ('presentations', 'ارائه‌ها'),
+            ('executive_records', 'سوابق اجرایی'),
+            ('training_courses', 'دوره‌های آموزشی'),
+        ],
+        verbose_name='ثبت شده در'
+    )
+    
+    profile_data = models.JSONField(default=dict, blank=True, verbose_name='داده‌های پروفایل')
+    
+    # ✅ فیلدهای جدید برای جزئیات فعالیت
+    progress_percentage = models.PositiveIntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name='درصد پیشرفت'
+    )
+    
+    notes = models.TextField(blank=True, null=True, verbose_name='یادداشت‌ها')
+    
+    actual_start_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name='تاریخ شروع واقعی'
+    )
+    
+    actual_end_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name='تاریخ پایان واقعی'
+    )
+    
+    # ✅ فیلد برای ذخیره انتخاب از STATIC_ITEMS
+    static_item_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name='شناسه آیتم ثابت'
+    )
+    
+    static_item_data = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name='داده‌های آیتم ثابت'
+    )
+    
+    # ✅ فیلد برای نوع فعالیت (ثابت یا دستی)
+    activity_source = models.CharField(
+        max_length=20,
+        choices=[
+            ('static', 'از لیست ثابت'),
+            ('custom', 'دستی ایجاد شده'),
+        ],
+        default='custom',
+        verbose_name='منبع فعالیت'
+    )
+    
+    # ✅ فیلد برای checkpoints
+    checkpoints = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name='نقاط کنترل',
+        help_text='[{"title": "...", "is_completed": false, "date": "..."}]'
+    )
+    
+    # ✅ فیلد برای منابع
+    resources = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name='منابع',
+        help_text='[{"title": "...", "url": "...", "type": "link"}]'
+    )
+    
+    # ✅ فیلد برای نتایج
+    result_summary = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name='خلاصه نتایج'
+    )
+    
+    outcome_data = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name='داده‌های نتیجه'
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
     class Meta:
+        ordering = ['stage', 'order']
         verbose_name = 'فعالیت مرحله'
         verbose_name_plural = 'فعالیت‌های مرحله'
-        ordering = ['order']
-        unique_together = ['stage', 'activity']
-
+        unique_together = ('stage', 'activity', 'order')
+    
     def __str__(self):
-        return f'{self.stage.title} - {self.activity.title}'
+        return f"{self.stage.title} - {self.activity.title}"
+    
+    def get_remaining_days(self):
+        """روزهای باقی‌مانده"""
+        from datetime import date
+        end_date = self.actual_end_date or self.stage.end_date
+        remaining = (end_date - date.today()).days
+        return max(0, remaining)
+    
+    def is_overdue(self):
+        """آیا تاخیر دارد"""
+        from datetime import date
+        if self.is_completed:
+            return False
+        end_date = self.actual_end_date or self.stage.end_date
+        return date.today() > end_date
 
 
-
-class RoadmapActivity(models.Model):
-    """
-    فعالیتی که از طریق رودمپ تکمیل شده
-    و در رزومه کاربر ثبت می‌شود
-    """
-
-    profile = models.ForeignKey(
-        'accounts.Profile',
-        on_delete=models.CASCADE,
-        related_name='roadmap_activities'
-    )
-
-    activity = models.ForeignKey(
-        'Activity',
-        on_delete=models.CASCADE
-    )
-
-    stage_activity = models.OneToOneField(
-        'StageActivity',
-        on_delete=models.CASCADE,
-        related_name='resume_record'
-    )
-
+class RoadmapTemplate(models.Model):
+    """الگوهای آماده رودمپ"""
+    
+    goal = models.CharField(max_length=50, unique=True, verbose_name='هدف')
+    title = models.CharField(max_length=255, verbose_name='عنوان الگو')
+    description = models.TextField(verbose_name='توضیحات')
+    
+    # ساختار
+    template_data = models.JSONField(verbose_name='داده‌های الگو')
+    
+    is_active = models.BooleanField(default=True, verbose_name='فعال')
     created_at = models.DateTimeField(auto_now_add=True)
-
+    updated_at = models.DateTimeField(auto_now=True)
+    
     class Meta:
-        verbose_name = "فعالیت تکمیل شده رودمپ"
-        verbose_name_plural = "فعالیت‌های تکمیل شده رودمپ"
-
+        verbose_name = 'الگوی رودمپ'
+        verbose_name_plural = 'الگوهای رودمپ'
+    
     def __str__(self):
-        return f"{self.profile} - {self.activity.title}"
+        return self.title

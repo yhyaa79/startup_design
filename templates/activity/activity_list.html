@@ -1,0 +1,581 @@
+<!-- templates/activity/activity_list.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if view_mode == 'all_activities' %}
+        تمام فعالیت‌ها
+    {% else %}
+        فعالیت‌های من
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/activity.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ════════════════════════════════════════════════
+     HEADER
+     ════════════════════════════════════════════════ -->
+<div class="at-header">
+    <div class="container">
+        <div class="at-header-content">
+            <h1 class="at-header-title">
+                {% if view_mode == 'all_activities' %}
+                    🌍 تمام فعالیت‌ها
+                {% else %}
+                    📋 فعالیت‌های من
+                {% endif %}
+            </h1>
+            <p class="at-header-subtitle">
+                {% if view_mode == 'all_activities' %}
+                    مشاهده فعالیت‌های تمام کاربران و انتخاب فعالیت‌های مناسب
+                {% else %}
+                    مدیریت و پیگیری تمام فعالیت‌های شخصی شما
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="container at-main-container">
+    
+    <!-- ════════════════════════════════════════════════
+         VIEW MODE TOGGLE
+         ════════════════════════════════════════════════ -->
+    <div class="at-view-mode-toggle">
+        <a 
+            href="{% url 'activity:list' %}?view=my_activities" 
+            class="at-mode-btn {% if view_mode == 'my_activities' %}at-mode-btn--active{% endif %}"
+        >
+            <span class="at-mode-icon">👤</span>
+            <span class="at-mode-text">فعالیت‌های من</span>
+        </a>
+        <a 
+            href="{% url 'activity:list' %}?view=all_activities" 
+            class="at-mode-btn {% if view_mode == 'all_activities' %}at-mode-btn--active{% endif %}"
+        >
+            <span class="at-mode-icon">🌍</span>
+            <span class="at-mode-text">تمام فعالیت‌ها</span>
+        </a>
+    </div>
+    
+    <!-- ════════════════════════════════════════════════
+         STATS CARDS
+         ════════════════════════════════════════════════ -->
+    <div class="at-stats-grid">
+        <div class="at-stat-card">
+            <div class="at-stat-icon">📊</div>
+            <div class="at-stat-content">
+                <div class="at-stat-value">{{ stats.total }}</div>
+                <div class="at-stat-label">
+                    {% if view_mode == 'all_activities' %}
+                        کل فعالیت‌ها
+                    {% else %}
+                        فعالیت‌های من
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="at-stat-card at-stat-card--pending">
+            <div class="at-stat-icon">⏳</div>
+            <div class="at-stat-content">
+                <div class="at-stat-value">{{ stats.pending }}</div>
+                <div class="at-stat-label">در انتظار</div>
+            </div>
+        </div>
+        
+        <div class="at-stat-card at-stat-card--progress">
+            <div class="at-stat-icon">⚙️</div>
+            <div class="at-stat-content">
+                <div class="at-stat-value">{{ stats.in_progress }}</div>
+                <div class="at-stat-label">در حال انجام</div>
+            </div>
+        </div>
+        
+        <div class="at-stat-card at-stat-card--completed">
+            <div class="at-stat-icon">✅</div>
+            <div class="at-stat-content">
+                <div class="at-stat-value">{{ stats.completed }}</div>
+                <div class="at-stat-label">تکمیل‌شده</div>
+            </div>
+        </div>
+        
+        <div class="at-stat-card at-stat-card--overdue">
+            <div class="at-stat-icon">⚠️</div>
+            <div class="at-stat-content">
+                <div class="at-stat-value">{{ stats.overdue }}</div>
+                <div class="at-stat-label">تاخیر دارد</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════
+         FILTER CARD
+         ════════════════════════════════════════════════ -->
+    <div class="at-filter-wrapper">
+        <div class="at-filter-card">
+            <div class="at-filter-header">
+                <span class="at-filter-icon">🔍</span>
+                <h3 class="at-filter-title">فیلتر و جستجو</h3>
+            </div>
+            
+            <form method="get" class="at-filter-form">
+                <!-- حفظ view mode -->
+                <input type="hidden" name="view" value="{{ view_mode }}">
+                
+                <!-- جستجو -->
+                <div class="at-form-group at-search-group">
+                    <label class="at-form-label">جستجو</label>
+                    <input 
+                        type="text" 
+                        name="search" 
+                        class="at-form-input" 
+                        placeholder="عنوان یا توضیحات..."
+                        value="{{ search_query }}"
+                    >
+                </div>
+                
+                <!-- وضعیت -->
+                <div class="at-form-group">
+                    <label class="at-form-label">وضعیت</label>
+                    <select name="status" class="at-form-select">
+                        <option value="">همه</option>
+                        {% for value, label in statuses %}
+                            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- دسته -->
+                <div class="at-form-group">
+                    <label class="at-form-label">دسته</label>
+                    <select name="category" class="at-form-select">
+                        <option value="">همه</option>
+                        {% for value, label in categories %}
+                            <option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- رودمپ -->
+                <div class="at-form-group">
+                    <label class="at-form-label">رودمپ</label>
+                    <select name="roadmap" class="at-form-select">
+                        <option value="">همه</option>
+                        {% for roadmap in roadmaps_for_filter %}
+                            <option value="{{ roadmap.id }}" {% if roadmap_filter == roadmap.id|stringformat:"s" %}selected{% endif %}>
+                                {{ roadmap.title }}
+                                {% if view_mode == 'all_activities' %}
+                                    ({{ roadmap.user.get_full_name }})
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- اولویت -->
+                <div class="at-form-group">
+                    <label class="at-form-label">اولویت</label>
+                    <select name="priority" class="at-form-select">
+                        <option value="">همه</option>
+                        {% for value, label in priorities %}
+                            <option value="{{ value }}" {% if priority_filter == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- ترتیب‌دهی -->
+                <div class="at-form-group">
+                    <label class="at-form-label">ترتیب</label>
+                    <select name="sort" class="at-form-select">
+                        <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>جدیدترین</option>
+                        <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>قدیمی‌ترین</option>
+                        <option value="-target_completion_date" {% if sort_by == '-target_completion_date' %}selected{% endif %}>نزدیک‌ترین سررسید</option>
+                        <option value="-progress_percentage" {% if sort_by == '-progress_percentage' %}selected{% endif %}>بیشترین پیشرفت</option>
+                    </select>
+                </div>
+                
+                <!-- دکمه‌ها -->
+                <div class="at-filter-buttons">
+                    <button type="submit" class="at-btn-search">
+                        🔍 جستجو
+                    </button>
+                    <a href="{% url 'activity:list' %}?view={{ view_mode }}" class="at-btn-reset">
+                        ↻ پاک کردن
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════
+         RESULTS INFO
+         ════════════════════════════════════════════════ -->
+    {% if search_query or status_filter or category_filter or roadmap_filter or priority_filter %}
+    <div class="at-results-info">
+        <span class="at-results-label">نتایج:</span>
+        {% if search_query %}
+            <span class="at-results-query">{{ search_query }}</span>
+        {% endif %}
+        <span class="at-results-badge">{{ total_count }} فعالیت</span>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════════════════════════════════════
+         ACTIVITIES GRID
+         ════════════════════════════════════════════════ -->
+    {% if activities %}
+        <div class="at-grid">
+            {% for activity_log in activities %}
+                <div class="at-card" data-activity-id="{{ activity_log.id }}">
+                    
+                    <!-- Card Header -->
+                    <div class="at-card-header">
+                        <div class="at-card-header-info">
+                            <h3 class="at-card-title">{{ activity_log.activity.title }}</h3>
+                            <p class="at-card-category">
+                                <span class="at-category-badge at-category-{{ activity_log.activity.category }}">
+                                    {{ activity_log.activity.get_category_display }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="at-card-status">
+                            <span class="at-status-badge at-status-{{ activity_log.status }}">
+                                {{ activity_log.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Body -->
+                    <div class="at-card-body">
+                        
+                        <!-- User Info (Only in All Activities) -->
+                        {% if view_mode == 'all_activities' %}
+                        <div class="at-user-info">
+                            <span class="at-user-label">کاربر</span>
+                            <span class="at-user-name">
+                                {% if activity_log.user == current_user %}
+                                    <span class="at-user-badge-me">شما</span>
+                                {% endif %}
+                                <a href="{% url 'accounts:profile' activity_log.user.profile.pk %}" class="at-user-link">
+                                    {% if activity_log.user.get_full_name %}
+                                        {{ activity_log.user.get_full_name }}
+                                    {% else %}
+                                        {{ activity_log.user.username }}
+                                    {% endif %}
+                                </a>
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Roadmap -->
+                        <div class="at-info-item">
+                            <span class="at-info-label">رودمپ</span>
+                            <span class="at-info-value">{{ activity_log.roadmap.title }}</span>
+                        </div>
+                        
+                        <!-- Stage -->
+                        {% if activity_log.stage %}
+                        <div class="at-info-item">
+                            <span class="at-info-label">مرحله</span>
+                            <span class="at-info-value">{{ activity_log.stage.title }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Progress -->
+                        <div class="at-progress-box">
+                            <div class="at-progress-header">
+                                <span class="at-progress-label">پیشرفت</span>
+                                <span class="at-progress-value">{{ activity_log.progress_percentage }}%</span>
+                            </div>
+                            <div class="at-progress-bar">
+                                <div 
+                                    class="at-progress-fill" 
+                                    style="width: {{ activity_log.progress_percentage }}%"
+                                ></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dates -->
+                        <div class="at-dates-row">
+                            <div class="at-date-item">
+                                <span class="at-date-label">شروع</span>
+                                <span class="at-date-value">{{ activity_log.start_date|date:"d/m/Y" }}</span>
+                            </div>
+                            <div class="at-date-item">
+                                <span class="at-date-label">هدف</span>
+                                <span class="at-date-value {% if activity_log.is_overdue %}at-date-overdue{% endif %}">
+                                    {{ activity_log.target_completion_date|date:"d/m/Y" }}
+                                </span>
+                            </div>
+                            <div class="at-date-item">
+                                <span class="at-date-label">باقی‌مانده</span>
+                                <span class="at-date-value">{{ activity_log.get_remaining_days }} روز</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Impact & Difficulty -->
+                        <div class="at-meta-row">
+                            <div class="at-meta-item">
+                                <span class="at-meta-label">تاثیر</span>
+                                <span class="at-meta-value at-impact-{{ activity_log.activity.impact_level }}">
+                                    {{ activity_log.activity.get_impact_level_display }}
+                                </span>
+                            </div>
+                            <div class="at-meta-item">
+                                <span class="at-meta-label">دشواری</span>
+                                <span class="at-meta-value at-difficulty-{{ activity_log.activity.difficulty_rating }}">
+                                    {{ activity_log.activity.get_difficulty_rating_display }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Checkpoints Count -->
+                        {% if activity_log.checkpoints.count %}
+                        <div class="at-checkpoints-summary">
+                            <span class="at-checkpoint-icon">✓</span>
+                            <span class="at-checkpoint-text">
+                                {{ activity_log.checkpoints.count }} نقطه کنترل
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Notes -->
+                        {% if activity_log.notes %}
+                        <div class="at-notes-box">
+                            <p class="at-notes-text">{{ activity_log.notes|truncatewords:20 }}</p>
+                        </div>
+                        {% endif %}
+                        
+                    </div>
+                    
+                    <!-- Card Footer -->
+                    <div class="at-card-footer">
+                        <button 
+                            class="at-btn-details" 
+                            data-activity-id="{{ activity_log.id }}"
+                            onclick="showActivityDetail({{ activity_log.id }})"
+                        >
+                            👁️ جزئیات بیشتر
+                        </button>
+                    </div>
+                    
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="at-empty-state">
+            <div class="at-empty-state-icon">📭</div>
+            <h3 class="at-empty-state-title">فعالیتی یافت نشد</h3>
+            <p class="at-empty-state-text">
+                {% if search_query or status_filter or category_filter or roadmap_filter %}
+                    با این فیلتر‌ها فعالیتی یافت نشد.
+                {% else %}
+                    {% if view_mode == 'all_activities' %}
+                        هنوز فعالیتی در سیستم ثبت نشده است.
+                    {% else %}
+                        هنوز فعالیتی ثبت نشده است. یک رودمپ جدید ایجاد کنید و شروع کنید!
+                    {% endif %}
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+
+    <!-- ════════════════════════════════════════════════
+         PAGINATION
+         ════════════════════════════════════════════════ -->
+    {% if page_obj.has_other_pages %}
+    <div class="at-pagination-wrapper">
+        <ul class="at-pagination">
+            {% if page_obj.has_previous %}
+                <li class="at-pagination-item">
+                    <a href="?page=1&view={{ view_mode }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if roadmap_filter %}&roadmap={{ roadmap_filter }}{% endif %}" class="at-pagination-link">
+                        «
+                    </a>
+                </li>
+                <li class="at-pagination-item">
+                    <a href="?page={{ page_obj.previous_page_number }}&view={{ view_mode }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if roadmap_filter %}&roadmap={{ roadmap_filter }}{% endif %}" class="at-pagination-link">
+                        ‹
+                    </a>
+                </li>
+            {% else %}
+                <li class="at-pagination-item disabled">
+                    <span class="at-pagination-link">«</span>
+                </li>
+                <li class="at-pagination-item disabled">
+                    <span class="at-pagination-link">‹</span>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="at-pagination-item active">
+                        <span class="at-pagination-link">{{ num }}</span>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="at-pagination-item">
+                        <a href="?page={{ num }}&view={{ view_mode }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if roadmap_filter %}&roadmap={{ roadmap_filter }}{% endif %}" class="at-pagination-link">
+                            {{ num }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="at-pagination-item">
+                    <a href="?page={{ page_obj.next_page_number }}&view={{ view_mode }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if roadmap_filter %}&roadmap={{ roadmap_filter }}{% endif %}" class="at-pagination-link">
+                        ›
+                    </a>
+                </li>
+                <li class="at-pagination-item">
+                    <a href="?page={{ page_obj.paginator.num_pages }}&view={{ view_mode }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if roadmap_filter %}&roadmap={{ roadmap_filter }}{% endif %}" class="at-pagination-link">
+                        »
+                    </a>
+                </li>
+            {% else %}
+                <li class="at-pagination-item disabled">
+                    <span class="at-pagination-link">›</span>
+                </li>
+                <li class="at-pagination-item disabled">
+                    <span class="at-pagination-link">»</span>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- ════════════════════════════════════════════════
+     MODAL FOR ACTIVITY DETAILS
+     ════════════════════════════════════════════════ -->
+<div id="activityDetailModal" class="at-modal">
+    <div class="at-modal-overlay" onclick="closeActivityDetail()"></div>
+    <div class="at-modal-content">
+        <div class="at-modal-header">
+            <h2 id="modalTitle" class="at-modal-title">جزئیات فعالیت</h2>
+            <button class="at-modal-close" onclick="closeActivityDetail()">✕</button>
+        </div>
+        <div id="modalBody" class="at-modal-body">
+            <!-- محتوا از طریق AJAX بارگذاری می‌شود -->
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+// نمایش جزئیات فعالیت
+function showActivityDetail(activityId) {
+    const modal = document.getElementById('activityDetailModal');
+    const modalBody = document.getElementById('modalBody');
+    
+    // بارگذاری محتوا از طریق AJAX
+    fetch(`/activity/detail/${activityId}/`)
+        .then(response => response.text())
+        .then(html => {
+            modalBody.innerHTML = html;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        })
+        .catch(error => {
+            console.error('خطا در بارگذاری جزئیات:', error);
+            alert('خطا در بارگذاری جزئیات فعالیت');
+        });
+}
+
+// بستن مودال
+function closeActivityDetail() {
+    const modal = document.getElementById('activityDetailModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+// بستن مودال با کلید Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeActivityDetail();
+    }
+});
+
+// بستن مودال با کلیک بر روی overlay
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('activityDetailModal');
+    if (event.target === modal.querySelector('.at-modal-overlay')) {
+        closeActivityDetail();
+    }
+});
+
+// فیلتر کردن فعالیت‌ها
+function filterActivities(filterType, filterValue) {
+    const url = new URL(window.location);
+    url.searchParams.set(filterType, filterValue);
+    window.location.href = url.toString();
+}
+
+// ریست فیلتر‌ها
+function resetFilters() {
+    window.location.href = window.location.pathname;
+}
+
+// بروزرسانی پیشرفت (اختیاری)
+function updateActivityProgress(activityId, progressValue) {
+    fetch(`/activity/update-progress/${activityId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({
+            progress: progressValue
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // بروزرسانی صفحه
+            location.reload();
+        }
+    });
+}
+
+// دریافت CSRF Token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// انیمیشن برای کارت‌ها
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.at-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.05}s`;
+    });
+});
+
+
+</script>
+{% endblock %}

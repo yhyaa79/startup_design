@@ -4,15 +4,11 @@ import json
 import re
 import requests
 from django.conf import settings
+from .models import Profile
 
 
 
 TIMEOUT = getattr(settings, "GAPGPT_TIMEOUT", 60)
-
-# ═══════════════════════════════════════════════════════════════
-# تنظیمات API - GapGPT
-# ═══════════════════════════════════════════════════════════════
-
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -98,7 +94,6 @@ TIMEOUT = getattr(settings, "GAPGPT_TIMEOUT", 60)
                 "result": ""   # برگزیده / جایزه | ارائه عادی
             }
         ],
-      ],
       "executive_records": [
         {
           "title": str,
@@ -125,11 +120,27 @@ TIMEOUT = getattr(settings, "GAPGPT_TIMEOUT", 60)
 # تابع کمکی برای ارتباط با API
 # ═══════════════════════════════════════════════════════════════
 
+import logging
+import time
+
+logger = logging.getLogger(__name__)
+
+# می‌تونی در settings تعریفش کنی
+DEFAULT_TIMEOUT = 60   # read timeout
+CONNECT_TIMEOUT = 10   # connect timeout
+MAX_RETRIES = 2
 
 
-def _call_gpt_api(messages: list, max_tokens: int = 2000) -> str:
+def _call_gpt_api(messages: list, max_tokens: int = 1000) -> str:
+    """
+    Calls GapGPT Chat Completion API with retry & proper error handling.
+    """
+
     if settings.GAPGPT_API_KEY == "YOUR_API_KEY_HERE" or not settings.GAPGPT_API_KEY:
+        logger.error("GAPGPT_API_KEY is not configured.")
         raise ValueError("API Key تنظیم نشده است.")
+
+    url = f"{settings.GAPGPT_API_BASE}/chat/completions"
 
     headers = {
         "Content-Type": "application/json",
@@ -143,30 +154,70 @@ def _call_gpt_api(messages: list, max_tokens: int = 2000) -> str:
         "temperature": 0.3,
     }
 
-    try:
-        response = requests.post(
-            f"{settings.GAPGPT_API_BASE}/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=(10, TIMEOUT),
-        )
-        response.raise_for_status()
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            logger.info("Calling GPT API (attempt %s/%s)", attempt, MAX_RETRIES)
 
-        data = response.json()
-        return data["choices"][0]["message"]["content"]
+            start_time = time.monotonic()
 
-    except requests.exceptions.Timeout:
-        raise TimeoutError("زمان انتظار برای پاسخ API به پایان رسید.")
-    except requests.exceptions.ConnectionError:
-        raise ConnectionError("خطا در اتصال به API.")
-    except requests.exceptions.HTTPError as e:
-        raise ValueError(f"خطای HTTP از API: {e.response.status_code} - {e.response.text}")
-    except (KeyError, IndexError, ValueError, json.JSONDecodeError) as e:
-        raise ValueError(f"پاسخ API نامعتبر است: {str(e)}")
+            response = requests.post(
+                url,
+                headers=headers,
+                json=payload,
+                timeout=(CONNECT_TIMEOUT, DEFAULT_TIMEOUT),
+            )
 
+            elapsed = time.monotonic() - start_time
+            logger.info("GPT API responded in %.2f seconds", elapsed)
 
+            # اگر موفق بود
+            if response.status_code == 200:
+                data = response.json()
+                return data["choices"][0]["message"]["content"]
 
+            # اگر 5xx بود → retry
+            if response.status_code in (502, 503, 504):
+                logger.warning(
+                    "Upstream error %s on attempt %s",
+                    response.status_code,
+                    attempt,
+                )
 
+                if attempt == MAX_RETRIES:
+                    raise TimeoutError(
+                        "سرویس هوش مصنوعی موقتاً در دسترس نیست. لطفاً چند دقیقه بعد دوباره تلاش کنید."
+                    )
+
+                time.sleep(2 ** attempt)  # exponential backoff
+                continue
+
+            # سایر خطاهای HTTP
+            logger.error("HTTP error %s: %s", response.status_code, response.text)
+            raise ValueError(
+                f"خطای سرویس هوش مصنوعی: {response.status_code}"
+            )
+
+        except requests.exceptions.ReadTimeout:
+            logger.warning("Read timeout on attempt %s", attempt)
+
+            if attempt == MAX_RETRIES:
+                raise TimeoutError(
+                    "سرویس هوش مصنوعی دیر پاسخ داد. لطفاً دوباره تلاش کنید."
+                )
+
+            time.sleep(2 ** attempt)
+
+        except requests.exceptions.ConnectionError:
+            logger.exception("Connection error while calling GPT API.")
+            raise ConnectionError("خطا در اتصال به سرویس هوش مصنوعی.")
+
+        except (KeyError, IndexError, json.JSONDecodeError):
+            logger.exception("Invalid API response structure.")
+            raise ValueError("پاسخ دریافتی از سرویس هوش مصنوعی نامعتبر است.")
+
+        except Exception:
+            logger.exception("Unexpected error in _call_gpt_api.")
+            raise
 
 
 def _parse_json_response(response_text: str) -> dict:
@@ -176,14 +227,13 @@ def _parse_json_response(response_text: str) -> dict:
     json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', text)
     if json_match:
         text = json_match.group(1)
-    
+
     # بررسی بلوک کد ``` ... ```
     code_match = re.search(r'```\s*([\s\S]*?)\s*```', text)
     if code_match:
         text = code_match.group(1)
 
     return json.loads(text)
-
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -194,10 +244,10 @@ def _parse_json_response(response_text: str) -> dict:
 def extract_profile_from_text(text: str) -> dict:
     """
     استخراج داده‌های ساختاریافته پروفایل از متن خام فارسی با استفاده از LLM.
-    
+
     Args:
         text: متن خام شامل اطلاعات پروفایل کاربر
-    
+
     Returns:
         دیکشنری با ساختار زیر:
         {
@@ -210,8 +260,6 @@ def extract_profile_from_text(text: str) -> dict:
             "training_courses": [...]
         }
     """
-    import re
-    
     system_prompt = """تو یک دستیار هوشمند برای استخراج اطلاعات از متن‌های فارسی هستیت.
 وظیفت این است که متن زیر را بخوانی و اطلاعات موجود در آن را به صورت ساختاریافته استخراج کنی.
 
@@ -287,11 +335,27 @@ def extract_profile_from_text(text: str) -> dict:
 
     response_text = _call_gpt_api(messages, max_tokens=4000)
     result = _parse_json_response(response_text)
-    
+
     return result
 
 
 
+def _sanitize_profile_data(data: dict) -> dict:
+    """
+    تبدیل مقادیر None به مقدار مناسب بر اساس نوع فیلد مدل،
+    تا با محدودیت‌های NOT NULL دیتابیس تطابق داشته باشد.
+    """
+    numeric_null_fields = {'proposal_count'}
 
+    text_null_fields = set()
+    for field in Profile._meta.get_fields():
+        if hasattr(field, 'blank') and field.blank and not field.null:
+            text_null_fields.add(field.name)
 
-
+    cleaned = {}
+    for key, value in data.items():
+        if value is None:
+            cleaned[key] = None if key in numeric_null_fields else ''
+        else:
+            cleaned[key] = value
+    return cleaned

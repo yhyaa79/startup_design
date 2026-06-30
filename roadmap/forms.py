@@ -1,96 +1,118 @@
 # roadmap/forms.py
 from django import forms
-from django.forms import inlineformset_factory
-from .models import Roadmap, Stage, StageActivity, Activity
+from django.core.exceptions import ValidationError
+from datetime import date, timedelta
+from .models import Roadmap, Stage, Activity, StageActivity
 
 
-class RoadmapForm(forms.ModelForm):
+class RoadmapCreateForm(forms.ModelForm):
+    """فرم ایجاد رودمپ"""
+    
+    GOAL_CHOICES = [
+        ('estedad_darakhshan', '🌟 استعداد درخشان'),
+        ('40_emtiaz', '📊 ۴۰ امتیازی'),
+        ('heyat_elmi', '👨‍🎓 هیات علمی'),
+        ('research_position', '🌍 ریسرچ پوزیشن / فلوشیپ خارج'),
+        ('general', '📈 بهبود عمومی'),
+    ]
+    
+    goal = forms.ChoiceField(
+        choices=GOAL_CHOICES,
+        widget=forms.RadioSelect,
+        label='هدف خود را انتخاب کنید'
+    )
+    
+    duration_days = forms.IntegerField(
+        min_value=30,
+        max_value=1095,
+        label='مدت زمان (روز)',
+        help_text='حداقل 30 روز، حداکثر 3 سال'
+    )
+    
+    goal_details = forms.CharField(
+        widget=forms.Textarea,
+        required=False,
+        label='جزئیات اضافی (اختیاری)',
+        help_text='توضیحات بیشتری درباره اهدافتان بنویسید'
+    )
+    
     class Meta:
         model = Roadmap
-        fields = ['title', 'description', 'status']
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'عنوان رود مپ را وارد کنید'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'توضیح رود مپ را وارد کنید'
-            }),
-            'status': forms.Select(attrs={'class': 'form-control'}),
-        }
+        fields = ['goal', 'duration_days', 'goal_details']
+    
+    def clean_duration_days(self):
+        duration = self.cleaned_data.get('duration_days')
+        return duration
+
 
 
 class StageForm(forms.ModelForm):
+    """فرم ایجاد/ویرایش مرحله"""
+    
+    success_criteria = forms.CharField(
+        widget=forms.Textarea,
+        required=False,
+        label='معیارهای موفقیت (هر یک در خط جدید)',
+        help_text='معیارهای تکمیل مرحله را وارد کنید'
+    )
+    
+    risks = forms.CharField(
+        widget=forms.Textarea,
+        required=False,
+        label='ریسک‌های احتمالی (هر یک در خط جدید)',
+        help_text='چالش‌های احتمالی را لیست کنید'
+    )
+    
     class Meta:
         model = Stage
-        fields = ['title', 'description', 'objectives', 'order']
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'عنوان مرحله'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 2,
-                'placeholder': 'توضیح مرحله'
-            }),
-            'objectives': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'اهداف مرحله را وارد کنید'
-            }),
-            'order': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'type': 'number'
-            }),
+        fields = [
+            'title', 'description', 'objectives', 'phase_type',
+            'priority', 'milestone'
+        ]
+
+        labels = {
+            'title': 'عنوان مرحله',
+            'description': 'توضیحات',
+            'objectives': 'اهداف مرحله',
+            'phase_type': 'نوع فاز',
+            'priority': 'اولویت',
+            'duration_days': 'مدت زمان (روز)',
+            'milestone': 'نقطه عطف (معیار تکمیل)',
         }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        # تبدیل معیارهای موفقیت
+        criteria_text = cleaned_data.get('success_criteria', '')
+        if criteria_text:
+            criteria = [c.strip() for c in criteria_text.split('\n') if c.strip()]
+            self.instance.success_criteria = criteria
+        
+        # تبدیل ریسک‌ها
+        risks_text = cleaned_data.get('risks', '')
+        if risks_text:
+            risks = [r.strip() for r in risks_text.split('\n') if r.strip()]
+            self.instance.risks = risks
+        
+        return cleaned_data
 
 
-class StageActivityForm(forms.ModelForm):
-    activity = forms.ModelChoiceField(
-        queryset=Activity.objects.filter(is_active=True).order_by('category', 'title'),
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-            'style': 'width: 100%;'
-        }),
-        label='فعالیت',
-        required=False,
-        empty_label='--- انتخاب کنید ---'
-    )
-
+class ActivityForm(forms.ModelForm):
+    """فرم ایجاد/ویرایش فعالیت"""
+    
     class Meta:
-        model = StageActivity
-        fields = ['activity', 'order']
-        widgets = {
-
-            'order': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'type': 'number'
-            }),
+        model = Activity
+        fields = [
+            'title', 'description', 'category', 'duration_days',
+            'impact_score', 'difficulty_rating', 'resume_output'
+        ]
+        labels = {
+            'title': 'عنوان فعالیت',
+            'description': 'توضیحات',
+            'category': 'دسته',
+            'duration_days': 'مدت زمان (روز)',
+            'impact_score': 'امتیاز تاثیر',
+            'difficulty_rating': 'سطح دشواری',
+            'resume_output': 'خروجی رزومه',
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['order'].required = False
-        self.fields['order'].initial = 0
-
-    def clean_order(self):
-        return self.cleaned_data.get('order') or 0
-
-    def validate_unique(self):
-        # اگه activity انتخاب نشده، unique check نزن
-        if not self.cleaned_data.get('activity'):
-            return
-        super().validate_unique()
-
-
-
-StageActivityFormSet = inlineformset_factory(
-    Stage,
-    StageActivity,
-    form=StageActivityForm,
-    extra=0,
-    can_delete=True,
-)

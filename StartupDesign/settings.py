@@ -7,10 +7,8 @@ import os
 from dotenv import load_dotenv
 
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
-
 
 
 SECRET_KEY = os.getenv(
@@ -18,29 +16,20 @@ SECRET_KEY = os.getenv(
     "django-insecure-dev-only-change-this-in-production"
 )
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = os.getenv(
     "ALLOWED_HOSTS",
-    "127.0.0.1,localhost,startupdesign.liara.run"
+    "172.86.113.249,127.0.0.1,localhost"
 ).split(",")
-
-
-#ALLOWED_HOSTS = ["153.75.90.123", "127.0.0.1", "localhost"]
-
 
 
 GAPGPT_API_BASE = os.getenv("GAPGPT_API_BASE", "https://api.gapgpt.app/v1")
 GAPGPT_API_KEY = os.getenv("GAPGPT_API_KEY", "")
 GAPGPT_MODEL_NAME = os.getenv("GAPGPT_MODEL_NAME", "gapgpt-qwen-3.5")
-# settings.py
+GAPGPT_TIMEOUT = int(os.getenv("GAPGPT_TIMEOUT", "30"))
 
-# ── تایم‌اوت API ──
-GAPGPT_TIMEOUT = int(os.getenv("GAPGPT_TIMEOUT", "30"))  # 30 ثانیه
-
-# ── تنظیمات Gunicorn برای Liara ──
 GUNICORN_CMD_ARGS = "--workers 2 --timeout 120 --max-requests 1000"
-
 
 
 INSTALLED_APPS = [
@@ -57,13 +46,15 @@ INSTALLED_APPS = [
     "course",
     "networking",
     "resume",
-    'project',
-    'event_hub',
+    "project",
+    "event_hub",
+    "activity",
 ]
 
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -104,50 +95,41 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": "INFO",
+        "level": "WARNING",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "WARNING"),
+            "propagate": False,
+        },
     },
 }
 
-# =========================================================
-# Database
-# =========================================================
-""" 
-from pathlib import Path
-import os
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-SQLITE_DIR = Path(os.getenv("SQLITE_DIR", "/usr/src/app/database"))
-SQLITE_DIR.mkdir(parents=True, exist_ok=True)
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": str(SQLITE_DIR / "db.sqlite3"),
-        "OPTIONS": {
-            "timeout": 20,
-        },
+# اگر DB_NAME در .env تنظیم شده باشد از PostgreSQL استفاده می‌شود،
+# در غیر این صورت به sqlite3 برمی‌گردد (برای توسعه روی لوکال).
+if os.getenv("DB_NAME"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST", "127.0.0.1"),
+            "PORT": os.getenv("DB_PORT", "5432"),
+        }
     }
-}
- """
-# =========================================================
-# Database local
-# =========================================================
- 
-if os.getenv("LIARA"):
-    DB_DIR = Path("/usr/src/app/database")
-    DB_DIR.mkdir(parents=True, exist_ok=True)
-    DB_PATH = DB_DIR / "db.sqlite3"
 else:
-    DB_PATH = BASE_DIR / "db.sqlite3"
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": str(DB_PATH),
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+            "OPTIONS": {
+                "timeout": 20,
+            },
+        }
     }
-}
-
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -173,16 +155,9 @@ USE_TZ = True
 
 
 STATIC_URL = "/static/"
-
-# این پوشه برای فایل‌هایی است که خودتان می‌سازید (مثل CSSهای خودتان)
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-
-# این پوشه فقط برای زمان دپلوی (collectstatic) است
+STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
-
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -190,6 +165,5 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
-LOGIN_REDIRECT_URL = '/dashboard/'
-LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = "/dashboard/"
+LOGIN_URL = "/accounts/login/"

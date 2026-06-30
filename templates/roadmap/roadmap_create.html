@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ایجاد رودمپ جدید{% endblock %}
+{% block topbar_title %}ایجاد نقشه راه{% endblock %}
+
+{% block content %}
+
+<div class="rm-page rm-page-form">
+    <div class="rm-form-container">
+        <div class="rm-form-header">
+            <h1>ایجاد نقشه راه حرفه‌ای</h1>
+            <p>با کمک هوش مصنوعی، برنامه‌ای شخصی‌شده برای رسیدن به اهدافتان</p>
+        </div>
+
+        {% if error %}
+        <div class="rm-alert rm-alert-error">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post" class="rm-form">
+            {% csrf_token %}
+
+            <div class="rm-form-section">
+                <h2>انتخاب هدف</h2>
+                <p class="rm-section-desc">کدام هدف را دنبال می‌کنید؟</p>
+
+                <div class="rm-radio-group">
+                    {% for value, label in form.goal.field.choices %}
+                    <label class="rm-radio-label">
+                        <input type="radio" name="goal" value="{{ value }}" {% if form.goal.value == value %}checked{% endif %} required>
+                        <span class="rm-radio-text">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+
+                {% if form.goal.errors %}
+                <div class="rm-form-error">{{ form.goal.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="rm-form-section">
+                <label for="id_duration_days" class="rm-form-label">
+                    مدت زمان (روز)
+                    <span class="rm-required">*</span>
+                </label>
+                <input 
+                    type="number" 
+                    name="duration_days" 
+                    id="id_duration_days"
+                    min="30"
+                    max="1095"
+                    step="1"
+                    placeholder="مثال: 90"
+                    value="{{ form.duration_days.value|default:'' }}"
+                    class="rm-form-input"
+                    required
+                >
+                <p class="rm-form-help">حداقل 30 روز، حداکثر 3 سال</p>
+                {% if form.duration_days.errors %}
+                <div class="rm-form-error">{{ form.duration_days.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="rm-form-section">
+                <label for="id_goal_details" class="rm-form-label">
+                    جزئیات اضافی (اختیاری)
+                </label>
+                <textarea 
+                    name="goal_details" 
+                    id="id_goal_details"
+                    rows="4"
+                    placeholder="توضیحات بیشتری درباره اهدافتان..."
+                    class="rm-form-textarea"
+                >{{ form.goal_details.value|default:'' }}</textarea>
+            </div>
+
+            <div class="rm-form-actions">
+                <a href="{% url 'roadmap:roadmap_list' %}" class="rm-btn rm-btn-outline">
+                    انصراف
+                </a>
+                <button type="submit" class="rm-btn rm-btn-primary rm-btn-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"></path>
+                    </svg>
+                    ایجاد رودمپ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .rm-page-form {
+        padding: 2rem;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .rm-form-container {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .rm-form-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .rm-form-header h1 {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+        color: #1a1a1a;
+    }
+
+    .rm-form-header p {
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    .rm-alert {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .rm-alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .rm-alert svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+
+    .rm-form-section {
+        margin-bottom: 2rem;
+    }
+
+    .rm-section-desc {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .rm-radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .rm-radio-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        cursor: pointer;
+        padding: 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .rm-radio-label:hover {
+        border-color: #4f46e5;
+        background: #f0f4ff;
+    }
+
+    .rm-radio-label input[type="radio"] {
+        margin-top: 0.25rem;
+        cursor: pointer;
+    }
+
+    .rm-radio-label input[type="radio"]:checked + .rm-radio-text {
+        color: #4f46e5;
+        font-weight: 600;
+    }
+
+    .rm-form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    .rm-required {
+        color: #ef4444;
+    }
+
+    .rm-form-input,
+    .rm-form-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: border-color 0.2s;
+    }
+
+    .rm-form-input:focus,
+    .rm-form-textarea:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .rm-form-help {
+        font-size: 0.85rem;
+        color: #999;
+        margin-top: 0.5rem;
+    }
+
+    .rm-form-error {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .rm-form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .rm-btn-lg {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .rm-page-form {
+            padding: 1rem;
+        }
+
+        .rm-form-container {
+            padding: 1.5rem;
+        }
+
+        .rm-form-actions {
+            flex-direction: column;
+        }
+
+        .rm-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+{% endblock %}

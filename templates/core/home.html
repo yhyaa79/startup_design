@@ -1,6 +1,5 @@
 <!-- templates/core/home.html -->
 
-
 {% extends 'base.html' %}
 
 {% block title %}صفحه اصلی{% endblock %}
@@ -8,15 +7,12 @@
 
 {% block content %}
 
-
 <div class="content">
-    <!-- TWO-COLUMN CONTENT -->
     <div class="content-profile">
 
-        <!-- ══ COL RIGHT: INFO ══ -->
         <div class="col-info">
 
-            <!-- Stats -->
+            <!-- STATS -->
             <div class="section-card" style="padding:16px 20px;">
                 <div class="section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -36,21 +32,19 @@
                             </svg>
                             <div class="rsd-ps-ring-text">
                                 <span class="rsd-ps-ring-val">{{ stat.value }}</span>
-                                <span class="rsd-ps-ring-sub">{{ stat.label }}</span>
+                                <span class="rsd-ps-ring-sub">{{ stat.sub }}</span>
                             </div>
                         </div>
-                        {% if stat.sub %}
-                        <div class="rsd-ps-ring-note">{{ stat.sub }}</div>
-                        {% endif %}
                     </div>
                     {% empty %}
-                    <p style="color: var(--text-muted); font-size: 13px;">اطلاعاتی برای نمایش وجود ندارد.</p>
+                    <p style="color: var(--text-muted); font-size: 13px;">
+                        اطلاعاتی برای نمایش وجود ندارد.
+                    </p>
                     {% endfor %}
                 </div>
 
                 <br>
 
-                <!-- Weak point alert -->
                 {% if weak_point %}
                 <div class="rsd-ps-card rsd-ps-alert rsd-ps-alert--{{ weak_point.0 }}">
                     <div class="rsd-ps-alert-icon">
@@ -80,123 +74,280 @@
             </div>
 
 
-
-
-            <!-- ROADMAP -->
-            {% if roadmap %}
-            <div class="roadmap-card">
+            <!-- ROADMAP SUMMARY REPORT -->
+            <div class="section-card" style="margin-top:20px; padding:16px 20px;">
                 <div class="section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
+                        <path d="M4 19V5" />
+                        <path d="M4 19H20" />
+                        <path d="M8 16V11" />
+                        <path d="M12 16V7" />
+                        <path d="M16 16V9" />
                     </svg>
-                    نقشه راه: {{ roadmap.title }}
-                    <a href="{% url 'roadmap:roadmap_detail' %}" class="milestone-more-info">جزئیات بیشتر</a>
+                    گزارش کلی رودمپ‌ها
+
+                    <a href="{% url 'roadmap:roadmap_list' %}" class="milestone-more-info">
+                        مشاهده همه
+                    </a>
                 </div>
 
-                <div class="roadmap-header">
-                    <div class="roadmap-progress-info">
-                        <div class="roadmap-percent">{{ total_progress }}٪</div>
-                        <div class="roadmap-percent-label">
-                            پیشرفت کلی<br />
-                            <span style="color:var(--primary);font-weight:600;">
-                                {{ roadmap.stages.all|length }} مرحله تدوین شده
-                            </span>
+                <div class="stats-row" style="margin-top:15px;">
+                    <div class="stat-box">
+                        <div class="rsd-ps-ring-text-roadmaps">
+                            <span class="rsd-ps-ring-val">{{ total_roadmaps_count }}</span>
+                            <span class="rsd-ps-ring-sub">کل رودمپ‌ها</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-box">
+                        <div class="rsd-ps-ring-text-roadmaps">
+                            <span class="rsd-ps-ring-val">{{ active_roadmaps_count }}</span>
+                            <span class="rsd-ps-ring-sub">رودمپ فعال</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-box">
+                        <div class="rsd-ps-ring-text-roadmaps">
+                            <span class="rsd-ps-ring-val">{{ active_stages_count }}</span>
+                            <span class="rsd-ps-ring-sub">مرحله در حال انجام</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-box">
+                        <div class="rsd-ps-ring-text-roadmaps">
+                            <span class="rsd-ps-ring-val">{{ average_roadmap_progress }}٪</span>
+                            <span class="rsd-ps-ring-sub">میانگین پیشرفت</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="roadmap-timeline">
-                    {% for stage in stages %}
-                    {% if stage.get_progress == 100 %}
-                    <!-- مرحله تکمیل شده -->
-                    <div class="roadmap-step done">
-                        <div class="step-node">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5">
-                                <polyline points="20 6 9 17 4 12" />
-                            </svg>
+                <div style="margin-top:18px;">
+                    <div class="rm-progress-section">
+                        <div class="rm-progress-header">
+                            <span class="rm-progress-label">پیشرفت کلی همه رودمپ‌ها</span>
+                            <span class="rm-progress-pct">{{ average_roadmap_progress }}٪</span>
                         </div>
-                        <div class="step-label">{{ stage.title }}</div>
+                        <div class="rm-progress-bar-track">
+                            <div class="rm-progress-bar-fill" style="width: {{ average_roadmap_progress }}%;"></div>
+                        </div>
                     </div>
-                    {% elif stage.id == active_stage.id %}
-                    <!-- مرحله در حال انجام -->
-                    <div class="roadmap-step active">
-                        <div class="step-node rsd-tm-dot-active">{{ stage.order }}</div>
-                        <div class="step-label">{{ stage.title }}</div>
-                    </div>
-                    {% else %}
-                    <!-- مرحله آتی -->
-                    <div class="roadmap-step">
-                        <div class="step-node">{{ stage.order }}</div>
-                        <div class="step-label">{{ stage.title }}</div>
-                    </div>
-                    {% endif %}
-                    {% endfor %}
                 </div>
 
-                <div class="roadmap-milestones">
-                    {% if active_stage %}
-                    <div class="milestone-row active-m">
-                        <div class="milestone-info-bar">
-                            <div class="milestone-info">
-                                <div class="milestone-name">{{ active_stage.title }}</div>
-                                <div class="milestone-desc">
-                                    {{ active_stage.description|truncatechars:50|default:"در حال اجرای این مرحله" }}
-                                </div>
-                                <div class="milestone-desc">مدت کل: {{ active_stage.get_total_duration }} روز</div>
-                                <div class="milestone-desc">فعالیت‌ها: {{ active_stage.stage_activities.count }} مورد
-                                </div>
+                <div class="rm-card-meta" style="margin-top:15px;">
+                    <div class="rm-meta-item">
+                        <span class="rm-meta-label">تکمیل‌شده</span>
+                        <span class="rm-meta-value">{{ completed_roadmaps_count }}</span>
+                    </div>
+
+                    <div class="rm-meta-item">
+                        <span class="rm-meta-label">متوقف</span>
+                        <span class="rm-meta-value">{{ paused_roadmaps_count }}</span>
+                    </div>
+
+                    <div class="rm-meta-item">
+                        <span class="rm-meta-label">پیش‌نویس</span>
+                        <span class="rm-meta-value">{{ draft_roadmaps_count }}</span>
+                    </div>
+
+                    <div class="rm-meta-item">
+                        <span class="rm-meta-label">مراحل تکمیل‌شده</span>
+                        <span class="rm-meta-value">{{ completed_stage_count }} از {{ total_stage_count }}</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ACTIVE ROADMAP SELECTOR + DETAIL -->
+            {% if active_roadmaps %}
+            <div class="roadmap-card" style="margin-top:20px;" id="dashboard-roadmap-card">
+
+                <div class="section-title"
+                    style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        رودمپ منتخب
+                    </div>
+
+                    <div class="roadmap-tabs" style="display:flex; gap:8px; flex-wrap:wrap;">
+                        {% for item in active_roadmaps %}
+                        <button type="button"
+                            class="rm-btn rm-btn-sm {% if item.id == roadmap.id %}rm-btn-primary{% else %}rm-btn-outline{% endif %} dashboard-roadmap-tab"
+                            data-roadmap-id="{{ item.id }}">
+                            {{ item.title }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% for item in active_roadmaps %}
+                <div class="dashboard-roadmap-panel" data-roadmap-panel="{{ item.id }}"
+                    style="{% if item.id != roadmap.id %}display:none;{% endif %}">
+
+                    <div class="section-title" style="margin-top:15px;">
+                        <span>رودمپ: {{ item.title }}</span>
+
+                        <a href="{% url 'roadmap:roadmap_detail' item.id %}" class="milestone-more-info">
+                            جزئیات بیشتر
+                        </a>
+                    </div>
+
+                    <div class="roadmap-header">
+                        <div class="roadmap-progress-info">
+                            <div class="roadmap-percent">{{ item.get_progress }}٪</div>
+                            <div class="roadmap-percent-label">
+                                پیشرفت کلی<br />
+                                <span style="color:var(--primary);font-weight:600;">
+                                    {{ item.stages.count }} مرحله تدوین شده
+                                </span>
                             </div>
-                            <div class="milestone-bar-wrap">
-                                <div>
-                                    <div class="milestone-pct">پیشرفت در فعالیت ها</div>
-                                    <div class="milestone-bar">
+                        </div>
+                    </div>
 
-                                        <div class="milestone-fill" style="width:{{ active_stage.get_progress }}%">
+                    <div class="roadmap-timeline">
+                        {% for stage in item.stages.all %}
+                        {% if stage.get_progress == 100 %}
+                        <div class="roadmap-step done">
+                            <div class="step-node">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </div>
+                            <div class="step-label">{{ stage.title }}</div>
+                        </div>
+                        {% elif stage.status == 'active' %}
+                        <div class="roadmap-step active">
+                            <div class="step-node rsd-tm-dot-active">{{ stage.order }}</div>
+                            <div class="step-label">{{ stage.title }}</div>
+                        </div>
+                        {% else %}
+                        <div class="roadmap-step">
+                            <div class="step-node">{{ stage.order }}</div>
+                            <div class="step-label">{{ stage.title }}</div>
+                        </div>
+                        {% endif %}
+                        {% empty %}
+                        <p class="rm-hint">برای این رودمپ هنوز مرحله‌ای ثبت نشده است.</p>
+                        {% endfor %}
+                    </div>
+
+                    {% with active_stage=item.get_active_stage %}
+                    <div class="roadmap-milestones">
+                        {% if active_stage %}
+                        <div class="milestone-row active-m">
+                            <div class="milestone-info-bar">
+                                <div class="milestone-info">
+                                    <div class="milestone-name">{{ active_stage.title }}</div>
+
+                                    <div class="milestone-desc">
+                                        {{ active_stage.description|truncatechars:70|default:"در حال اجرای این مرحله" }}
+                                    </div>
+
+                                    <div class="milestone-desc">
+                                        مدت کل فعالیت‌ها: {{ active_stage.get_total_duration }} روز
+                                    </div>
+
+                                    <div class="milestone-desc">
+                                        فعالیت‌ها: {{ active_stage.stage_activities.count }} مورد
+                                    </div>
+                                </div>
+
+                                <div class="milestone-bar-wrap">
+                                    <div>
+                                        <div class="milestone-pct">پیشرفت فعالیت‌ها</div>
+                                        <div class="milestone-bar">
+                                            <div class="milestone-fill"
+                                                style="width: {{ active_stage.get_progress }}%;"></div>
+                                        </div>
+
+                                        <div class="milestone-pct">
+                                            {{ active_stage.get_progress }}٪ انجام شده
+                                        </div>
+
+                                        <div class="milestone-pct">
+                                            {{ active_stage.get_remaining_days }} روز باقی‌مانده
                                         </div>
                                     </div>
-                                    <div class="milestone-pct">{{ active_stage.get_remaining_days }} روز باقی مانده
-                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="milestone-cheklist">
+                                <p class="milestone-p-title">چک‌لیست فعالیت‌ها</p>
+
+                                <div class="milestone-checklist-list">
+                                    {% for stage_item in active_stage.stage_activities.all|slice:":4" %}
+                                    <span
+                                        class="milestone-checklist {% if stage_item.is_completed %}milestone-checklist-done{% endif %}">
+                                        {{ stage_item.activity.title }}
+                                        <p>{{ stage_item.activity.duration_days }} روز</p>
+                                    </span>
+                                    {% empty %}
+                                    <span class="milestone-checklist">
+                                        فعالیتی برای این مرحله ثبت نشده است.
+                                    </span>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
-                        <div class="milestone-cheklist">
-                            <p class="milestone-p-title">چک لیست</p>
-                            <div class="milestone-checklist-list">
-                                {% for item in active_stage.stage_activities.all|slice:":3" %}
-                                <span
-                                    class="milestone-checklist {% if item.is_completed %}milestone-checklist-done{% endif %}">{{ item.activity.title }}
-                                    <p>{{ item.activity.duration_days }} روز</p></span>
-                                {% endfor %}
-                            </div>
+                        {% else %}
+                        <div class="milestone-row">
+                            <p>برای این رودمپ مرحله فعالی وجود ندارد.</p>
                         </div>
+                        {% endif %}
                     </div>
-                    {% else %}
-                    <div class="milestone-row">
-                        <p>تمامی مراحل با موفقیت به پایان رسیده‌اند.</p>
-                    </div>
-                    {% endif %}
+                    {% endwith %}
+
                 </div>
+                {% endfor %}
             </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const tabs = document.querySelectorAll('.dashboard-roadmap-tab');
+                    const panels = document.querySelectorAll('.dashboard-roadmap-panel');
+
+                    tabs.forEach(function (tab) {
+                        tab.addEventListener('click', function () {
+                            const roadmapId = this.dataset.roadmapId;
+
+                            tabs.forEach(function (item) {
+                                item.classList.remove('rm-btn-primary');
+                                item.classList.add('rm-btn-outline');
+                            });
+
+                            this.classList.remove('rm-btn-outline');
+                            this.classList.add('rm-btn-primary');
+
+                            panels.forEach(function (panel) {
+                                if (panel.dataset.roadmapPanel === roadmapId) {
+                                    panel.style.display = '';
+                                } else {
+                                    panel.style.display = 'none';
+                                }
+                            });
+                        });
+                    });
+                });
+            </script>
+
             {% else %}
-            <div class="roadmap-card">
-                <p class="rm-hint">هنوز نقشه راهی برای شما تعریف نشده است.</p>
-                <p class="rm-hint">ابتدا از کامل بودن پروفایل خود اطمینان حاصل کنید بعد گزینه "ایجاد نقشه راه" را انتخاب
-                    کنید</p>
-                {% if user.is_authenticated and not user.profile.first_name and not user.profile.last_name and not user.profile.job_title %}
-                برای ساخت رود مپ حرفه‌ای لطفاً اول پروفایل خود را بسازید
-                {% else %}
-                <!-- لینک با intercept جاوااسکریپت -->
-                <!-- لینک بدون href معمولی -->
-                <!-- لینک باز کردن مودال -->
+            <div class="roadmap-card" style="margin-top:20px;">
+                <p class="rm-hint">هنوز رودمپ فعالی برای شما تعریف نشده است.</p>
+                <p class="rm-hint">
+                    برای دریافت گزارش رودمپ، ابتدا یک نقشه راه فعال ایجاد کنید.
+                </p>
+
                 <br>
-                <a href="#" id="roadmapLink" class="rm-btn rm-btn-primary" onclick="openRoadmapModal(event)">
+
+                <a href="{% url 'roadmap:roadmap_create' %}" class="rm-btn rm-btn-primary">
                     ایجاد نقشه راه
                 </a>
-                {% endif %}
             </div>
             {% endif %}
+
 
 
 
@@ -648,199 +799,6 @@
 </div>
 
 
-
-<!-- ══════════════ ROADMAP MODAL ══════════════ -->
-<div id="roadmapModal" class="rm-modal-overlay" style="display:none;" onclick="closeOnOverlay(event)">
-    <div class="rm-modal-box">
-
-        <button class="rm-modal-close" onclick="closeRoadmapModal()">&#10005;</button>
-        <h2 class="rm-modal-title">ساخت نقشه راه حرفه‌ای</h2>
-        <p class="rm-modal-subtitle">چند اطلاعات کوتاه تا رودمپ شخصی‌سازی‌شده برات بسازیم</p>
-
-        <!-- هدف -->
-        <div class="rm-field-group">
-            <label class="rm-label">هدف حرفه‌ای <span class="rm-required">*</span></label>
-            <select id="rmGoal" class="rm-select">
-                {% for value, label in goal_choices %}
-                <option value="{{ value }}" {% if value == user.profile.goal %}selected{% endif %}>
-                    {{ label }}
-                </option>
-                {% endfor %}
-            </select>
-            {% if user.profile.goal %}
-            <p class="rm-hint">هدف فعلی پروفایل شما:
-                <strong>{{ user.profile.get_goal_display }}</strong></p>
-            {% endif %}
-        </div>
-
-        <!-- بازه زمانی -->
-        <div class="rm-field-group">
-            <label class="rm-label">بازه زمانی مورد نظر <span class="rm-required">*</span></label>
-            <div class="rm-time-options">
-                <label class="rm-time-card">
-                    <input type="radio" name="rmTimeframe" value="under_3_months" data-days="90">
-                    <span class="rm-time-label">
-                        <strong>کمتر از ۳ ماه</strong>
-                        <small>مناسب اهداف فوری و کوتاه‌مدت</small>
-                    </span>
-                </label>
-                <label class="rm-time-card">
-                    <input type="radio" name="rmTimeframe" value="3_to_6_months" data-days="180" checked>
-                    <span class="rm-time-label">
-                        <strong>۳ تا ۶ ماه</strong>
-                        <small>متوازن — پیشنهاد ما برای اکثر کاربران</small>
-                    </span>
-                </label>
-                <label class="rm-time-card">
-                    <input type="radio" name="rmTimeframe" value="6_to_12_months" data-days="365">
-                    <span class="rm-time-label">
-                        <strong>۶ ماه تا ۱ سال</strong>
-                        <small>مناسب اهداف جامع و بلندمدت</small>
-                    </span>
-                </label>
-                <label class="rm-time-card">
-                    <input type="radio" name="rmTimeframe" value="1_to_2_years" data-days="730">
-                    <span class="rm-time-label">
-                        <strong>۱ تا ۲ سال</strong>
-                        <small>برنامه‌ریزی استراتژیک بلندمدت</small>
-                    </span>
-                </label>
-                <label class="rm-time-card">
-                    <input type="radio" name="rmTimeframe" value="over_2_years" data-days="900">
-                    <span class="rm-time-label">
-                        <strong>بیشتر از ۲ سال</strong>
-                        <small>رودمپ جامع تخصصی</small>
-                    </span>
-                </label>
-            </div>
-        </div>
-
-        <!-- توضیحات دلبخواهی -->
-        <div class="rm-field-group">
-            <label class="rm-label">نکات اضافه <span class="rm-optional">(اختیاری)</span></label>
-            <textarea id="rmNotes" class="rm-textarea" rows="3"
-                placeholder="هر نکته‌ای که فکر می‌کنی در ساخت رودمپت مهمه بنویس — مثلاً: دو روز در هفته وقت دارم، یا مهلت امتحان جامع دارم..."></textarea>
-        </div>
-
-        <!-- دکمه ارسال -->
-        <div class="rm-modal-actions">
-            <button class="rm-btn rm-btn-secondary" onclick="closeRoadmapModal()">انصراف</button>
-            <button class="rm-btn rm-btn-primary" id="rmSubmitBtn" onclick="submitRoadmapModal()">
-                <span id="rmBtnText">ساخت نقشه راه</span>
-                <span id="rmBtnSpinner" style="display:none;">در حال پردازش...</span>
-            </button>
-        </div>
-
-    </div>
-</div>
-
-<script>
-    async function handleRoadmapClick(event) {
-        event.preventDefault();
-
-        document.getElementById('processingModal').style.display = 'flex';
-
-        try {
-            const response = await fetch("{% url 'roadmap:roadmap_generate_ai' %}", {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                }
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                window.location.href = data.redirect_url;
-            } else {
-                document.getElementById('processingModal').style.display = 'none';
-                document.getElementById('errorModal').style.display = 'flex';
-            }
-
-        } catch (error) {
-            document.getElementById('processingModal').style.display = 'none';
-            document.getElementById('errorModal').style.display = 'flex';
-        }
-    }
-
-    function closeErrorModal() {
-        document.getElementById('errorModal').style.display = 'none';
-    }
-</script>
-
-
-
-
-<!-- ══════════════ JavaScript ══════════════ -->
-<script>
-    function openRoadmapModal(e) {
-        e.preventDefault();
-        document.getElementById('roadmapModal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeRoadmapModal() {
-        document.getElementById('roadmapModal').style.display = 'none';
-        document.body.style.overflow = '';
-    }
-
-    function closeOnOverlay(e) {
-        if (e.target.id === 'roadmapModal') closeRoadmapModal();
-    }
-
-    function submitRoadmapModal() {
-        const goal = document.getElementById('rmGoal').value;
-        const timeframeInput = document.querySelector('input[name="rmTimeframe"]:checked');
-        const notes = document.getElementById('rmNotes').value.trim();
-
-        if (!goal) {
-            alert('لطفاً هدف حرفه‌ای را انتخاب کنید.');
-            return;
-        }
-        if (!timeframeInput) {
-            alert('لطفاً بازه زمانی را انتخاب کنید.');
-            return;
-        }
-
-        // بستن مودال فرم و نمایش مودال پردازش
-        closeRoadmapModal();
-        document.getElementById('processingModal').style.display = 'flex';
-
-        const formData = new FormData();
-        formData.append('goal', goal);
-        formData.append('timeframe', timeframeInput.value);
-        formData.append('timeframe_days', timeframeInput.dataset.days);
-        formData.append('notes', notes);
-        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-        fetch("{% url 'roadmap:roadmap_generate_ai' %}", {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData,
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success && data.redirect_url) {
-                    window.location.href = data.redirect_url;
-                } else {
-                    document.getElementById('processingModal').style.display = 'none';
-                    document.getElementById('errorModal').style.display = 'flex';
-                }
-            })
-            .catch(() => {
-                document.getElementById('processingModal').style.display = 'none';
-                document.getElementById('errorModal').style.display = 'flex';
-            });
-    }
-
-    function resetSubmitBtn() {
-        document.getElementById('rmBtnText').style.display = 'inline';
-        document.getElementById('rmBtnSpinner').style.display = 'none';
-        document.getElementById('rmSubmitBtn').disabled = false;
-    }
-</script>
 
 
 {% endblock %}

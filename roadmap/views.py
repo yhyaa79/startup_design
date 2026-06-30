@@ -1,470 +1,710 @@
 # roadmap/views.py
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
-from django.db import transaction
-from django.http import JsonResponse
-from django.urls import reverse
-
-from .models import Roadmap, Stage, StageActivity, Activity
-from .services.ai_roadmap import generate_ai_roadmap
- 
-from .models import Roadmap, Stage, StageActivity, Activity
-from .services.ai_roadmap import generate_ai_roadmap
-
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseNotAllowed
-from django.db.models import Q
+from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
+from django.db import transaction
 from django.utils import timezone
-from .models import Roadmap, Stage, StageActivity, Activity
-from .forms import (
-    RoadmapForm, StageForm,
-    StageActivityFormSet
-)
-from accounts.models import (
-    Profile,
-    TrainingCourse,
-    Article,
-    Presentation,
-    ExecutiveRecord,
-    Education,
-    SocialProfile,
-)
-from .services.ai_roadmap import generate_ai_roadmap
-import logging
-from accounts.models import TrainingCourse, Article, Presentation, ExecutiveRecord
-from roadmap.services.profile_activity_sync import save_activity_to_profile
+from datetime import timedelta, date
+import json
 
-from .models import RoadmapActivity
+from .models import Roadmap, Stage, Activity, StageActivity
+from .forms import RoadmapCreateForm, StageForm, ActivityForm
+from .services.ai_roadmap import generate_roadmap
+from .services.profile_data import collect_profile_data
+from .services.scoring import calculate_roadmap_score
+from .static_items import get_all_items_flat, get_item_by_id, CATEGORY_LABELS, LEVEL_LABELS, DIFFICULTY_LABELS
 
 
-logger = logging.getLogger(__name__)
-
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from django.utils import timezone
-from django.contrib import messages
+# ═══════════════════════════════════════════════════════════════════
+#  لیست رودمپ‌ها
+# ═══════════════════════════════════════════════════════════════════
 
 @login_required
-def roadmap_detail(request):
-    try:
-        roadmap = request.user.profile.roadmap
-    except Roadmap.DoesNotExist:
-        messages.error(
-            request,
-            'رودمپ هنوز ساخته نشده است. برای ساخت رودمپ از گزینه "ایجاد نقشه راه" استفاده کنید.'
-        )
-        return redirect('core:home')
+def roadmap_list(request):
+    """نمایش لیست رودمپ‌های کاربر"""
+    
+    roadmaps = Roadmap.objects.filter(user=request.user).prefetch_related('stages')
+    
+    context = {
+        'roadmaps': roadmaps,
+        'active_count': roadmaps.filter(status='active').count(),
+        'completed_count': roadmaps.filter(status='completed').count(),
+    }
+    
+    return render(request, 'roadmap/roadmap_list.html', context)
 
-    stages = roadmap.stages.prefetch_related(
-        'stage_activities__activity'
-    ).all().order_by('order')
 
-    total_progress = roadmap.get_total_progress()
-    total_duration = roadmap.get_total_duration()
+# ═══════════════════════════════════════════════════════════════════
+#  ایجاد رودمپ
+# ═══════════════════════════════════════════════════════════════════
 
-    active_stage_id = None
-    now = timezone.now()
-    should_reset_following_stages = False
+@login_required
+@require_http_methods(["GET", "POST"])
+def roadmap_create(request):
+    """ایجاد رودمپ جدید"""
+    
+    if request.method == 'POST':
+        form = RoadmapCreateForm(request.POST)
+        
+        if form.is_valid():
+            goal = form.cleaned_data['goal']
+            duration_days = form.cleaned_data['duration_days']
+            goal_details = form.cleaned_data.get('goal_details', '')
+            
+            # جمع‌آوری داده‌های پروفایل
+            try:
+                profile = request.user.profile
+                profile_data = collect_profile_data(profile)
+            except:
+                return render(request, 'roadmap/roadmap_create.html', {
+                    'form': form,
+                    'error': 'لطفاً ابتدا پروفایل خود را کامل کنید.'
+                })
+            
+            # تولید رودمپ با AI
+            try:
+                roadmap_data = generate_roadmap(profile_data, goal, duration_days)
+            except Exception as e:
+                return render(request, 'roadmap/roadmap_create.html', {
+                    'form': form,
+                    'error': f'خطا در تولید رودمپ: {str(e)}'
+                })
+            
+            # ذخیره رودمپ
+            with transaction.atomic():
+                roadmap = Roadmap.objects.create(
+                    user=request.user,
+                    title=roadmap_data.get('title', f'رودمپ {goal}'),
+                    description=roadmap_data.get('description', ''),
+                    goal=goal,
+                    goal_details=goal_details,
+                    duration_days=duration_days,
+                    target_end_date=date.today() + timedelta(days=duration_days),
+                    ai_generated=True,
+                    ai_prompt=json.dumps({
+                        'goal': goal,
+                        'duration_days': duration_days,
+                        'goal_details': goal_details,
+                    }),
+                    ai_analysis=profile_data,
+                )
+                
+                # ایجاد مراحل
+                for stage_data in roadmap_data.get('stages', []):
+                    stage = Stage.objects.create(
+                        roadmap=roadmap,
+                        order=stage_data.get('order', 1),
+                        title=stage_data.get('title', ''),
+                        description=stage_data.get('description', ''),
+                        objectives=stage_data.get('objectives', ''),
+                        phase_type=stage_data.get('phase_type', ''),
+                        priority=stage_data.get('priority', 'medium'),
+                        duration_days=stage_data.get('duration_days', 30),
+                        start_date=date.today(),
+                        end_date=date.today() + timedelta(days=stage_data.get('duration_days', 30)),
+                        milestone=stage_data.get('milestone', ''),
+                        success_criteria=stage_data.get('success_criteria', []),
+                        risks=stage_data.get('risks', []),
+                        recommended_resources=stage_data.get('recommended_resources', []),
+                    )
+                    
+                    # ایجاد فعالیت‌ها
+                    for activity_data in stage_data.get('activities', []):
+                        raw_id = f"{roadmap.id}_{stage.id}_{activity_data.get('title', '')}"
+                        external_id = raw_id[:50]  # جلوگیری از value too long for varchar(50)
 
-    for s in stages:
-        progress = s.get_progress()
+                        activity, _ = Activity.objects.get_or_create(
+                            external_id=external_id,
+                            defaults={
+                                'title': activity_data.get('title', ''),
+                                'description': activity_data.get('description', ''),
+                                'category': activity_data.get('category', 'course'),
+                                'duration_days': activity_data.get('duration_days', 7),
+                                'impact_score': activity_data.get('impact_score', 5),
+                                'difficulty_rating': activity_data.get('difficulty_rating', 'medium'),
+                                'resume_output': activity_data.get('resume_output', ''),
+                            }
+                        )
 
-        if progress == 100:
-            should_reset_following_stages = True
-            continue
+                        StageActivity.objects.create(
+                            stage=stage,
+                            activity=activity,
+                            order=stage_data.get('activities', []).index(activity_data) + 1,
+                        )
+                
+                # فعال کردن اولین مرحله
+                first_stage = roadmap.stages.first()
+                if first_stage:
+                    first_stage.status = 'active'
+                    first_stage.save()
+                
+                roadmap.status = 'active'
+                roadmap.save()
+            
+            return redirect('roadmap:roadmap_detail', pk=roadmap.id)
+    
+    else:
+        form = RoadmapCreateForm()
+    
+    return render(request, 'roadmap/roadmap_create.html', {'form': form})
 
-        if active_stage_id is None:
-            active_stage_id = s.id
 
-        if should_reset_following_stages:
-            s.updated_at = now
-            s.save(update_fields=['updated_at'])
+# ═══════════════════════════════════════════════════════════════════
+#  جزئیات رودمپ
+# ═══════════════════════════════════════════════════════════════════
 
+@login_required
+def roadmap_detail(request, pk):
+    """نمایش جزئیات رودمپ"""
+    
+    roadmap = get_object_or_404(Roadmap, pk=pk, user=request.user)
+    stages = roadmap.stages.prefetch_related('stage_activities').order_by('order')
+    
+    # محاسبه امتیاز
+    score_data = calculate_roadmap_score(roadmap, roadmap.ai_analysis)
+    roadmap.total_score = score_data['total_score']
+    roadmap.score_breakdown = score_data['breakdown']
+    roadmap.save()
+    
     context = {
         'roadmap': roadmap,
         'stages': stages,
-        'total_progress': total_progress,
-        'total_duration': total_duration,
-        'active_stage_id': active_stage_id,
+        'total_progress': roadmap.get_progress(),
+        'total_duration': roadmap.duration_days,
+        'active_stage_id': roadmap.get_active_stage().id if roadmap.get_active_stage() else None,
+        'remaining_days': roadmap.get_remaining_days(),
+        'score_breakdown': score_data['breakdown'],
     }
-
+    
     return render(request, 'roadmap/roadmap_detail.html', context)
 
 
-
-@login_required
-def roadmap_create(request):
-    """ساخت رود مپ"""
-    profile = request.user.profile
-
-    if hasattr(profile, 'roadmap'):
-        return redirect('roadmap:roadmap_detail')
-
-    if request.method == 'POST':
-        form = RoadmapForm(request.POST)
-        if form.is_valid():
-            roadmap = form.save(commit=False)
-            roadmap.profile = profile
-            roadmap.save()
-            return redirect('roadmap:stage_create', roadmap_id=roadmap.id)
-    else:
-        form = RoadmapForm()
-
-    context = {'form': form, 'action': 'ساخت'}
-    return render(request, 'roadmap/roadmap_form.html', context)
-
-
-@login_required
-def roadmap_edit(request, roadmap_id):
-    """ویرایش رود مپ"""
-    roadmap = get_object_or_404(Roadmap, id=roadmap_id, profile=request.user.profile)
-
-    if request.method == 'POST':
-        form = RoadmapForm(request.POST, instance=roadmap)
-        if form.is_valid():
-            form.save()
-            return redirect('roadmap:roadmap_detail')
-    else:
-        form = RoadmapForm(instance=roadmap)
-
-    context = {
-        'form': form,
-        'action': 'ویرایش',
-        'roadmap': roadmap,
-        'stages': roadmap.stages.all().order_by('order'),
-    }
-    return render(request, 'roadmap/roadmap_form.html', context)
-
-
-@login_required
-def stage_create(request, roadmap_id):
-    """ساخت مرحله جدید"""
-    roadmap = get_object_or_404(Roadmap, id=roadmap_id, profile=request.user.profile)
-
-    if request.method == 'POST':
-        stage_form = StageForm(request.POST)
-        if stage_form.is_valid():
-            stage = stage_form.save(commit=False)
-            stage.roadmap = roadmap
-            stage.save()
-            return redirect('roadmap:stage_edit', stage_id=stage.id)
-    else:
-        stage_form = StageForm()
-
-    context = {
-        'form': stage_form,
-        'roadmap': roadmap,
-        'action': 'ساخت',
-    }
-    return render(request, 'roadmap/stage_create.html', context)
-
+# ═══════════════════════════════════════════════════════════════════
+#  جزئیات مرحله
+# ═══════════════════════════════════════════════════════════════════
 
 @login_required
 def stage_detail(request, stage_id):
     """نمایش جزئیات مرحله"""
-    stage = get_object_or_404(
-        Stage.objects.prefetch_related('stage_activities__activity'),
-        id=stage_id,
-        roadmap__profile=request.user.profile
-    )
-
+    
+    stage = get_object_or_404(Stage, id=stage_id)
     roadmap = stage.roadmap
-
-    active_stage = None
-    stages = roadmap.stages.all().order_by('order')
-
-    for s in stages:
-        if s.get_progress() < 100:
-            active_stage = s
-            break
-
+    
+    # بررسی دسترسی
+    if roadmap.user != request.user:
+        return redirect('roadmap:roadmap_list')
+    
+    activities = stage.stage_activities.select_related('activity').order_by('order')
+    
     context = {
-        'stage': stage,
         'roadmap': roadmap,
-        'active_stage': active_stage,
+        'stage': stage,
+        'activities': activities,
         'progress': stage.get_progress(),
         'duration': stage.get_total_duration(),
+        'active_stage': roadmap.get_active_stage(),
     }
-
+    
     return render(request, 'roadmap/stage_detail.html', context)
 
 
+# ═══════════════════════════════════════════════════════════════════
+#  ✅ جزئیات فعالیت (صفحه کامل - جدید)
+# ═══════════════════════════════════════════════════════════════════
 
 @login_required
-def stage_edit(request, stage_id):
-    stage = get_object_or_404(Stage, id=stage_id, roadmap__profile=request.user.profile)
-
-    if request.method == 'POST':
-        stage_form = StageForm(request.POST, instance=stage)
-        activity_formset = StageActivityFormSet(request.POST, instance=stage, prefix='activities')
-
-        stage_valid = stage_form.is_valid()
-        activity_valid = activity_formset.is_valid()
-
-        if stage_valid and activity_valid :
-            stage_form.save()
-
-            activity_instances = activity_formset.save(commit=False)
-
-            for obj in activity_formset.deleted_objects:
-                obj.delete()
-
-            for item in activity_instances:
-                if item.activity_id:
-                    item.stage = stage
-                    item.save()
-
-
-            return redirect('roadmap:stage_detail', stage_id=stage.id)
-
-    else:
-        stage_form = StageForm(instance=stage)
-        activity_formset = StageActivityFormSet(instance=stage, prefix='activities')
-
-    context = {
-        'stage_form': stage_form,
-        'activity_formset': activity_formset,
-        'stage': stage,
-        'roadmap': stage.roadmap,
-        'action': 'ویرایش',
-    }
-    return render(request, 'roadmap/stage_form.html', context)
-
-
-@login_required
-def stage_delete(request, stage_id):
-    """حذف مرحله"""
-    stage = get_object_or_404(Stage, id=stage_id, roadmap__profile=request.user.profile)
-    roadmap = stage.roadmap
-    stage.delete()
-    return redirect('roadmap:roadmap_detail')
-
-
-@login_required
-def activity_list(request):
-    """لیست فعالیت‌های موجود"""
-    activities = Activity.objects.filter(is_active=True)
-
-    category = request.GET.get('category')
-    field = request.GET.get('field')
-    search = request.GET.get('search')
-
-    if category:
-        activities = activities.filter(category=category)
-    if field:
-        activities = activities.filter(field=field)
-    if search:
-        activities = activities.filter(
-            Q(title__icontains=search) | Q(description__icontains=search)
-        )
-
-    activities = activities.order_by('category', 'title')
-
-    context = {
-        'activities': activities,
-        'categories': Activity.CATEGORY_CHOICES,
-        'fields': Activity.FIELD_CHOICES,
-    }
-    return render(request, 'roadmap/activity_list.html', context)
-
-
-@login_required
-def activity_detail(request, activity_id):
-    """جزئیات فعالیت"""
-    activity = get_object_or_404(Activity, id=activity_id)
-    context = {'activity': activity}
-    return render(request, 'roadmap/activity_detail.html', context)
-
-
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect
-from django.http import JsonResponse, HttpResponseNotAllowed
-
-@login_required
-def stage_activity_toggle(request, stage_activity_id):
-    if request.method != 'POST':
-        return HttpResponseNotAllowed(['POST'])
-
+def stage_activity_detail(request, activity_id):
+    """نمایش صفحه کامل جزئیات فعالیت"""
+    
     stage_activity = get_object_or_404(
-        StageActivity,
-        id=stage_activity_id,
-        stage__roadmap__profile=request.user.profile
+        StageActivity.objects.select_related('activity', 'stage', 'stage__roadmap'),
+        id=activity_id
     )
+    roadmap = stage_activity.stage.roadmap
+    
+    # بررسی دسترسی
+    if roadmap.user != request.user:
+        return redirect('roadmap:roadmap_list')
+    
+    # لیست آیتم‌های ثابت برای انتخاب
+    static_items = get_all_items_flat()
+    
+    context = {
+        'roadmap': roadmap,
+        'stage': stage_activity.stage,
+        'stage_activity': stage_activity,
+        'activity': stage_activity.activity,
+        'static_items': static_items,
+        'category_labels': CATEGORY_LABELS,
+        'level_labels': LEVEL_LABELS,
+        'difficulty_labels': DIFFICULTY_LABELS,
+    }
+    
+    return render(request, 'roadmap/stage_activity_detail.html', context)
 
-    if stage_activity.is_completed:
-        messages.warning(request, 'این فعالیت قبلاً تکمیل شده و دیگر قابل تغییر نیست.')
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'success': False, 'message': 'قبلاً تکمیل شده.'}, status=400)
-        return redirect('roadmap:stage_detail', stage_id=stage_activity.stage.id)
 
-    stage_activity.is_completed = True
-    stage_activity.save()
+# ═══════════════════════════════════════════════════════════════════
+#  ✅ بروزرسانی فعالیت (جدید)
+# ═══════════════════════════════════════════════════════════════════
 
-    profile = request.user.profile
-    activity = stage_activity.activity
-
-    RoadmapActivity.objects.get_or_create(
-        profile=profile,
-        stage_activity=stage_activity,
-        activity=activity
-    )
-
-    save_target = request.POST.get('save_target', '')
-    if save_target and save_target != '__skip__':
-        # مکان ذخیره انتخابی کاربر رو به تابع sync پاس می‌دیم
-        save_activity_to_profile(profile, activity, override_model=save_target)
-
-    messages.success(request, 'فعالیت با موفقیت تکمیل شد.')
-
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+@login_required
+@require_http_methods(["POST"])
+def stage_activity_update(request, activity_id):
+    """بروزرسانی جزئیات فعالیت"""
+    
+    stage_activity = get_object_or_404(StageActivity, id=activity_id)
+    roadmap = stage_activity.stage.roadmap
+    
+    # بررسی دسترسی
+    if roadmap.user != request.user:
+        return JsonResponse({'error': 'دسترسی رد شد'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        
+        # بروزرسانی فیلدهای اصلی
+        if 'progress_percentage' in data:
+            stage_activity.progress_percentage = int(data['progress_percentage'])
+        
+        if 'notes' in data:
+            stage_activity.notes = data['notes']
+        
+        if 'actual_start_date' in data and data['actual_start_date']:
+            stage_activity.actual_start_date = data['actual_start_date']
+        
+        if 'actual_end_date' in data and data['actual_end_date']:
+            stage_activity.actual_end_date = data['actual_end_date']
+        
+        if 'result_summary' in data:
+            stage_activity.result_summary = data['result_summary']
+        
+        # بروزرسانی checkpoints
+        if 'checkpoints' in data:
+            stage_activity.checkpoints = data['checkpoints']
+        
+        # بروزرسانی resources
+        if 'resources' in data:
+            stage_activity.resources = data['resources']
+        
+        stage_activity.save()
+        
         return JsonResponse({
             'success': True,
-            'is_completed': True,
-            'stage_progress': stage_activity.stage.get_progress()
+            'message': 'فعالیت با موفقیت بروزرسانی شد'
         })
-
-    return redirect('roadmap:stage_detail', stage_id=stage_activity.stage.id)
-
-
-
-@login_required
-def roadmap_generate_ai(request):
-    if request.method != 'POST':
-        from django.http import HttpResponseNotAllowed
-        return HttpResponseNotAllowed(['POST'])
-
-    profile = request.user.profile
-
-    if hasattr(profile, "roadmap"):
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({
-                "success": True,
-                "redirect_url": reverse("roadmap:roadmap_detail"),
-            })
-        return redirect("roadmap:roadmap_detail")
-
-    # ── پارامترهای مودال ──
-    selected_goal = request.POST.get('goal', '').strip()
-    timeframe = request.POST.get('timeframe', '').strip()
-    timeframe_days = request.POST.get('timeframe_days', '').strip()
-    user_notes = request.POST.get('notes', '').strip()
-
-    # اگه کاربر هدف انتخاب نکرد، هدف پروفایل رو بگیر
-    target_goal = selected_goal or profile.goal or ''
-
-    try:
-        timeframe_days_int = int(timeframe_days)
-    except (ValueError, TypeError):
-        timeframe_days_int = 180  # default: 3 تا 6 ماه
-
-    try:
-        roadmap_data = generate_ai_roadmap(
-            profile,
-            target_goal=target_goal,
-            timeframe=timeframe,
-            timeframe_days=timeframe_days_int,
-            user_notes=user_notes,
-        )
-
-        with transaction.atomic():
-            roadmap = Roadmap.objects.create(
-                profile=profile,
-                title=roadmap_data["title"],
-                description=roadmap_data.get("description", ""),
-                status=roadmap_data.get("status", "فعال"),
-            )
-
-            for stage_data in roadmap_data.get("stages", []):
-                stage_kwargs = {
-                    "roadmap": roadmap,
-                    "title": stage_data["title"],
-                    "description": stage_data.get("description", ""),
-                    "objectives": stage_data.get("objectives", ""),
-                    "order": stage_data.get("order", 0),
-                }
-
-                _optional_stage_fields = {
-                    "phase_type": stage_data.get("phase_type", ""),
-                    "priority": stage_data.get("priority", ""),
-                    "milestone": stage_data.get("milestone", ""),
-                    "success_criteria": stage_data.get("success_criteria", []),
-                    "risks": stage_data.get("risks", []),
-                    "recommended_resources": stage_data.get("recommended_resources", []),
-                }
-
-                from django.db.models.fields import Field as DjangoField
-                stage_field_names = {f.name for f in Stage._meta.get_fields()
-                                     if isinstance(f, DjangoField)}
-                for field_name, value in _optional_stage_fields.items():
-                    if field_name in stage_field_names and value is not None:
-                        stage_kwargs[field_name] = value
-
-                stage = Stage.objects.create(**stage_kwargs)
-
-                for activity_item in stage_data.get("activities", []):
-                    activity = Activity.objects.filter(
-                        title=activity_item["title"],
-                        is_active=True,
-                    ).first()
-
-                    if activity:
-                        sa_kwargs = {
-                            "stage": stage,
-                            "activity": activity,
-                            "notes": activity_item.get("notes", ""),
-                            "order": stage_data.get("activities", []).index(activity_item) + 1,
-                        }
-                        StageActivity.objects.create(**sa_kwargs)
-
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({
-                "success": True,
-                "redirect_url": reverse("roadmap:roadmap_detail"),
-            })
-        return redirect("roadmap:roadmap_detail")
-
-    except Exception as e:
-        logger.exception("خطا در تولید رودمپ AI")
-
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse(
-                {"success": False, "message": "خطا در ساخت نقشه راه"},
-                status=500,
-            )
-        return redirect("core:home")
     
+    except Exception as e:
+        return JsonResponse({
+            'error': f'خطا: {str(e)}'
+        }, status=400)
 
+
+# ═══════════════════════════════════════════════════════════════════
+#  ✅ انتخاب آیتم از لیست ثابت (جدید)
+# ═══════════════════════════════════════════════════════════════════
 
 @login_required
-def activity_search_api(request):
-    search = request.GET.get('q', '').strip()
-
-    activities = Activity.objects.filter(is_active=True)
-
-    if search:
-        activities = activities.filter(
-            Q(title__icontains=search) |
-            Q(description__icontains=search) |
-            Q(category__icontains=search) |
-            Q(resume_output__icontains=search)
-        )
-
-    activities = activities.order_by('category', 'title')
-
-    data = []
-    for activity in activities:
-        data.append({
-            'id': activity.id,
-            'title': activity.title,
-            'description': activity.description,
-            'category': activity.category,
-            'resume_output': getattr(activity, 'resume_output', ''),
-            'resume_target': getattr(activity, 'resume_target', ''),
-            'duration_days': getattr(activity, 'duration_days', ''),
+@require_http_methods(["POST"])
+def stage_activity_select_static_item(request, activity_id):
+    """انتخاب آیتم ثابت برای فعالیت"""
+    
+    stage_activity = get_object_or_404(StageActivity, id=activity_id)
+    roadmap = stage_activity.stage.roadmap
+    
+    # بررسی دسترسی
+    if roadmap.user != request.user:
+        return JsonResponse({'error': 'دسترسی رد شد'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        static_item_id = data.get('static_item_id')
+        
+        # دریافت آیتم
+        static_item = get_item_by_id(static_item_id)
+        if not static_item:
+            return JsonResponse({'error': 'آیتم یافت نشد'}, status=404)
+        
+        with transaction.atomic():
+            # بروزرسانی StageActivity
+            stage_activity.activity_source = 'static'
+            stage_activity.static_item_id = static_item_id
+            stage_activity.static_item_data = static_item
+            
+            # بروزرسانی Activity اگر لازم باشد
+            activity = stage_activity.activity
+            activity.title = static_item['title']
+            activity.description = static_item['description']
+            activity.category = static_item['category']
+            activity.duration_days = static_item['estimated_duration_days']
+            activity.impact_score = static_item['impact_score']
+            activity.difficulty_rating = static_item['difficulty']
+            activity.organizer = static_item.get('organizer', '')
+            activity.level = static_item.get('level', '')
+            activity.save()
+            
+            stage_activity.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'آیتم با موفقیت انتخاب شد',
+            'activity': {
+                'title': activity.title,
+                'description': activity.description,
+                'category': activity.get_category_display(),
+            }
         })
+    
+    except Exception as e:
+        return JsonResponse({
+            'error': f'خطا: {str(e)}'
+        }, status=400)
 
-    return JsonResponse({'results': data})
+
+# ═══════════════════════════════════════════════════════════════════
+#  ✅ ایجاد فعالیت دستی (جدید)
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+@require_http_methods(["POST"])
+def stage_activity_create_custom(request, activity_id):
+    """ایجاد فعالیت دستی برای StageActivity"""
+    
+    stage_activity = get_object_or_404(StageActivity, id=activity_id)
+    roadmap = stage_activity.stage.roadmap
+    
+    # بررسی دسترسی
+    if roadmap.user != request.user:
+        return JsonResponse({'error': 'دسترسی رد شد'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        
+        with transaction.atomic():
+            # بروزرسانی Activity
+            activity = stage_activity.activity
+            activity.title = data.get('title', 'فعالیت جدید')
+            activity.description = data.get('description', '')
+            activity.category = data.get('category', 'course')
+            activity.duration_days = int(data.get('duration_days', 7))
+            activity.impact_score = int(data.get('impact_score', 5))
+            activity.difficulty_rating = data.get('difficulty_rating', 'medium')
+            activity.organizer = data.get('organizer', '')
+            activity.level = data.get('level', '')
+            activity.save()
+            
+            # بروزرسانی StageActivity
+            stage_activity.activity_source = 'custom'
+            stage_activity.static_item_id = None
+            stage_activity.static_item_data = {}
+            stage_activity.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'فعالیت دستی با موفقیت ایجاد شد',
+            'activity': {
+                'id': activity.id,
+                'title': activity.title,
+                'category': activity.get_category_display(),
+            }
+        })
+    
+    except Exception as e:
+        return JsonResponse({
+            'error': f'خطا: {str(e)}'
+        }, status=400)
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  تغییر وضعیت فعالیت (اصلاح شده)
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+@require_http_methods(["POST"])
+def stage_activity_toggle(request, activity_id):
+    """تغییر وضعیت فعالیت"""
+    
+    stage_activity = get_object_or_404(StageActivity, id=activity_id)
+    roadmap = stage_activity.stage.roadmap
+    
+    # بررسی دسترسی
+    if roadmap.user != request.user:
+        return JsonResponse({'error': 'دسترسی رد شد'}, status=403)
+    
+    save_target = request.POST.get('save_target', '__skip__')
+    
+    with transaction.atomic():
+        stage_activity.is_completed = True
+        stage_activity.completion_date = date.today()
+        stage_activity.progress_percentage = 100
+        stage_activity.saved_to_profile = save_target if save_target != '__skip__' else None
+        stage_activity.save()
+        
+        # بررسی تکمیل مرحله
+        stage = stage_activity.stage
+        if stage.stage_activities.filter(is_completed=False).count() == 0:
+            stage.status = 'completed'
+            stage.save()
+            
+            # فعال کردن مرحله بعدی
+            next_stage = stage.roadmap.stages.filter(order=stage.order + 1).first()
+            if next_stage:
+                next_stage.status = 'active'
+                next_stage.save()
+            else:
+                # تمام مراحل تکمیل شده
+                roadmap.status = 'completed'
+                roadmap.save()
+    
+    return redirect('roadmap:stage_activity_detail', activity_id=activity_id)
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  ✅ اضافه کردن checkpoint (جدید)
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+@require_http_methods(["POST"])
+def stage_activity_add_checkpoint(request, activity_id):
+    """اضافه کردن نقطه کنترل"""
+    
+    stage_activity = get_object_or_404(StageActivity, id=activity_id)
+    roadmap = stage_activity.stage.roadmap
+    
+    if roadmap.user != request.user:
+        return JsonResponse({'error': 'دسترسی رد شد'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        
+        checkpoint = {
+            'id': len(stage_activity.checkpoints) + 1,
+            'title': data.get('title', ''),
+            'description': data.get('description', ''),
+            'is_completed': False,
+            'date': None,
+        }
+        
+        checkpoints = stage_activity.checkpoints or []
+        checkpoints.append(checkpoint)
+        stage_activity.checkpoints = checkpoints
+        stage_activity.save()
+        
+        return JsonResponse({
+            'success': True,
+            'checkpoint': checkpoint,
+        })
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  ✅ تغییر وضعیت checkpoint (جدید)
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+@require_http_methods(["POST"])
+def stage_activity_toggle_checkpoint(request, activity_id, checkpoint_id):
+    """تغییر وضعیت checkpoint"""
+    
+    stage_activity = get_object_or_404(StageActivity, id=activity_id)
+    roadmap = stage_activity.stage.roadmap
+    
+    if roadmap.user != request.user:
+        return JsonResponse({'error': 'دسترسی رد شد'}, status=403)
+    
+    try:
+        checkpoint_id = int(checkpoint_id)
+        checkpoints = stage_activity.checkpoints or []
+        
+        for checkpoint in checkpoints:
+            if checkpoint['id'] == checkpoint_id:
+                checkpoint['is_completed'] = not checkpoint['is_completed']
+                if checkpoint['is_completed']:
+                    checkpoint['date'] = str(date.today())
+                else:
+                    checkpoint['date'] = None
+                break
+        
+        stage_activity.checkpoints = checkpoints
+        stage_activity.save()
+        
+        return JsonResponse({'success': True})
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  ✅ اضافه کردن resource (جدید)
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+@require_http_methods(["POST"])
+def stage_activity_add_resource(request, activity_id):
+    """اضافه کردن منبع"""
+    
+    stage_activity = get_object_or_404(StageActivity, id=activity_id)
+    roadmap = stage_activity.stage.roadmap
+    
+    if roadmap.user != request.user:
+        return JsonResponse({'error': 'دسترسی رد شد'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        
+        resource = {
+            'id': len(stage_activity.resources) + 1,
+            'title': data.get('title', ''),
+            'type': data.get('type', 'link'),
+            'url': data.get('url', ''),
+            'description': data.get('description', ''),
+        }
+        
+        resources = stage_activity.resources or []
+        resources.append(resource)
+        stage_activity.resources = resources
+        stage_activity.save()
+        
+        return JsonResponse({
+            'success': True,
+            'resource': resource,
+        })
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  ✅ حذف resource (جدید)
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+@require_http_methods(["POST"])
+def stage_activity_delete_resource(request, activity_id, resource_id):
+    """حذف منبع"""
+    
+    stage_activity = get_object_or_404(StageActivity, id=activity_id)
+    roadmap = stage_activity.stage.roadmap
+    
+    if roadmap.user != request.user:
+        return JsonResponse({'error': 'دسترسی رد شد'}, status=403)
+    
+    try:
+        resource_id = int(resource_id)
+        resources = stage_activity.resources or []
+        
+        stage_activity.resources = [r for r in resources if r.get('id') != resource_id]
+        stage_activity.save()
+        
+        return JsonResponse({'success': True})
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  ویرایش رودمپ
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def roadmap_edit(request, pk):
+    """ویرایش رودمپ"""
+    
+    roadmap = get_object_or_404(Roadmap, pk=pk, user=request.user)
+    
+    if request.method == 'POST':
+        form = RoadmapCreateForm(request.POST, instance=roadmap)
+        
+        if form.is_valid():
+            form.save()
+            return redirect('roadmap:roadmap_detail', pk=roadmap.id)
+    
+    else:
+        form = RoadmapCreateForm(instance=roadmap)
+    
+    return render(request, 'roadmap/roadmap_edit.html', {
+        'form': form,
+        'roadmap': roadmap,
+    })
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  حذف رودمپ
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+@require_http_methods(["POST"])
+def roadmap_delete(request, pk):
+    """حذف رودمپ"""
+    
+    roadmap = get_object_or_404(Roadmap, pk=pk, user=request.user)
+    roadmap.delete()
+    
+    return redirect('roadmap:roadmap_list')
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  ایجاد مرحله
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def stage_create(request, roadmap_id):
+    """ایجاد مرحله جدید"""
+    
+    roadmap = get_object_or_404(Roadmap, id=roadmap_id, user=request.user)
+    
+    if request.method == 'POST':
+        form = StageForm(request.POST)
+        
+        if form.is_valid():
+            stage = form.save(commit=False)
+            stage.roadmap = roadmap
+            stage.order = roadmap.stages.count() + 1
+            stage.save()
+            
+            return redirect('roadmap:stage_detail', stage_id=stage.id)
+    
+    else:
+        form = StageForm()
+    
+    return render(request, 'roadmap/stage_create_edit.html', {
+        'form': form,
+        'roadmap': roadmap,
+        'title': 'ایجاد مرحله جدید',
+    })
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  ویرایش مرحله
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def stage_edit(request, stage_id):
+    """ویرایش مرحله"""
+    
+    stage = get_object_or_404(Stage, id=stage_id)
+    
+    if stage.roadmap.user != request.user:
+        return redirect('roadmap:roadmap_list')
+    
+    if request.method == 'POST':
+        form = StageForm(request.POST, instance=stage)
+        
+        if form.is_valid():
+            form.save()
+            return redirect('roadmap:stage_detail', stage_id=stage.id)
+    
+    else:
+        form = StageForm(instance=stage)
+    
+    return render(request, 'roadmap/stage_create_edit.html', {
+        'form': form,
+        'stage': stage,
+        'title': 'ویرایش مرحله',
+    })

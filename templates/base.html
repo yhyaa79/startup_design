@@ -90,8 +90,8 @@
             {% endif %}
 
 
-            <a class="nav-item {% if request.resolver_match.namespace == 'roadmap' and request.resolver_match.url_name == 'roadmap_detail' %}active{% endif %}"
-                href="{% url 'roadmap:roadmap_detail' %}">
+            <a class="nav-item {% if request.resolver_match.namespace == 'roadmap' and request.resolver_match.url_name == 'roadmap_list' %}active{% endif %}"
+                href="{% url 'roadmap:roadmap_list' %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <circle cx="12" cy="12" r="10" />
                     <polyline points="12 6 12 12 16 14" />
@@ -145,11 +145,13 @@
 
             <div class="nav-section-label" style="margin-top:8px;">توسعه فردی</div>
 
-            <a class="nav-item" href="#">
+
+            <a class="nav-item {% if request.resolver_match.namespace == 'activity' and request.resolver_match.url_name == 'list' %}active{% endif %}"
+                href="{% url 'activity:list' %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                 </svg>
-                مهارت‌ها
+                فعالیت ها
             </a>
 
             <a class="nav-item {% if request.resolver_match.namespace == 'resume' and request.resolver_match.url_name == 'resume_list' %}active{% endif %}"
@@ -164,7 +166,7 @@
                 رزومه و کارنامه
             </a>
 
-            <a class="nav-item" href="#">
+<!--             <a class="nav-item" href="#">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <rect x="2" y="7" width="20" height="14" rx="2" />
                     <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
@@ -173,7 +175,7 @@
                 </svg>
                 فرصت‌های شغلی
             </a>
-
+ -->
             <div class="nav-section-label" style="margin-top:8px;">سیستم</div>
 
             <a class="nav-item" href="#">
@@ -273,7 +275,7 @@
                         </svg>
                         داشبورد
                     </a>
-                    <a href="{% url 'roadmap:roadmap_detail' %}">
+                    <a href="{% url 'roadmap:roadmap_list' %}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <circle cx="12" cy="12" r="10" />
                             <polyline points="12 6 12 12 16 14" />

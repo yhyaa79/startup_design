@@ -1,5 +1,5 @@
 # roadmap/management/commands/populate_activities.py
-
+'''
 from django.core.management.base import BaseCommand
 from roadmap.models import Activity
 
@@ -141,4 +141,4 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(self.style.SUCCESS(f'فعالیت "{activity.title}" ایجاد شد'))
             else:
-                self.stdout.write(self.style.WARNING(f'فعالیت "{activity.title}" به‌روز شد'))
+                self.stdout.write(self.style.WARNING(f'فعالیت "{activity.title}" به‌روز شد'))'''
