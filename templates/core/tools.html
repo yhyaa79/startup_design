@@ -1,0 +1,672 @@
+<!-- templates/core/tools.html -->
+
+
+{% extends 'base.html' %}
+
+{% block title %}ابزارها{% endblock %}
+{% block topbar_title %}جعبه ابزار{% endblock %}
+
+{% block content %}
+
+<style>
+    :root {
+        --home-primary: #3b82f6;
+        --home-success: #10b981;
+        --home-warning: #f59e0b;
+        --home-danger: #ef4444;
+        --home-gray-50: #f9fafb;
+        --home-gray-100: #f3f4f6;
+        --home-gray-200: #e5e7eb;
+        --home-gray-300: #d1d5db;
+        --home-gray-700: #374151;
+        --home-gray-900: #111827;
+    }
+
+    .home-activitydetail-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .home-activity-header {
+        background: linear-gradient(135deg, var(--home-primary) 0%, #1e40af 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0.1);
+    }
+
+    .home-activity-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 2rem;
+    }
+
+    .home-activity-header-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0.5rem;
+    }
+
+    .home-activity-header-breadcrumb {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        margin-bottom: 1rem;
+    }
+
+    .home-activity-header-breadcrumb a {
+        color: white;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .home-activity-header-status {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .home-status-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .home-status-badge.home-completed {
+        background: var(--home-success);
+    }
+
+    .home-status-badge.home-pending {
+        background: var(--home-warning);
+    }
+
+    /* TABS */
+    .home-tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 2px solid var(--home-gray-200);
+        margin-bottom: 1.5rem;
+    }
+
+    .home-tab-btn {
+        padding: 1rem 1.5rem;
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--home-gray-700);
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
+        transition: all 0.2s;
+        font-family: inherit;
+        font-size: 0.95rem;
+    }
+
+    .home-tab-btn:hover {
+        color: var(--home-primary);
+    }
+
+    .home-tab-btn.home-active {
+        color: var(--home-primary);
+        border-bottom-color: var(--home-primary);
+    }
+
+    .home-tab-content {
+        display: none;
+    }
+
+    .home-tab-content.home-active {
+        display: block;
+    }
+
+    /* CARD */
+    .home-card {
+        background: white;
+        border-radius: 12px;
+        padding: .5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--home-gray-200);
+    }
+
+    .home-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--home-gray-100);
+    }
+
+    .home-card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--home-gray-900);
+        margin: 0;
+    }
+
+    /* TOOLS GRID */
+    .home-tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.25rem;
+        margin-top: 1rem;
+    }
+
+    .home-tool-card {
+        border: 2px solid var(--home-gray-200);
+        border-radius: 12px;
+        padding: 1.5rem;
+        background: white;
+        transition: all 0.25s;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .home-tool-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--home-primary);
+        border-radius: 0 12px 12px 0;
+        opacity: 0;
+        transition: opacity 0.25s;
+    }
+
+    .home-tool-card:hover {
+        border-color: var(--home-primary);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .home-tool-card:hover::before {
+        opacity: 1;
+    }
+
+    .home-tool-card.home-tool-new {
+        border-color: var(--home-success);
+    }
+
+    .home-tool-card.home-tool-new::before {
+        background: var(--home-success);
+        opacity: 1;
+    }
+
+    .home-tool-icon-wrap {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        background: var(--home-gray-100);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .home-tool-icon-wrap svg {
+        width: 24px;
+        height: 24px;
+        stroke: var(--home-primary);
+    }
+
+    .home-tool-icon-wrap.home-icon-green svg {
+        stroke: var(--home-success);
+    }
+
+    .home-tool-icon-wrap.home-icon-orange svg {
+        stroke: var(--home-warning);
+    }
+
+    .home-tool-icon-wrap.home-icon-red svg {
+        stroke: var(--home-danger);
+    }
+
+    .home-tool-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .home-tool-meta {
+        flex: 1;
+    }
+
+    .home-tool-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--home-gray-900);
+        margin: 0 0.25rem;
+    }
+
+    .home-tool-badge-row {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.25rem;
+    }
+
+    .home-tool-badge {
+        display: inline-block;
+        background: var(--home-gray-100);
+        padding: 0.2rem 0.6rem;
+        border-radius: 10px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--home-gray-700);
+    }
+
+    .home-tool-badge.home-badge-blue {
+        background: rgba(59, 130, 246, 0.1);
+        color: #1d4ed8;
+    }
+
+    .home-tool-badge.home-badge-green {
+        background: rgba(16, 185, 129, 0.1);
+        color: #065f46;
+    }
+
+    .home-tool-badge.home-badge-orange {
+        background: rgba(245, 158, 11, 0.1);
+        color: #92400e;
+    }
+
+    .home-tool-badge.home-badge-new {
+        background: var(--home-success);
+        color: white;
+    }
+
+    .home-tool-desc {
+        font-size: 0.875rem;
+        color: var(--home-gray-700);
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    .home-tool-features {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .home-tool-features li {
+        font-size: 0.8rem;
+        color: var(--home-gray-700);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .home-tool-features li::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--home-primary);
+        flex-shrink: 0;
+    }
+
+    .home-tool-footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--home-gray-100);
+    }
+
+    .home-tool-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: var(--home-primary);
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+
+    .home-tool-link:hover {
+        background: #1d4ed8;
+        color: white;
+    }
+
+    .home-tool-link.home-link-green {
+        background: var(--home-success);
+    }
+
+    .home-tool-link.home-link-green:hover {
+        background: #059669;
+    }
+
+    .home-tool-link svg {
+        width: 14px;
+        height: 14px;
+        stroke: white;
+    }
+
+    .home-tool-status {
+        font-size: 0.75rem;
+        color: var(--home-gray-700);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .home-tool-status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--home-success);
+        display: inline-block;
+    }
+
+    .home-tool-status-dot.home-dot-orange {
+        background: var(--home-warning);
+    }
+
+    /* ALERT */
+    .home-alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+
+    .home-alert-info {
+        background: rgba(59, 130, 246, 0.08);
+        border: 1px solid var(--home-primary);
+        color: #1e40af;
+    }
+
+    .home-alert-icon {
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+    }
+
+    .home-alert-text {
+        font-size: 0.875rem;
+        line-height: 1.6;
+    }
+
+    /* SECTION DIVIDER */
+    .home-section-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--home-gray-700);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 1.5rem 0 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .home-section-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--home-gray-200);
+    }
+
+    @media (max-width: 640px) {
+        .home-tools-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .home-activity-headertitle {
+            font-size: 1.4rem;
+        }
+    }
+</style>
+
+<div class="home-activity-detail-container">
+
+    <!-- HEADER -->
+    <div class="home-activity-header">
+        <div class="home-activity-header-content">
+            <div>
+                <div class="home-activity-header-breadcrumb">
+                    <a href="{% url 'core:home' %}">داشبورد</a>
+                    <span> /ابزارها</span>
+                </div>
+                <h1 class="home-activity-header-title">جعبه ابزار</h1>
+                <p style="opacity:0.85; margin:0; font-size:0.95rem;">
+                    مجموعه‌ای از ابزارهای هوشمند برای ارزیابی و ساخت رزومه تحقیقاتی شما
+                </p>
+            </div>
+            <div class="home-activity-header-status">
+                <span class="home-status-badge">۴ ابزار</span>
+                <span class="home-status-badge home-completed">۲ فعال</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="home-card" style="margin-bottom: 1.5rem;">
+
+        <!-- TAB: ALL -->
+        <div class="home-tab-content home-active" id="home-tab-all">
+
+            <div class="home-alert home-alert-info">
+                <span class="home-alert-icon">💡</span>
+                <span class="home-alert-text">
+                    برای استفاده از هر ابزار روی دکمه «ورود به ابزار» کلیک کنید.
+                    ابزارهای که نشان‌گر زرد دارند در حال توسعه هستند.
+                </span>
+            </div>
+
+            <div class="home-section-label">ابزارهای رزومه</div>
+
+            <div class="home-tools-grid">
+
+                <!-- TOOL 1: تعین سطح رزومه -->
+                <div class="home-tool-card">
+                    <div class="home-tool-top">
+                        <div class="home-tool-icon-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M9 11l3 3L22 4" />
+                                <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2V5a2 2 0 012-2h11" />
+                            </svg>
+                        </div>
+                        <div class="home-tool-meta">
+                            <h3 class="home-tool-title">تعیین سطح رزومه</h3>
+                            <div class="home-tool-badge-row">
+                                <span class="home-tool-badge home-badge-blue">تحلیل</span>
+                                <span class="home-tool-badge home-badge-green">رایگان</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="home-tool-desc">
+                        رزومه تحقیقاتی خود رارزیابی کنید و بدانید در چه سطحی قرار دارید.
+                        این ابزار بر اساس مقالات، ارائه‌ها، دوره‌ها و تجربیات اجرایی شما
+                        یک امتیاز کلی محاسبه می‌کند.
+                    </p>
+
+                    <ul class="home-tool-features">
+                        <li>امتیازدهی بر اساس معیارهای علمی</li>
+                        <li>مقایسه با استانداردهای پذیرش فلوشیپ</li>
+                        <li>پیشنهاد مسیر بهبود</li>
+                    </ul>
+
+                    <div class="home-tool-footer">
+                        <span class="home-tool-link"
+                            style="background: var(--home-gray-300); color: var(--home-gray-700); cursor: not-allowed;">
+                            به زودی
+                        </span>
+                        <span class="home-tool-status">
+                            <span class="home-tool-status-dot home-dot-orange"></span>
+                            در توسعه
+                        </span>
+                    </div>
+                </div>
+
+                <!-- TOOL 2: ساخت رزومه -->
+                <div class="home-tool-card home-tool-new">
+                    <div class="home-tool-top">
+                        <div class="home-tool-icon-wrap home-icon-green">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="16" y1="13" x2="8" y2="13" />
+                                <line x1="16" y1="17" x2="8" y2="17" />
+                                <polyline points="10 9 8 9" />
+                            </svg>
+                        </div>
+                        <div class="home-tool-meta">
+                            <h3 class="home-tool-title">ساخت رزومه تحقیقاتی</h3>
+                            <div class="home-tool-badge-row">
+                                <span class="home-tool-badge home-badge-green">رزومه</span>
+                                <span class="home-tool-badge home-badge-new">جدید</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="home-tool-desc">
+                        رزومه تحقیقاتی استندارد خود را در چند دقیقه بسازید.
+                        اطلاعات پروفایل شما به صورت خودکار وارد می‌شود و
+                        خروجی PDF آماده ارسال به ژورنال یا مصحبه دریافت کنید.
+                    </p>
+
+                    <ul class="home-tool-features">
+                        <li>قالب‌های متعد سازگار با استانداردهای بین‌المللی</li>
+                        <li>وارد کردن خودکار اطلاعات از پروفایل</li>
+                        <li>خروجی PDF با یک کلیک</li>
+                    </ul>
+
+                    <div class="home-tool-footer">
+                        <a href="{% url 'resume:resume_list' %}" target="_blank"
+                            class="home-tool-link home-link-green">
+                            <svg viewBox="0 0 24" fill="none" stroke-width="2.5">
+                                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 01-2-2V8a2 2 0 012-2h6" />
+                                <polyline points="15 3 21 3 21 9" />
+                                <line x1="10" y1="14" x2="21" y2="3" />
+                            </svg>
+                            ورود به ابزار
+                        </a>
+                        <span class="home-tool-status">
+                            <span class="home-tool-status-dot"></span>
+                            فعال
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="home-section-label">ابزارهای تحلیل</div>
+
+            <div class="home-tools-grid">
+
+                <!-- TOOL 3: مقایسه با ربا -->
+                <div class="home-tool-card">
+                    <div class="home-tool-top">
+                        <div class="home-tool-icon-wrap home-icon-orange">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <line x1="18" y1="20" x2="18" y2="10" />
+                                <line x1="12" y1="20" x2="12" y2="4" />
+                                <line x1="6" y1="20" x2="6" y2="14" />
+                            </svg>
+                        </div>
+                        <div class="home-tool-meta">
+                            <h3 class="home-tool-title">مقایسه با سایر دانشجویان</h3>
+                            <div class="home-tool-badge-row">
+                                <span class="home-tool-badge home-badge-orange">تحلیل</span>
+                                <span class="home-tool-badge">در توسعه</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="home-tool-desc">
+                        رزومه خود را با میانگین دانشجویان پذیرفته‌شده در رشته و مقطع
+                        مشابه مقایسه کنید و بفهمید در کدام بخش‌ها عقب هستید.
+                    </p>
+
+                    <ul class="home-tool-features">
+                        <li>مقایسه بر اساس رشته و دانشگاه</li>
+                        <li>نمودار نقاط قوت و ضعف</li>
+                        <li>پیشنهاد اولویت‌بندی فعالیت‌ها</li>
+                    </ul>
+
+                    <div class="home-tool-footer">
+                        <span class="home-tool-link"
+                            style="background: var(--home-gray-300); color: var(--home-gray-700); cursor: not-allowed;">
+                            به زودی
+                        </span>
+                        <span class="home-tool-status">
+                            <span class="home-tool-status-dot home-dot-orange"></span>
+                            در توسعه
+                        </span>
+                    </div>
+                </div>
+
+                <div class="home-tool-card">
+                    <div class="home-tool-top">
+                        <div class="home-tool-icon-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M9 11l3 3L22 4" />
+                                <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2V5a2 2 0 012-2h11" />
+                            </svg>
+                        </div>
+                        <div class="home-tool-meta">
+                            <h3 class="home-tool-title">تعیین سطح رزومه</h3>
+                            <div class="home-tool-badge-row">
+                                <span class="home-tool-badge home-badge-blue">تحلیل</span>
+                                <span class="home-tool-badge home-badge-green">رایگان</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="home-tool-desc">
+                        رزومه تحقیقاتی خود رارزیابی کنید و بدانید در چه سطحی قرار دارید.
+                        این ابزار بر اساس مقالات، ارائه‌ها، دوره‌ها و تجربیات اجرایی شما
+                        یک امتیاز کلی محاسبه می‌کند.
+                    </p>
+
+                    <ul class="home-tool-features">
+                        <li>امتیازدهی بر اساس معیارهای علمی</li>
+                        <li>مقایسه با استانداردهای پذیرش فلوشیپ</li>
+                        <li>پیشنهاد مسیر بهبود</li>
+                    </ul>
+
+                    <div class="home-tool-footer">
+                        <a href="{% url 'resume:resume_list' %}" target="_blank" class="home-tool-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5">
+                                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+                                <polyline points="15 3 21 3 21 9" />
+                                <line x1="10" y1="14" x2="21" y2="3" />
+                            </svg>
+                            ورود به ابزار
+                        </a>
+                        <span class="home-tool-status">
+                            <span class="home-tool-status-dot"></span>
+                            فعال
+                        </span>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+
+    {% endblock %}

@@ -12,3 +12,6 @@ Pillow
 arabic-reshaper 
 python-bidi
 reportlab
+python-docx
+pdfplumber
+whitenoise
