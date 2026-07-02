@@ -217,33 +217,45 @@ def stage_detail(request, stage_id):
 @login_required
 def stage_activity_detail(request, activity_id):
     """نمایش صفحه کامل جزئیات فعالیت"""
-    
+
     stage_activity = get_object_or_404(
         StageActivity.objects.select_related('activity', 'stage', 'stage__roadmap'),
         id=activity_id
     )
     roadmap = stage_activity.stage.roadmap
-    
+
     # بررسی دسترسی
     if roadmap.user != request.user:
         return redirect('roadmap:roadmap_list')
-    
-    # لیست آیتم‌های ثابت برای انتخاب
+
+    activity = stage_activity.activity
+
+    # لیست آیتم‌های ثابت برای انتخاب + برچسب فارسی دسته برای هر آیتم
+    # (چون قبلاً کل دیکشنری category_labels توی تمپلیت پرینت می‌شد)
     static_items = get_all_items_flat()
-    
+    for item in static_items:
+        item['category_label'] = CATEGORY_LABELS.get(item.get('category'), item.get('category'))
+
     context = {
         'roadmap': roadmap,
         'stage': stage_activity.stage,
         'stage_activity': stage_activity,
-        'activity': stage_activity.activity,
+        'activity': activity,
         'static_items': static_items,
+
+        # این‌ها برای ساخت select ها با for-loop استفاده می‌شن (به‌جای هاردکد)
         'category_labels': CATEGORY_LABELS,
         'level_labels': LEVEL_LABELS,
         'difficulty_labels': DIFFICULTY_LABELS,
-    }
-    
-    return render(request, 'roadmap/stage_activity_detail.html', context)
 
+        # مقدار نهاییِ برچسبِ خودِ همین فعالیت (نه کل دیکشنری)
+        'activity_level_label': LEVEL_LABELS.get(activity.level, activity.level) if activity.level else '',
+        'activity_difficulty_label': DIFFICULTY_LABELS.get(
+            activity.difficulty_rating, activity.difficulty_rating
+        ),
+    }
+
+    return render(request, 'roadmap/stage_activity_detail.html', context)
 
 # ═══════════════════════════════════════════════════════════════════
 #  ✅ بروزرسانی فعالیت (جدید)
@@ -265,8 +277,6 @@ def stage_activity_update(request, activity_id):
         data = json.loads(request.body)
         
         # بروزرسانی فیلدهای اصلی
-        if 'progress_percentage' in data:
-            stage_activity.progress_percentage = int(data['progress_percentage'])
         
         if 'notes' in data:
             stage_activity.notes = data['notes']

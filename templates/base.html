@@ -354,11 +354,16 @@
         </footer>
     </div>
     {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags }}">
-        {{ message }}
+    {% if messages %}
+    <div class="rs-toast-container">
+        {% for msg in messages %}
+        <div class="alert alert-{{ msg.tags }} alert-dismissible rs-alert mb-2" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close-alert" aria-label="Close">×</button>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
+    {% endif %}
     {% endif %}
 
     <script src="{% static 'js/script.js' %}"></script>

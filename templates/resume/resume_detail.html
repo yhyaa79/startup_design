@@ -5,19 +5,13 @@
 {% block title %}{{ resume.title }}{% endblock %}
 
 {% block content %}
+
+
+
+
+
 <div class="rs-page" dir="rtl">
   <div class="container-fluid py-4">
-
-    {% if messages %}
-      <div class="container mb-3">
-        {% for msg in messages %}
-          <div class="alert alert-{{ msg.tags }} alert-dismissible fade show rs-alert">
-            {{ msg }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
 
     <div class="row g-4">
 
@@ -29,7 +23,7 @@
               <span class="rs-badge rs-badge-gray">{{ resume.get_purpose_display }}</span>
               <span class="rs-badge rs-badge-blue">{{ resume.get_template_display }}</span>
               {% if resume.ai_enhanced %}
-                <span class="rs-badge rs-badge-orange"><i class="bi bi-stars me-1"></i>AI</span>
+              <span class="rs-badge rs-badge-orange"><i class="bi bi-stars me-1"></i>AI</span>
               {% endif %}
             </div>
             <p class="rs-card-date mb-0">
@@ -41,23 +35,23 @@
             <h6 class="rs-sidebar-label">دانلود</h6>
 
             {% if resume.pdf_file %}
-              <a href="{% url 'resume:download_pdf' resume.pk %}" class="rs-btn rs-btn-danger w-100 mb-2">
-                <i class="bi bi-file-pdf-fill me-2"></i>دانلود PDF
-              </a>
+            <a href="{% url 'resume:download_pdf' resume.pk %}" class="rs-btn rs-btn-danger w-100 mb-2">
+              <i class="bi bi-file-pdf-fill me-2"></i>دانلود PDF
+            </a>
             {% else %}
-              <button class="rs-btn rs-btn-outline-danger w-100 mb-2" disabled>
-                <i class="bi bi-file-pdf me-2"></i>PDF در دسترس نیست
-              </button>
+            <button class="rs-btn rs-btn-outline-danger w-100 mb-2" disabled>
+              <i class="bi bi-file-pdf me-2"></i>PDF در دسترس نیست
+            </button>
             {% endif %}
 
             {% if resume.docx_file %}
-              <a href="{% url 'resume:download_docx' resume.pk %}" class="rs-btn rs-btn-primary w-100 mb-2">
-                <i class="bi bi-file-word-fill me-2"></i>دانلود Word
-              </a>
+            <a href="{% url 'resume:download_docx' resume.pk %}" class="rs-btn rs-btn-primary w-100 mb-2">
+              <i class="bi bi-file-word-fill me-2"></i>دانلود Word
+            </a>
             {% else %}
-              <button class="rs-btn rs-btn-outline-primary w-100 mb-2" disabled>
-                <i class="bi bi-file-word me-2"></i>Word در دسترس نیست
-              </button>
+            <button class="rs-btn rs-btn-outline-primary w-100 mb-2" disabled>
+              <i class="bi bi-file-word me-2"></i>Word در دسترس نیست
+            </button>
             {% endif %}
           </div>
 
@@ -88,11 +82,11 @@
             <div class="rs-paper-header rs-paper-header-{{ tmpl }}">
               <h1 class="rs-paper-name">{{ profile.first_name }} {{ profile.last_name }}</h1>
               {% if profile.job_title or profile.specialty %}
-                <p class="rs-paper-subtitle">
-                  {% if profile.job_title %}{{ profile.job_title }}{% endif %}
-                  {% if profile.job_title and profile.specialty %} · {% endif %}
-                  {% if profile.specialty %}{{ profile.specialty }}{% endif %}
-                </p>
+              <p class="rs-paper-subtitle">
+                {% if profile.job_title %}{{ profile.job_title }}{% endif %}
+                {% if profile.job_title and profile.specialty %} · {% endif %}
+                {% if profile.specialty %}{{ profile.specialty }}{% endif %}
+              </p>
               {% endif %}
               <div class="rs-paper-contact">
                 {% if profile.phone %}<span><i class="bi bi-telephone"></i> {{ profile.phone }}</span>{% endif %}
@@ -103,182 +97,185 @@
             </div>
 
             {% if resume.ai_enhanced and resume.ai_summary %}
-              <div class="rs-paper-section">
-                <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">
-                  خلاصه حرفه‌ای
-                  <span class="rs-badge rs-badge-orange ms-2"><i class="bi bi-stars"></i> AI</span>
-                </div>
-                <p class="rs-paper-body">{{ resume.ai_summary }}</p>
+            <div class="rs-paper-section">
+              <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">
+                خلاصه حرفه‌ای
+                <span class="rs-badge rs-badge-orange ms-2"><i class="bi bi-stars"></i> AI</span>
               </div>
+              <p class="rs-paper-body">{{ resume.ai_summary }}</p>
+            </div>
             {% elif profile.goal_notes %}
-              <div class="rs-paper-section">
-                <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">خلاصه حرفه‌ای</div>
-                <p class="rs-paper-body">{{ profile.goal_notes }}</p>
-              </div>
+            <div class="rs-paper-section">
+              <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">خلاصه حرفه‌ای</div>
+              <p class="rs-paper-body">{{ profile.goal_notes }}</p>
+            </div>
             {% endif %}
 
             {% if resume.include_education and profile.educations.all %}
-              <div class="rs-paper-section">
-                <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">سوابق تحصیلی</div>
-                {% for edu in profile.educations.all %}
-                  <div class="rs-paper-item">
-                    <div class="rs-paper-item-title">{{ edu.degree }} {{ edu.field }}</div>
-                    <div class="rs-paper-item-meta">
-                      {{ edu.university }}{% if edu.uni_type %} · {{ edu.uni_type }}{% endif %}
-                      {% if edu.start_date or edu.end_date %} · {{ edu.start_date }} تا {{ edu.end_date|default:"اکنون" }}{% endif %}
-                      {% if edu.gpa %} · معدل: {{ edu.gpa }}{% endif %}
-                      {% if edu.stage %} · {{ edu.stage }}{% endif %}
-                    </div>
-                  </div>
-                {% endfor %}
+            <div class="rs-paper-section">
+              <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">سوابق تحصیلی</div>
+              {% for edu in profile.educations.all %}
+              <div class="rs-paper-item">
+                <div class="rs-paper-item-title">{{ edu.degree }} {{ edu.field }}</div>
+                <div class="rs-paper-item-meta">
+                  {{ edu.university }}{% if edu.uni_type %} · {{ edu.uni_type }}{% endif %}
+                  {% if edu.start_date or edu.end_date %} · {{ edu.start_date }} تا
+                  {{ edu.end_date|default:"اکنون" }}{% endif %}
+                  {% if edu.gpa %} · معدل: {{ edu.gpa }}{% endif %}
+                  {% if edu.stage %} · {{ edu.stage }}{% endif %}
+                </div>
               </div>
+              {% endfor %}
+            </div>
             {% endif %}
 
             {% if resume.include_articles and profile.articles.all %}
-              <div class="rs-paper-section">
-                <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">مقالات پژوهشی</div>
-                {% for art in profile.articles.all %}
-                  <div class="rs-paper-item rs-paper-item-numbered">
-                    <div class="rs-paper-item-num">{{ forloop.counter }}.</div>
-                    <div class="flex-grow-1">
-                      <div class="rs-paper-item-title">{{ art.title|default:"بدون عنوان" }}</div>
-                      <div class="rs-paper-item-meta">
-                        {% if art.journal %}{{ art.journal }}{% endif %}
-                        {% if art.quartile %} · <span class="rs-quartile rs-quartile-{{ art.quartile }}">{{ art.quartile }}</span>{% endif %}
-                        {% if art.impact_factor %} · IF: {{ art.impact_factor }}{% endif %}
-                        {% if art.year %} · {{ art.year }}{% endif %}
-                        {% if art.author_rank and art.total_authors %} · نویسنده {{ art.author_rank }} از {{ art.total_authors }}{% endif %}
-                        {% if art.index %} · {{ art.index }}{% endif %}
-                      </div>
-                    </div>
+            <div class="rs-paper-section">
+              <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">مقالات پژوهشی</div>
+              {% for art in profile.articles.all %}
+              <div class="rs-paper-item rs-paper-item-numbered">
+                <div class="rs-paper-item-num">{{ forloop.counter }}.</div>
+                <div class="flex-grow-1">
+                  <div class="rs-paper-item-title">{{ art.title|default:"بدون عنوان" }}</div>
+                  <div class="rs-paper-item-meta">
+                    {% if art.journal %}{{ art.journal }}{% endif %}
+                    {% if art.quartile %} · <span
+                      class="rs-quartile rs-quartile-{{ art.quartile }}">{{ art.quartile }}</span>{% endif %}
+                    {% if art.impact_factor %} · IF: {{ art.impact_factor }}{% endif %}
+                    {% if art.year %} · {{ art.year }}{% endif %}
+                    {% if art.author_rank and art.total_authors %} · نویسنده {{ art.author_rank }} از
+                    {{ art.total_authors }}{% endif %}
+                    {% if art.index %} · {{ art.index }}{% endif %}
                   </div>
-                {% endfor %}
+                </div>
               </div>
+              {% endfor %}
+            </div>
             {% endif %}
 
             {% if resume.include_presentations and profile.presentations.all %}
-              <div class="rs-paper-section">
-                <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">ارائه در کنگره</div>
-                {% for p in profile.presentations.all %}
-                  <div class="rs-paper-item rs-paper-item-numbered">
-                    <div class="rs-paper-item-num">{{ forloop.counter }}.</div>
-                    <div class="flex-grow-1">
-                      <div class="rs-paper-item-title">{{ p.title|default:"بدون عنوان" }}</div>
-                      <div class="rs-paper-item-meta">
-                        {% if p.event %}{{ p.event }}{% endif %}
-                        {% if p.level %} · {{ p.level }}{% endif %}
-                        {% if p.result %} · {{ p.result }}{% endif %}
-                      </div>
-                    </div>
+            <div class="rs-paper-section">
+              <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">ارائه در کنگره</div>
+              {% for p in profile.presentations.all %}
+              <div class="rs-paper-item rs-paper-item-numbered">
+                <div class="rs-paper-item-num">{{ forloop.counter }}.</div>
+                <div class="flex-grow-1">
+                  <div class="rs-paper-item-title">{{ p.title|default:"بدون عنوان" }}</div>
+                  <div class="rs-paper-item-meta">
+                    {% if p.event %}{{ p.event }}{% endif %}
+                    {% if p.level %} · {{ p.level }}{% endif %}
+                    {% if p.result %} · {{ p.result }}{% endif %}
                   </div>
-                {% endfor %}
+                </div>
               </div>
+              {% endfor %}
+            </div>
             {% endif %}
 
             {% if resume.include_executive and profile.executive_records.all %}
-              <div class="rs-paper-section">
-                <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">سوابق اجرایی</div>
-                {% for ex in profile.executive_records.all %}
-                  <div class="rs-paper-item">
-                    <div class="rs-paper-item-title">{{ ex.title }}</div>
-                    {% if ex.start_date or ex.end_date %}
-                      <div class="rs-paper-item-meta">{{ ex.start_date }} تا {{ ex.end_date|default:"اکنون" }}</div>
-                    {% endif %}
-                  </div>
-                {% endfor %}
+            <div class="rs-paper-section">
+              <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">سوابق اجرایی</div>
+              {% for ex in profile.executive_records.all %}
+              <div class="rs-paper-item">
+                <div class="rs-paper-item-title">{{ ex.title }}</div>
+                {% if ex.start_date or ex.end_date %}
+                <div class="rs-paper-item-meta">{{ ex.start_date }} تا {{ ex.end_date|default:"اکنون" }}</div>
+                {% endif %}
               </div>
+              {% endfor %}
+            </div>
             {% endif %}
 
             {% if resume.include_training and profile.training_courses.all %}
-              <div class="rs-paper-section">
-                <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">دوره‌های آموزشی</div>
-                {% for tc in profile.training_courses.all %}
-                  <div class="rs-paper-item">
-                    <div class="rs-paper-item-title">{{ tc.title }}</div>
-                    <div class="rs-paper-item-meta">
-                      {% if tc.category %}{{ tc.category }}{% endif %}
-                      {% if tc.organizer %} · {{ tc.organizer }}{% endif %}
-                      {% if tc.date %} · {{ tc.date }}{% endif %}
-                      {% if tc.certificate %} · گواهی: {{ tc.certificate }}{% endif %}
-                    </div>
-                  </div>
-                {% endfor %}
+            <div class="rs-paper-section">
+              <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">دوره‌های آموزشی</div>
+              {% for tc in profile.training_courses.all %}
+              <div class="rs-paper-item">
+                <div class="rs-paper-item-title">{{ tc.title }}</div>
+                <div class="rs-paper-item-meta">
+                  {% if tc.category %}{{ tc.category }}{% endif %}
+                  {% if tc.organizer %} · {{ tc.organizer }}{% endif %}
+                  {% if tc.date %} · {{ tc.date }}{% endif %}
+                  {% if tc.certificate %} · گواهی: {{ tc.certificate }}{% endif %}
+                </div>
               </div>
+              {% endfor %}
+            </div>
             {% endif %}
 
             {% if resume.include_clinical %}
-              {% if profile.clinical_exp or profile.clinical_certs or profile.procedures %}
-                <div class="rs-paper-section">
-                  <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">سوابق بالینی</div>
-                  {% if profile.clinical_exp %}
-                    <div class="rs-paper-item">
-                      <div class="rs-paper-item-title">سوابق کار بالینی</div>
-                      <p class="rs-paper-body">{{ profile.clinical_exp }}</p>
-                    </div>
-                  {% endif %}
-                  {% if profile.clinical_certs %}
-                    <div class="rs-paper-item">
-                      <div class="rs-paper-item-title">گواهینامه‌های مهارتی</div>
-                      <p class="rs-paper-body">{{ profile.clinical_certs }}</p>
-                    </div>
-                  {% endif %}
-                  {% if profile.procedures %}
-                    <div class="rs-paper-item">
-                      <div class="rs-paper-item-title">مهارت‌های پروسیجرال</div>
-                      <p class="rs-paper-body">{{ profile.procedures }}</p>
-                    </div>
-                  {% endif %}
-                </div>
+            {% if profile.clinical_exp or profile.clinical_certs or profile.procedures %}
+            <div class="rs-paper-section">
+              <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">سوابق بالینی</div>
+              {% if profile.clinical_exp %}
+              <div class="rs-paper-item">
+                <div class="rs-paper-item-title">سوابق کار بالینی</div>
+                <p class="rs-paper-body">{{ profile.clinical_exp }}</p>
+              </div>
               {% endif %}
+              {% if profile.clinical_certs %}
+              <div class="rs-paper-item">
+                <div class="rs-paper-item-title">گواهینامه‌های مهارتی</div>
+                <p class="rs-paper-body">{{ profile.clinical_certs }}</p>
+              </div>
+              {% endif %}
+              {% if profile.procedures %}
+              <div class="rs-paper-item">
+                <div class="rs-paper-item-title">مهارت‌های پروسیجرال</div>
+                <p class="rs-paper-body">{{ profile.procedures }}</p>
+              </div>
+              {% endif %}
+            </div>
+            {% endif %}
             {% endif %}
 
             {% if resume.include_languages %}
-              {% if profile.native_lang or profile.english_level or profile.other_langs %}
-                <div class="rs-paper-section">
-                  <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">زبان‌ها</div>
-                  <div class="rs-lang-list">
-                    {% if profile.native_lang %}
-                      <div class="rs-lang-chip"><strong>زبان مادری:</strong> {{ profile.native_lang }}</div>
-                    {% endif %}
-                    {% if profile.english_level %}
-                      <div class="rs-lang-chip">
-                        <strong>انگلیسی:</strong> {{ profile.english_level }}
-                        {% if profile.lang_cert %} ({{ profile.lang_cert }}){% endif %}
-                      </div>
-                    {% endif %}
-                    {% if profile.other_langs %}
-                      <div class="rs-lang-chip"><strong>سایر:</strong> {{ profile.other_langs }}</div>
-                    {% endif %}
-                  </div>
+            {% if profile.native_lang or profile.english_level or profile.other_langs %}
+            <div class="rs-paper-section">
+              <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">زبان‌ها</div>
+              <div class="rs-lang-list">
+                {% if profile.native_lang %}
+                <div class="rs-lang-chip"><strong>زبان مادری:</strong> {{ profile.native_lang }}</div>
+                {% endif %}
+                {% if profile.english_level %}
+                <div class="rs-lang-chip">
+                  <strong>انگلیسی:</strong> {{ profile.english_level }}
+                  {% if profile.lang_cert %} ({{ profile.lang_cert }}){% endif %}
                 </div>
-              {% endif %}
+                {% endif %}
+                {% if profile.other_langs %}
+                <div class="rs-lang-chip"><strong>سایر:</strong> {{ profile.other_langs }}</div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
             {% endif %}
 
             {% if resume.include_skills %}
-              {% if profile.software_skills or profile.writing_skills %}
-                <div class="rs-paper-section">
-                  <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">مهارت‌ها</div>
-                  {% if profile.software_skills %}
-                    <div class="rs-paper-item">
-                      <div class="rs-paper-item-title">مهارت‌های نرم‌افزاری</div>
-                      <p class="rs-paper-body">{{ profile.software_skills }}</p>
-                    </div>
-                  {% endif %}
-                  {% if profile.writing_skills %}
-                    <div class="rs-paper-item">
-                      <div class="rs-paper-item-title">مهارت‌های نگارشی</div>
-                      <p class="rs-paper-body">{{ profile.writing_skills }}</p>
-                    </div>
-                  {% endif %}
-                </div>
+            {% if profile.software_skills or profile.writing_skills %}
+            <div class="rs-paper-section">
+              <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">مهارت‌ها</div>
+              {% if profile.software_skills %}
+              <div class="rs-paper-item">
+                <div class="rs-paper-item-title">مهارت‌های نرم‌افزاری</div>
+                <p class="rs-paper-body">{{ profile.software_skills }}</p>
+              </div>
               {% endif %}
+              {% if profile.writing_skills %}
+              <div class="rs-paper-item">
+                <div class="rs-paper-item-title">مهارت‌های نگارشی</div>
+                <p class="rs-paper-body">{{ profile.writing_skills }}</p>
+              </div>
+              {% endif %}
+            </div>
+            {% endif %}
             {% endif %}
 
             {% if resume.include_extracurricular and profile.extracurricular %}
-              <div class="rs-paper-section">
-                <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">فعالیت‌های فوق برنامه</div>
-                <p class="rs-paper-body">{{ profile.extracurricular }}</p>
-              </div>
+            <div class="rs-paper-section">
+              <div class="rs-paper-section-title rs-paper-section-title-{{ tmpl }}">فعالیت‌های فوق برنامه</div>
+              <p class="rs-paper-body">{{ profile.extracurricular }}</p>
+            </div>
             {% endif %}
 
             {% endwith %}

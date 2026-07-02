@@ -27,6 +27,7 @@ ALLOWED_HOSTS = os.getenv(
 GAPGPT_API_BASE = os.getenv("GAPGPT_API_BASE", "https://api.gapgpt.app/v1")
 GAPGPT_API_KEY = os.getenv("GAPGPT_API_KEY", "")
 GAPGPT_MODEL_NAME = os.getenv("GAPGPT_MODEL_NAME", "gapgpt-qwen-3.5")
+GAPGPT_MODEL_NAME_2 = os.getenv("GAPGPT_MODEL_NAME_2")
 GAPGPT_TIMEOUT = int(os.getenv("GAPGPT_TIMEOUT", "30"))
 
 GUNICORN_CMD_ARGS = "--workers 2 --timeout 120 --max-requests 1000"

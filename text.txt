@@ -1,19 +1,172 @@
+
+
+ آماده‌سازی محیط:
+
+# ساخت محیط مجازی
+python3 -m venv /srv/startup_design_django/venv
+
+# نصب وابستگی‌ها
+/srv/startup_design_django/venv/bin/pip install -r 
+/srv/startup_design_django/requirements.txt
+
+# نصب gunicorn
+/srv/startup_design_django/venv/bin/pip install gunicorn
+
+
+
+# ساخت پوشه لاگ
+mkdir -p /var/log/startupdesign
+
+# نصب وابستگی‌ها
+cd /srv/startup_design_django
+venv/bin/pip install -r requirements.txt
+venv/bin/pip install gunicorn
+source venv/bin/activate
+
+# migration — ساخت/آپدیت جداول دیتابیس
+venv/bin/python manage.py migrate
+
+# collectstatic — جمع‌آوری فایل‌های استاتیک
+venv/bin/python manage.py collectstatic --noinput
+
+# reload systemd — خواندن فایل سرویس جدید
+systemctl daemon-reload
+
+# enable — اجرای خودکار بعد از ریبوت
+systemctl enable startupdesign
+
+# start — شروع سرویس
+systemctl start startupdesign
+
+
+
+لاگ و دیباگ
+
+# وضعیت سرویس + آخرین لاگ‌ها
+systemctl status startupdesign
+
+# لاگ زنده journald
+journalctl -u startupdesign -f
+
+# 50 خط آخر لاگ
+journalctl -u startupdesign -n 50
+
+# لاگ درخواست‌های HTTP گانیکورن
+tail -f /var/log/startupdesign/access.log
+
+# خطاهای Python/Django
+tail -f /var/log/startupdesign/error.log
+
+# اجرای مستقیم برای دیباگ (بدون systemd)
+venv/bin/gunicorn --bind 0.0.0.0:8000 StartupDesign.wsgi:application
+
+
+
+مدیریت سرویس
+
+# ری‌استارت کامل
+systemctl restart startupdesign  
+
+# توقف
+systemctl stop startupdesign     
+
+# reload بدون downtime
+systemctl reload startupdesign    
+
+
+
+
+http://172.86.113.249:8000/
+
+
 value too long for type character varying(50)
 
 
 
 
 
-cd /srv/startup_design_django
-source venv/bin/activate
-
-pip install -r requirements.txt
-
-python manage.py migrate
 
 
-sudo systemctl restart startupdesign
 
 
-sudo journalctl -u startupdesign -f
-sudo journalctl -u startupdesign -n 100
+
+
+
+
+
+ فایل‌های پیکربندی
+/etc/systemd/system/startupdesign.service
+
+
+[Unit]
+Description=StartupDesign Django App (Gunicorn)
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/srv/startup_design_django
+ExecStart=/srv/startup_design_django/venv/bin/gunicorn \
+    --workers 3 \
+    --bind unix:/run/startupdesign.sock \
+    --access-logfile /var/log/startupdesign/access.log \
+    --error-logfile /var/log/startupdesign/error.log \
+    StartupDesign.wsgi:application
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+
+
+
+/etc/nginx/sites-available/startupdesign
+
+server {
+    listen 80;
+    server_name your-domain.com;  # یا IP سرور
+
+    access_log /var/log/nginx/startupdesign_access.log;
+    error_log  /var/log/nginx/startupdesign_error.log;
+
+    location /static/ {
+        alias /srv/startup_design_django/staticfiles/;
+    }
+
+    location /media/ {
+        alias /srv/startup_design_django/media/;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/startupdesign.sock;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+script.js
+resume html
+styles.css
+base.html
+stage_activity_detail.html
+roadmap/views.py
+requirements.txt
+settings.py
+
+accounts

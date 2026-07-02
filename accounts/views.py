@@ -1,5 +1,7 @@
 # accounts/views.py
 
+import logging
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
@@ -9,8 +11,8 @@ from .models import (
     SocialProfile, Education, Article, Presentation,
     ExecutiveRecord, Profile, TrainingCourse
 )
-from .ai_utils import extract_profile_from_text, _sanitize_profile_data
-from .file_utils import extract_text_from_file
+from .ai_utils import extract_profile_from_text, _sanitize_profile_data, AIExtractionError
+from .file_utils import extract_text_from_file, FileExtractionError
 from .forms import (
     ProfileForm,
     SocialProfileFormSet,
@@ -21,6 +23,8 @@ from .forms import (
     TrainingCourseFormSet,
 )
 
+logger = logging.getLogger(__name__)
+
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -30,7 +34,7 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            next_url = request.GET.get('next', 'core:home') 
+            next_url = request.GET.get('next', 'core:home')
             return redirect(next_url)
     else:
         form = AuthenticationForm()
@@ -42,16 +46,15 @@ def logout_view(request):
     return redirect('accounts:login')
 
 
-
 def register_view(request):
     if request.user.is_authenticated:
-        return redirect('core:home')  
+        return redirect('core:home')
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('accounts:edit_profile_ai') 
+            return redirect('accounts:edit_profile_ai')
     else:
         form = UserCreationForm()
     return render(request, 'accounts/register.html', {'form': form})
@@ -70,7 +73,6 @@ def profile(request, pk):
         pk=pk,
     )
     return render(request, 'accounts/profile_details.html', {'profile': profile})
-
 
 
 @login_required
@@ -131,12 +133,14 @@ def edit_profile_ai(request):
     if request.method == 'POST':
         text = request.POST.get('text', '').strip()
 
+        # ── ۱. استخراج متن از فایل آپلودشده (در صورت وجود) ──────────────
         uploaded_file = request.FILES.get('file')
         if uploaded_file:
             try:
                 file_text = extract_text_from_file(uploaded_file)
                 text = (text + '\n' + file_text).strip()
-            except (ImportError, ValueError) as e:
+            except FileExtractionError as e:
+                # پیام دقیق و قابل‌فهم برای کاربر (فایل خراب/فرمت اشتباه/بدون متن و ...)
                 messages.error(request, str(e))
                 return render(
                     request,
@@ -144,12 +148,33 @@ def edit_profile_ai(request):
                     {'raw_text': profile.raw_text}
                 )
 
+        # ── ۲. بررسی این‌که اصلاً متنی برای پردازش وجود دارد ─────────────
+        if not text:
+            messages.error(
+                request,
+                "متنی برای استخراج وارد نشده است. لطفاً متن را وارد کنید یا رزومه‌ای آپلود کنید."
+            )
+            return render(
+                request,
+                'accounts/edit_profile_ai_details.html',
+                {'raw_text': profile.raw_text}
+            )
+
         profile.raw_text = text
         profile.save(update_fields=['raw_text'])
 
+        # ── ۳. استخراج ساختاریافته با هوش مصنوعی (با retry روی مدل قوی‌تر) ──
         try:
             data = extract_profile_from_text(text)
+        except AIExtractionError as e:
+            messages.error(request, str(e))
+            return render(
+                request,
+                'accounts/edit_profile_ai_details.html',
+                {'raw_text': text, 'ai_error': True}
+            )
         except Exception:
+            logger.exception("خطای غیرمنتظره هنگام استخراج پروفایل با هوش مصنوعی")
             messages.error(
                 request,
                 "در حال حاضر سرویس هوش مصنوعی در دسترس نیست. لطفاً بعداً دوباره تلاش کنید."
@@ -157,16 +182,28 @@ def edit_profile_ai(request):
             return render(
                 request,
                 'accounts/edit_profile_ai_details.html',
-                {
-                    'raw_text': text,
-                    'ai_error': True
-                }
+                {'raw_text': text, 'ai_error': True}
             )
 
+        # ── ۴. ذخیره اطلاعات پروفایل ─────────────────────────────────
         for field, value in _sanitize_profile_data(data.get('profile', {})).items():
             setattr(profile, field, value)
-        profile.save()
 
+        try:
+            profile.save()
+        except Exception:
+            logger.exception("خطا در ذخیره پروفایل پس از استخراج AI")
+            messages.error(
+                request,
+                "اطلاعات استخراج‌شده معتبر نبودند و ذخیره نشدند. لطفاً متن را بررسی و دوباره تلاش کنید."
+            )
+            return render(
+                request,
+                'accounts/edit_profile_ai_details.html',
+                {'raw_text': text, 'ai_error': True}
+            )
+
+        # ── ۵. ذخیره بخش‌های وابسته ──────────────────────────────────
         _bulk_append(profile.social_profiles, SocialProfile, data.get('social_profiles', []), profile)
         _bulk_append(profile.educations, Education, data.get('educations', []), profile)
         _bulk_append(profile.articles, Article, data.get('articles', []), profile)
@@ -174,6 +211,7 @@ def edit_profile_ai(request):
         _bulk_append(profile.executive_records, ExecutiveRecord, data.get('executive_records', []), profile)
         _bulk_append(profile.training_courses, TrainingCourse, data.get('training_courses', []), profile)
 
+        messages.success(request, "اطلاعات پروفایل با موفقیت از متن استخراج شد.")
         return redirect('accounts:edit_profile')
 
     return render(request, 'accounts/edit_profile_ai_details.html', {'raw_text': profile.raw_text})
@@ -186,9 +224,25 @@ def _bulk_replace(related_manager, model_class, items: list, profile):
 
 
 def _bulk_append(related_manager, model_class, items: list, profile):
-    # فیلدهای معتبر مدل رو بگیر
+    """
+    آیتم‌های استخراج‌شده توسط AI را به رکوردهای مدل تبدیل می‌کند.
+    فیلدهای ناشناخته را نادیده می‌گیرد و اگر یک آیتم به هر دلیلی خطای دیتابیس داد،
+    کل درخواست را متوقف نمی‌کند بلکه فقط همان آیتم را رد می‌کند.
+    """
+    if not items:
+        return
+
     valid_fields = {f.name for f in model_class._meta.get_fields() if hasattr(f, 'column')}
+
     for item in items:
-        # فقط فیلدهای معتبر رو نگه دار
+        if not isinstance(item, dict):
+            continue
         filtered = {k: v for k, v in item.items() if k in valid_fields}
-        model_class.objects.create(profile=profile, **filtered)
+        try:
+            model_class.objects.create(profile=profile, **filtered)
+        except Exception:
+            logger.exception(
+                "خطا هنگام ذخیره یک رکورد %s از داده‌های استخراج‌شده AI: %r",
+                model_class.__name__, filtered
+            )
+            continue

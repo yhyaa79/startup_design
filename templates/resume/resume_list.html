@@ -7,6 +7,8 @@
 {% block title %}رزومه‌های من{% endblock %}
 
 {% block content %}
+
+
 <div class="rs-page" dir="rtl">
   <div class="container py-5">
 
@@ -22,17 +24,6 @@
         </div>
       </div>
     </div>
-
-    {% if messages %}
-    <div class="rs-stack-sm">
-      {% for msg in messages %}
-      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show rs-alert" role="alert">
-        {{ msg }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
 
     {% if resumes %}
     <div class="rs-grid">

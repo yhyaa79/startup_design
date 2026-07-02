@@ -22,6 +22,7 @@
                     پیشرفت‌ها
                 </div>
 
+
                 <div class="stats-row">
                     {% for stat in dashboard_stats %}
                     <div class="stat-box" style="--percent: {{ stat.percent }};">
@@ -32,14 +33,15 @@
                             </svg>
                             <div class="rsd-ps-ring-text">
                                 <span class="rsd-ps-ring-val">{{ stat.value }}</span>
-                                <span class="rsd-ps-ring-sub">{{ stat.sub }}</span>
+                                <span class="rsd-ps-ring-sub">{{ stat.label }}</span>
                             </div>
                         </div>
+                        {% if stat.sub %}
+                        <div class="rsd-ps-ring-note">{{ stat.sub }}</div>
+                        {% endif %}
                     </div>
                     {% empty %}
-                    <p style="color: var(--text-muted); font-size: 13px;">
-                        اطلاعاتی برای نمایش وجود ندارد.
-                    </p>
+                    <p style="color: var(--text-muted); font-size: 13px;">اطلاعاتی برای نمایش وجود ندارد.</p>
                     {% endfor %}
                 </div>
 
