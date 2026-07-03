@@ -19,9 +19,19 @@
         <p class="thank-you-p"><strong>به زودی با شما تماس می‌گیریم</strong></p>
         <a href="{% url 'regulation_assessment:evaluation_form' %}" class="back-button">بازگشت به صفحه اصلی</a>
     </div>
-
-
-
-
     
+{% endblock %}
+
+
+{% block extra_js %}
+    <script src="{% static 'js/tooltip.js' %}"></script>
+    <script src="{% static 'js/steps.js' %}"></script>
+    <script src="{% static 'js/score.js' %}"></script>
+    <script src="{% static 'js/bylaw-select.js' %}"></script>
+    <script src="{% static 'js/testEstedad.js' %}"></script>
+    <script src="{% static 'js/upload.js' %}"></script>
+    <script src="{% static 'js/estedad.js' %}"></script>
+    <script src="{% static 'js/modal.js' %}"></script>
+    <script src="{% static 'js/proposals.js' %}"></script>
+    <script src="{% static 'js/video.js' %}"></script>
 {% endblock %}

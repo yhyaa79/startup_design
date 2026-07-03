@@ -1,3 +1,6 @@
+<!-- templates/oadmap/roadmap_create.html -->
+
+
 {% extends 'base.html' %}
 {% load static %}
 
@@ -16,11 +19,24 @@
         {% if error %}
         <div class="rm-alert rm-alert-error">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
             </svg>
             {{ error }}
         </div>
         {% endif %}
+
+
+        {% if show_error_modal %}
+        <script>
+            // وقتی صفحه کامل لود شد (یعنی Django خطا برگشته و صفحه render شده)
+            document.addEventListener('DOMContentLoaded', function () {
+                // مودال خطا را نمایش بده
+                document.getElementById('roadmapErrorModal').style.display = 'flex';
+            });
+        </script>
+        {% endif %}
+
 
         <form method="post" class="rm-form">
             {% csrf_token %}
@@ -32,7 +48,8 @@
                 <div class="rm-radio-group">
                     {% for value, label in form.goal.field.choices %}
                     <label class="rm-radio-label">
-                        <input type="radio" name="goal" value="{{ value }}" {% if form.goal.value == value %}checked{% endif %} required>
+                        <input type="radio" name="goal" value="{{ value }}"
+                            {% if form.goal.value == value %}checked{% endif %} required>
                         <span class="rm-radio-text">{{ label }}</span>
                     </label>
                     {% endfor %}
@@ -48,18 +65,9 @@
                     مدت زمان (روز)
                     <span class="rm-required">*</span>
                 </label>
-                <input 
-                    type="number" 
-                    name="duration_days" 
-                    id="id_duration_days"
-                    min="30"
-                    max="1095"
-                    step="1"
-                    placeholder="مثال: 90"
-                    value="{{ form.duration_days.value|default:'' }}"
-                    class="rm-form-input"
-                    required
-                >
+                <input type="number" name="duration_days" id="id_duration_days" min="0" max="1095" step="1"
+                    placeholder="مثال: 90" value="{{ form.duration_days.value|default:'' }}" class="rm-form-input"
+                    required>
                 <p class="rm-form-help">حداقل 30 روز، حداکثر 3 سال</p>
                 {% if form.duration_days.errors %}
                 <div class="rm-form-error">{{ form.duration_days.errors.0 }}</div>
@@ -70,13 +78,9 @@
                 <label for="id_goal_details" class="rm-form-label">
                     جزئیات اضافی (اختیاری)
                 </label>
-                <textarea 
-                    name="goal_details" 
-                    id="id_goal_details"
-                    rows="4"
+                <textarea name="goal_details" id="id_goal_details" rows="4"
                     placeholder="توضیحات بیشتری درباره اهدافتان..."
-                    class="rm-form-textarea"
-                >{{ form.goal_details.value|default:'' }}</textarea>
+                    class="rm-form-textarea">{{ form.goal_details.value|default:'' }}</textarea>
             </div>
 
             <div class="rm-form-actions">
@@ -84,7 +88,8 @@
                     انصراف
                 </a>
                 <button type="submit" class="rm-btn rm-btn-primary rm-btn-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
                         <path d="M12 5v14M5 12h14"></path>
                     </svg>
                     ایجاد رودمپ
@@ -93,6 +98,101 @@
         </form>
     </div>
 </div>
+
+
+<!-- ═══ مودال پردازش رودمپ ═══ -->
+<div id="roadmapProcessingModal" class="roadmap-processing-modal" style="display:none;">
+    <div class="roadmap-processing-content">
+        <div class="roadmap-processing-animation">
+            <div class="roadmap-brain-icon">
+                <svg viewBox="0 0 100 100" width="80" height="80">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.3" />
+                    <circle cx="50" cy="50" r="35" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.5" />
+                    <circle cx="50" cy="50" r="25" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.7" />
+                    <circle cx="50" cy="50" r="15" fill="#4A90D9">
+                        <animate attributeName="r" values="15;18;15" dur="1s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="1;0.7;1" dur="1s" repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="20" cy="30" r="3" fill="#4A90D9">
+                        <animate attributeName="cy" values="30;20;30" dur="1.5s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="80" cy="40" r="3" fill="#4A90D9">
+                        <animate attributeName="cy" values="40;30;40" dur="1.8s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0;1;0" dur="1.8s" repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="30" cy="70" r="3" fill="#4A90D9">
+                        <animate attributeName="cy" values="70;60;70" dur="1.3s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0;1;0" dur="1.3s" repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="70" cy="65" r="3" fill="#4A90D9">
+                        <animate attributeName="cy" values="65;75;65" dur="1.6s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite" />
+                    </circle>
+                </svg>
+            </div>
+            <div class="roadmap-processing-text">
+                <h3>در حال تولید نقشه راه شخصی‌سازی شده</h3>
+                <p>هوش مصنوعی پروفایل، تجربیات و اهداف شما را تحلیل می‌کند</p>
+                <p class="roadmap-processing-subtext">این فرآیند ممکن است 30-60 ثانیه طول بکشد</p>
+            </div>
+            <div class="roadmap-progress-bar">
+                <div class="roadmap-progress-fill"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ مودال خطا رودمپ ═══ -->
+<div id="roadmapErrorModal" class="roadmap-error-modal" style="display:none;">
+    <div class="roadmap-processing-content roadmap-error-content">
+        <div class="roadmap-error-icon">
+            <svg viewBox="0 0 100 100" width="70" height="70">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#e74c3c" stroke-width="3" />
+                <path d="M30 30 L70 70 M70 30 L30 70" stroke="#e74c3c" stroke-width="4" stroke-linecap="round" />
+            </svg>
+        </div>
+        <div class="roadmap-processing-text">
+            <h3>خطا در تولید نقشه راه</h3>
+            <p>متأسفانه سرویس هوش مصنوعی در حال حاضر در دسترس نیست.</p>
+            <p class="roadmap-error-suggestion">لطفاً چند دقیقه دیگر دوباره تلاش کنید یا در صورت تکرار مشکل با پشتیبانی
+                تماس بگیرید.</p>
+        </div>
+        <button type="button" onclick="closeRoadmapErrorModal()" class="rm-btn rm-btn-primary">
+            متوجه شدم
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('.rm-form');
+        const submitButton = form.querySelector('button[type="submit"]');
+        const processingModal = document.getElementById('roadmapProcessingModal');
+        const errorModal = document.getElementById('roadmapErrorModal');
+
+        // وقتی فرم submit شد، مودال پردازش را نمایش بده
+        form.addEventListener('submit', function (e) {
+            if (form.checkValidity()) {
+                processingModal.style.display = 'flex';
+                submitButton.disabled = true;
+            }
+        });
+    });
+
+    function closeRoadmapErrorModal() {
+        const errorModal = document.getElementById('roadmapErrorModal');
+        const processingModal = document.getElementById('roadmapProcessingModal');
+        const submitButton = document.querySelector('.rm-form button[type="submit"]');
+
+        errorModal.style.display = 'none';
+        processingModal.style.display = 'none';
+
+        if (submitButton) {
+            submitButton.disabled = false;
+        }
+    }
+</script>
 
 <style>
     .rm-page-form {
@@ -182,7 +282,7 @@
         cursor: pointer;
     }
 
-    .rm-radio-label input[type="radio"]:checked + .rm-radio-text {
+    .rm-radio-label input[type="radio"]:checked+.rm-radio-text {
         color: #4f46e5;
         font-weight: 600;
     }
@@ -261,5 +361,107 @@
         }
     }
 </style>
+
+
+<style>
+
+
+
+/* استایل مودال پردازش */
+.roadmap-processing-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.roadmap-processing-content {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 50px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.4s ease;
+    max-width: 400px;
+    width: 90%;
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.roadmap-processing-animation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.roadmap-brain-icon {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.roadmap-processing-text h3 {
+    color: #2c3e50;
+    font-size: 1.3rem;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+}
+
+.roadmap-processing-text p {
+    color: #7f8c8d;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.roadmap-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #ecf0f1;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.roadmap-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4A90D9, #67B26F, #4A90D9);
+    background-size: 200% 100%;
+    border-radius: 3px;
+    animation: progressMove 1.5s ease-in-out infinite;
+}
+
+@keyframes progressMove {
+    0% { width: 0%; background-position: 0% 50%; }
+    50% { width: 70%; background-position: 100% 50%; }
+    100% { width: 100%; background-position: 0% 50%; }
+}
+</style>
+
 
 {% endblock %}

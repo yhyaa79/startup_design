@@ -18,7 +18,7 @@ READ_TIMEOUT = 120
 MAX_RETRIES = 2
 
 
-def _call_gpt_api(messages: list, max_tokens: int = 12000) -> str:
+def _call_gpt_api(messages: list, max_tokens: int = 12000, model: str = None) -> str:
     """فراخوانی API GPT"""
     print(f"messages::::{messages}")
     if not settings.GAPGPT_API_KEY:
@@ -32,7 +32,7 @@ def _call_gpt_api(messages: list, max_tokens: int = 12000) -> str:
     }
 
     payload = {
-        "model": settings.GAPGPT_MODEL_NAME,
+        "model": model or settings.GAPGPT_MODEL_NAME,
         "messages": messages,
         "max_tokens": max_tokens,
         "temperature": 0.3,
@@ -40,7 +40,7 @@ def _call_gpt_api(messages: list, max_tokens: int = 12000) -> str:
 
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            logger.info("Calling GPT API (attempt %s/%s)", attempt, MAX_RETRIES)
+            logger.info("Calling GPT API (attempt %s/%s) model=%s", attempt, MAX_RETRIES, payload["model"])
             start = time.monotonic()
 
             response = requests.post(
@@ -83,6 +83,7 @@ def _call_gpt_api(messages: list, max_tokens: int = 12000) -> str:
             logger.exception("Unexpected error in _call_gpt_api.")
             raise
 
+
 def _parse_json_response(text: str) -> dict:
     """استخراج JSON از پاسخ"""
     text = text.strip()
@@ -120,6 +121,8 @@ def _parse_json_response(text: str) -> dict:
             raise ValueError(f"خطا در پارس JSON: {e}\n\nمتن:\n{extracted_json[:500]}")
 
 
+
+
 def generate_roadmap(profile_data: dict, goal: str, duration_days: int) -> dict:
     """تولید رودمپ حرفه‌ای با AI"""
     logger.info("Generating roadmap | goal=%s | duration=%s", goal, duration_days)
@@ -136,10 +139,12 @@ def generate_roadmap(profile_data: dict, goal: str, duration_days: int) -> dict:
 
     max_attempts = 3
     for attempt in range(max_attempts):
+        model = settings.GAPGPT_MODEL_NAME if attempt == 0 else settings.GAPGPT_MODEL_NAME_2
         try:
-            response = _call_gpt_api(messages, max_tokens=12000)
+            logger.info("Roadmap attempt %s/%s using model=%s", attempt + 1, max_attempts, model)
+            response = _call_gpt_api(messages, max_tokens=12000, model=model)
             roadmap_data = _parse_json_response(response)
-            logger.info("Roadmap generated successfully.")
+            logger.info("Roadmap generated successfully on attempt %s.", attempt + 1)
             return roadmap_data
         except ValueError as e:
             logger.warning(f"Attempt {attempt + 1} failed: {e}")

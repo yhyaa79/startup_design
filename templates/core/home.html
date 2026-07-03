@@ -7,799 +7,800 @@
 
 {% block content %}
 
-<div class="content">
-    <div class="content-profile">
 
-        <div class="col-info">
-
-            <!-- STATS -->
-            <div class="section-card" style="padding:16px 20px;">
-                <div class="section-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                    پیشرفت‌ها
-                </div>
-
-
-                <div class="stats-row">
-                    {% for stat in dashboard_stats %}
-                    <div class="stat-box" style="--percent: {{ stat.percent }};">
-                        <div class="rsd-ps-score-ring-wrap">
-                            <svg class="rsd-ps-ring" viewBox="0 0 80 80">
-                                <circle class="rsd-ps-ring-bg" cx="40" cy="40" r="32" />
-                                <circle class="rsd-ps-ring-fill" cx="40" cy="40" r="32" />
-                            </svg>
-                            <div class="rsd-ps-ring-text">
-                                <span class="rsd-ps-ring-val">{{ stat.value }}</span>
-                                <span class="rsd-ps-ring-sub">{{ stat.label }}</span>
-                            </div>
-                        </div>
-                        {% if stat.sub %}
-                        <div class="rsd-ps-ring-note">{{ stat.sub }}</div>
-                        {% endif %}
-                    </div>
-                    {% empty %}
-                    <p style="color: var(--text-muted); font-size: 13px;">اطلاعاتی برای نمایش وجود ندارد.</p>
-                    {% endfor %}
-                </div>
-
-                <br>
-
-                {% if weak_point %}
-                <div class="rsd-ps-card rsd-ps-alert rsd-ps-alert--{{ weak_point.0 }}">
-                    <div class="rsd-ps-alert-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="rsd-ps-alert-title">نقطه ضعف شناسایی‌شده</div>
-                        <div class="rsd-ps-alert-desc">{{ weak_point.1 }} — {{ weak_point.2 }}</div>
-                    </div>
-                </div>
-                {% else %}
-                <div class="rsd-ps-card rsd-ps-alert rsd-ps-alert--success">
-                    <div class="rsd-ps-alert-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="rsd-ps-alert-title">پروفایل در وضعیت خوبی است</div>
-                        <div class="rsd-ps-alert-desc">همه بخش‌های اصلی تکمیل شده‌اند. به مسیر خود ادامه دهید.</div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-
-
-            <!-- ROADMAP SUMMARY REPORT -->
-            <div class="section-card" style="margin-top:20px; padding:16px 20px;">
-                <div class="section-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M4 19V5" />
-                        <path d="M4 19H20" />
-                        <path d="M8 16V11" />
-                        <path d="M12 16V7" />
-                        <path d="M16 16V9" />
-                    </svg>
-                    گزارش کلی رودمپ‌ها
-
-                    <a href="{% url 'roadmap:roadmap_list' %}" class="milestone-more-info">
-                        مشاهده همه
-                    </a>
-                </div>
-
-                <div class="stats-row" style="margin-top:15px;">
-                    <div class="stat-box">
-                        <div class="rsd-ps-ring-text-roadmaps">
-                            <span class="rsd-ps-ring-val">{{ total_roadmaps_count }}</span>
-                            <span class="rsd-ps-ring-sub">کل رودمپ‌ها</span>
-                        </div>
-                    </div>
-
-                    <div class="stat-box">
-                        <div class="rsd-ps-ring-text-roadmaps">
-                            <span class="rsd-ps-ring-val">{{ active_roadmaps_count }}</span>
-                            <span class="rsd-ps-ring-sub">رودمپ فعال</span>
-                        </div>
-                    </div>
-
-                    <div class="stat-box">
-                        <div class="rsd-ps-ring-text-roadmaps">
-                            <span class="rsd-ps-ring-val">{{ active_stages_count }}</span>
-                            <span class="rsd-ps-ring-sub">مرحله در حال انجام</span>
-                        </div>
-                    </div>
-
-                    <div class="stat-box">
-                        <div class="rsd-ps-ring-text-roadmaps">
-                            <span class="rsd-ps-ring-val">{{ average_roadmap_progress }}٪</span>
-                            <span class="rsd-ps-ring-sub">میانگین پیشرفت</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="margin-top:18px;">
-                    <div class="rm-progress-section">
-                        <div class="rm-progress-header">
-                            <span class="rm-progress-label">پیشرفت کلی همه رودمپ‌ها</span>
-                            <span class="rm-progress-pct">{{ average_roadmap_progress }}٪</span>
-                        </div>
-                        <div class="rm-progress-bar-track">
-                            <div class="rm-progress-bar-fill" style="width: {{ average_roadmap_progress }}%;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rm-card-meta" style="margin-top:15px;">
-                    <div class="rm-meta-item">
-                        <span class="rm-meta-label">تکمیل‌شده</span>
-                        <span class="rm-meta-value">{{ completed_roadmaps_count }}</span>
-                    </div>
-
-                    <div class="rm-meta-item">
-                        <span class="rm-meta-label">متوقف</span>
-                        <span class="rm-meta-value">{{ paused_roadmaps_count }}</span>
-                    </div>
-
-                    <div class="rm-meta-item">
-                        <span class="rm-meta-label">پیش‌نویس</span>
-                        <span class="rm-meta-value">{{ draft_roadmaps_count }}</span>
-                    </div>
-
-                    <div class="rm-meta-item">
-                        <span class="rm-meta-label">مراحل تکمیل‌شده</span>
-                        <span class="rm-meta-value">{{ completed_stage_count }} از {{ total_stage_count }}</span>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- ACTIVE ROADMAP SELECTOR + DETAIL -->
-            {% if active_roadmaps %}
-            <div class="roadmap-card" style="margin-top:20px;" id="dashboard-roadmap-card">
-
-                <div class="section-title"
-                    style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                        </svg>
-                        رودمپ منتخب
-                    </div>
-
-                    <div class="roadmap-tabs" style="display:flex; gap:8px; flex-wrap:wrap;">
-                        {% for item in active_roadmaps %}
-                        <button type="button"
-                            class="rm-btn rm-btn-sm {% if item.id == roadmap.id %}rm-btn-primary{% else %}rm-btn-outline{% endif %} dashboard-roadmap-tab"
-                            data-roadmap-id="{{ item.id }}">
-                            {{ item.title }}
-                        </button>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                {% for item in active_roadmaps %}
-                <div class="dashboard-roadmap-panel" data-roadmap-panel="{{ item.id }}"
-                    style="{% if item.id != roadmap.id %}display:none;{% endif %}">
-
-                    <div class="section-title" style="margin-top:15px;">
-                        <span>رودمپ: {{ item.title }}</span>
-
-                        <a href="{% url 'roadmap:roadmap_detail' item.id %}" class="milestone-more-info">
-                            جزئیات بیشتر
-                        </a>
-                    </div>
-
-                    <div class="roadmap-header">
-                        <div class="roadmap-progress-info">
-                            <div class="roadmap-percent">{{ item.get_progress }}٪</div>
-                            <div class="roadmap-percent-label">
-                                پیشرفت کلی<br />
-                                <span style="color:var(--primary);font-weight:600;">
-                                    {{ item.stages.count }} مرحله تدوین شده
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="roadmap-timeline">
-                        {% for stage in item.stages.all %}
-                        {% if stage.get_progress == 100 %}
-                        <div class="roadmap-step done">
-                            <div class="step-node">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5">
-                                    <polyline points="20 6 9 17 4 12" />
-                                </svg>
-                            </div>
-                            <div class="step-label">{{ stage.title }}</div>
-                        </div>
-                        {% elif stage.status == 'active' %}
-                        <div class="roadmap-step active">
-                            <div class="step-node rsd-tm-dot-active">{{ stage.order }}</div>
-                            <div class="step-label">{{ stage.title }}</div>
-                        </div>
-                        {% else %}
-                        <div class="roadmap-step">
-                            <div class="step-node">{{ stage.order }}</div>
-                            <div class="step-label">{{ stage.title }}</div>
-                        </div>
-                        {% endif %}
-                        {% empty %}
-                        <p class="rm-hint">برای این رودمپ هنوز مرحله‌ای ثبت نشده است.</p>
-                        {% endfor %}
-                    </div>
-
-                    {% with active_stage=item.get_active_stage %}
-                    <div class="roadmap-milestones">
-                        {% if active_stage %}
-                        <div class="milestone-row active-m">
-                            <div class="milestone-info-bar">
-                                <div class="milestone-info">
-                                    <div class="milestone-name">{{ active_stage.title }}</div>
-
-                                    <div class="milestone-desc">
-                                        {{ active_stage.description|truncatechars:70|default:"در حال اجرای این مرحله" }}
-                                    </div>
-
-                                    <div class="milestone-desc">
-                                        مدت کل فعالیت‌ها: {{ active_stage.get_total_duration }} روز
-                                    </div>
-
-                                    <div class="milestone-desc">
-                                        فعالیت‌ها: {{ active_stage.stage_activities.count }} مورد
-                                    </div>
-                                </div>
-
-                                <div class="milestone-bar-wrap">
-                                    <div>
-                                        <div class="milestone-pct">پیشرفت فعالیت‌ها</div>
-                                        <div class="milestone-bar">
-                                            <div class="milestone-fill"
-                                                style="width: {{ active_stage.get_progress }}%;"></div>
-                                        </div>
-
-                                        <div class="milestone-pct">
-                                            {{ active_stage.get_progress }}٪ انجام شده
-                                        </div>
-
-                                        <div class="milestone-pct">
-                                            {{ active_stage.get_remaining_days }} روز باقی‌مانده
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="milestone-cheklist">
-                                <p class="milestone-p-title">چک‌لیست فعالیت‌ها</p>
-
-                                <div class="milestone-checklist-list">
-                                    {% for stage_item in active_stage.stage_activities.all|slice:":4" %}
-                                    <span
-                                        class="milestone-checklist {% if stage_item.is_completed %}milestone-checklist-done{% endif %}">
-                                        {{ stage_item.activity.title }}
-                                        <p>{{ stage_item.activity.duration_days }} روز</p>
-                                    </span>
-                                    {% empty %}
-                                    <span class="milestone-checklist">
-                                        فعالیتی برای این مرحله ثبت نشده است.
-                                    </span>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                        {% else %}
-                        <div class="milestone-row">
-                            <p>برای این رودمپ مرحله فعالی وجود ندارد.</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endwith %}
-
-                </div>
-                {% endfor %}
-            </div>
-
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const tabs = document.querySelectorAll('.dashboard-roadmap-tab');
-                    const panels = document.querySelectorAll('.dashboard-roadmap-panel');
-
-                    tabs.forEach(function (tab) {
-                        tab.addEventListener('click', function () {
-                            const roadmapId = this.dataset.roadmapId;
-
-                            tabs.forEach(function (item) {
-                                item.classList.remove('rm-btn-primary');
-                                item.classList.add('rm-btn-outline');
-                            });
-
-                            this.classList.remove('rm-btn-outline');
-                            this.classList.add('rm-btn-primary');
-
-                            panels.forEach(function (panel) {
-                                if (panel.dataset.roadmapPanel === roadmapId) {
-                                    panel.style.display = '';
-                                } else {
-                                    panel.style.display = 'none';
-                                }
-                            });
-                        });
-                    });
-                });
-            </script>
-
-            {% else %}
-            <div class="roadmap-card" style="margin-top:20px;">
-                <p class="rm-hint">هنوز رودمپ فعالی برای شما تعریف نشده است.</p>
-                <p class="rm-hint">
-                    برای دریافت گزارش رودمپ، ابتدا یک نقشه راه فعال ایجاد کنید.
-                </p>
-
-                <br>
-
-                <a href="{% url 'roadmap:roadmap_create' %}" class="rm-btn rm-btn-primary">
-                    ایجاد نقشه راه
-                </a>
-            </div>
-            {% endif %}
-
-
-
-
-
-            <!-- Events -->
-            <!--             <div class="section-card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <rect x="3" y="4" width="18" height="18" rx="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg>
-                        رویدادها
-                    </div>
-                    <span class="card-link">همه</span>
-                </div>
-                <div class="event-list">
-                    <div class="event-item">
-                        <div class="event-date">
-                            <div class="event-day">۱۵</div>
-                            <div class="event-month">خرداد</div>
-                        </div>
-                        <div class="event-info">
-                            <div class="event-name">کنگره قلب و عروق</div>
-                            <div class="event-loc">تهران — برج میلاد</div>
-                        </div>
-                        <span class="event-tag tag-blue">حضوری</span>
-                    </div>
-                    <div class="event-item">
-                        <div class="event-date">
-                            <div class="event-day">۲۰</div>
-                            <div class="event-month">خرداد</div>
-                        </div>
-                        <div class="event-info">
-                            <div class="event-name">وبینار آنکولوژی</div>
-                            <div class="event-loc">آنلاین — زوم</div>
-                        </div>
-                        <span class="event-tag tag-teal">آنلاین</span>
-                    </div>
-                    <div class="event-item">
-                        <div class="event-date">
-                            <div class="event-day">۳</div>
-                            <div class="event-month">تیر</div>
-                        </div>
-                        <div class="event-info">
-                            <div class="event-name">کارگاه مهارت‌های بالینی</div>
-                            <div class="event-loc">دانشگاه علوم پزشکی</div>
-                        </div>
-                        <span class="event-tag tag-blue">حضوری</span>
-                    </div>
-                </div>
-            </div>
- -->
-        </div>
-
-        <!-- ══ COL LEFT: RESUME ══ -->
-        <div class="col-resume">
-
-            {% if user.is_authenticated and not user.profile.first_name and not user.profile.last_name and not user.profile.job_title %}
-            <div class="rc-card">
-                <p>پروفایل خود را بسازیید.</p>
-                <a href="{% url 'accounts:edit_profile_ai' %}" class="rm-btn rm-btn-primary">
-                    ساخت پروفایل با هوش مصنوعی
-                </a>
-            </div>
-            {% endif %}
-
-
-
-            {% if user.is_authenticated and user.profile and user.profile.first_name %}
-
-            <!-- پروفایل هدر -->
-            <div class="rc-card rc-profile-card">
-                <div class="rc-avatar">
-                    {{ user.profile.first_name|first }} {{ user.profile.last_name|first }}
-                </div>
-                <div class="rc-profile-info">
-                    <h2 class="rc-name">{{ user.profile.first_name }} {{ user.profile.last_name }}</h2>
-                    {% if user.profile.job_title %}
-                    <div class="rc-job-title">{{ user.profile.job_title }}</div>
-                    {% endif %}
-                    <div class="rc-meta">
-                        {% if user.profile.city or user.profile.country %}
-                        <span class="rc-meta-item">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M12 21c-4-4-8-7.5-8-12a8 8 0 1 1 16 0c0 4.5-4 8-8 12z" />
-                                <circle cx="12" cy="9" r="2.5" /></svg>
-                            {{ user.profile.city }}{% if user.profile.city and user.profile.country %}،
-                            {% endif %}{{ user.profile.country }}
-                        </span>
-                        {% endif %}
-                        {% if user.profile.phone %}
-                        <span class="rc-meta-item">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path
-                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12 19.79 19.79 0 0 1 1.08 3.4 2 2 0 0 1 3.05 1.25h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 5.95 5.95l1.22-1.22a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 21 16.92z" />
-                            </svg>
-                            {{ user.profile.phone }}
-                        </span>
-                        {% elif user.profile.email %}
-                        <span class="rc-meta-item">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <rect x="2" y="4" width="20" height="16" rx="2" />
-                                <polyline points="2,4 12,13 22,4" /></svg>
-                            {{ user.profile.email }}
-                        </span>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- اطلاعات هویتی -->
-            {% with socials=user.profile.social_profiles.all %}
-            {% if user.profile.gender or user.profile.marital_status or user.profile.military_status or socials %}
-            <div class="rc-card">
-                <div class="rc-card-head">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="8" r="4" />
-                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></svg>
-                    اطلاعات هویتی و ارتباطی
-                </div>
-
-                {% if user.profile.gender or user.profile.marital_status or user.profile.military_status %}
-                <div class="rc-chips-row">
-                    {% if user.profile.gender %}
-                    <div class="rc-chip-labeled">
-                        <span class="rc-chip-label">جنسیت</span>
-                        <span class="rc-chip-val">{{ user.profile.gender }}</span>
-                    </div>
-                    {% endif %}
-                    {% if user.profile.marital_status %}
-                    <div class="rc-chip-labeled">
-                        <span class="rc-chip-label">تأهل</span>
-                        <span class="rc-chip-val">{{ user.profile.marital_status }}</span>
-                    </div>
-                    {% endif %}
-                    {% if user.profile.military_status %}
-                    <div class="rc-chip-labeled">
-                        <span class="rc-chip-label">سربازی</span>
-                        <span class="rc-chip-val">{{ user.profile.military_status }}</span>
-                    </div>
-                    {% endif %}
-                </div>
-                {% endif %}
-
-                {% if socials %}
-                <div class="rc-social-row">
-                    {% for s in socials %}
-                    {% if s.url %}
-                    <a class="rc-social-pill" href="{{ s.url }}" target="_blank" rel="noopener noreferrer">
-                        {% if s.social_type == 'LinkedIn' %}🔗
-                        {% elif s.social_type == 'GitHub' %}💻
-                        {% elif s.social_type == 'Google Scholar' %}🎓
-                        {% elif s.social_type == 'ResearchGate' %}🔬
-                        {% elif s.social_type == 'Twitter / X' %}🐦
-                        {% elif s.social_type == 'Instagram' %}📸
-                        {% else %}🌐
-                        {% endif %}
-                        <span>{{ s.social_type }}</span>
-                    </a>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-            {% endwith %}
-
-            <!-- تحصیلات -->
-            {% with educations=user.profile.educations.all %}
-            {% if educations %}
-            <div class="rc-card">
-                <div class="rc-card-head">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                        <path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
-                    اطلاعات تحصیلی
-                </div>
-
-                <div class="rc-stat-row">
-                    <div class="rc-stat">
-                        <span class="rc-stat-val">{{ educations|length }}</span>
-                        <span class="rc-stat-lbl">مقطع</span>
-                    </div>
-                    {% with max_gpa=educations|dictsortreversed:"gpa"|first %}
-                    {% if max_gpa.gpa %}
-                    <div class="rc-stat">
-                        <span class="rc-stat-val">{{ max_gpa.gpa }}</span>
-                        <span class="rc-stat-lbl">بهترین معدل</span>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
-                    {% if user.profile.service_plan %}
-                    <div class="rc-stat">
-                        <span class="rc-stat-val rc-stat-val--sm">{{ user.profile.service_plan }}</span>
-                        <span class="rc-stat-lbl">طرح نیروی انسانی</span>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <div class="rc-inline-list">
-                    {% for edu in educations %}
-                    <div class="rc-edu-item">
-                        <span class="rc-edu-degree">{{ edu.degree|default:"—" }}</span>
-                        {% if edu.field %}<span class="rc-edu-field">{{ edu.field }}</span>{% endif %}
-                        {% if edu.university %}<span class="rc-edu-uni">{{ edu.university }}</span>{% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-            {% endwith %}
-
-            <!-- سوابق پژوهشی -->
-            {% with articles=user.profile.articles.all presentations=user.profile.presentations.all %}
-            {% if user.profile.proposal_count is not None or user.profile.software_skills or user.profile.writing_skills or articles or presentations %}
-            <div class="rc-card">
-                <div class="rc-card-head">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14,2 14,8 20,8" />
-                        <line x1="16" y1="13" x2="8" y2="13" />
-                        <line x1="16" y1="17" x2="8" y2="17" />
-                        <polyline points="10,9 9,9 8,9" /></svg>
-                    سوابق پژوهشی
-                </div>
-
-                {% if articles or presentations or user.profile.proposal_count is not None %}
-                <div class="rc-stat-row">
-                    {% if user.profile.proposal_count is not None %}
-                    <div class="rc-stat">
-                        <span class="rc-stat-val">{{ user.profile.proposal_count }}</span>
-                        <span class="rc-stat-lbl">پروپوزال</span>
-                    </div>
-                    {% endif %}
-                    {% if articles %}
-                    <div class="rc-stat">
-                        <span class="rc-stat-val">{{ articles|length }}</span>
-                        <span class="rc-stat-lbl">مقاله</span>
-                    </div>
-                    {% endif %}
-                    {% if presentations %}
-                    <div class="rc-stat">
-                        <span class="rc-stat-val">{{ presentations|length }}</span>
-                        <span class="rc-stat-lbl">ارائه</span>
-                    </div>
-                    {% endif %}
-                </div>
-                {% endif %}
-
-                {% if user.profile.software_skills %}
-                <div class="rc-labeled-block">
-                    <span class="rc-field-lbl">نرم‌افزارها</span>
-                    <p class="rc-field-txt">{{ user.profile.software_skills }}</p>
-                </div>
-                {% endif %}
-                {% if user.profile.writing_skills %}
-                <div class="rc-labeled-block">
-                    <span class="rc-field-lbl">مهارت نگارشی</span>
-                    <p class="rc-field-txt">{{ user.profile.writing_skills }}</p>
-                </div>
-                {% endif %}
-                {% if user.profile.proposal_status %}
-                <div class="rc-badge-row">
-                    <span class="rc-badge rc-badge--orange">{{ user.profile.proposal_status }}</span>
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-            {% endwith %}
-
-            <!-- مهارت‌های بالینی -->
-            {% if user.profile.clinical_certs or user.profile.clinical_exp or user.profile.procedures %}
-            <div class="rc-card">
-                <div class="rc-card-head">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
-                    مهارت‌های بالینی و عملی
-                </div>
-                {% if user.profile.clinical_certs %}
-                <div class="rc-labeled-block">
-                    <span class="rc-field-lbl">گواهینامه‌ها</span>
-                    <p class="rc-field-txt">{{ user.profile.clinical_certs }}</p>
-                </div>
-                {% endif %}
-                {% if user.profile.clinical_exp %}
-                <div class="rc-labeled-block">
-                    <span class="rc-field-lbl">سوابق دانشجویی</span>
-                    <p class="rc-field-txt">{{ user.profile.clinical_exp }}</p>
-                </div>
-                {% endif %}
-                {% if user.profile.procedures %}
-                <div class="rc-labeled-block">
-                    <span class="rc-field-lbl">مهارت‌های پروسیجرال</span>
-                    <p class="rc-field-txt">{{ user.profile.procedures }}</p>
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-
-            <!-- زبان و فوق برنامه -->
-            {% with records=user.profile.executive_records.all %}
-            {% if user.profile.english_level or user.profile.lang_cert or user.profile.other_langs or records or user.profile.extracurricular %}
-            <div class="rc-card">
-                <div class="rc-card-head">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="2" y1="12" x2="22" y2="12" />
-                        <path
-                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    </svg>
-                    زبان، مهارت‌های نرم و فوق برنامه
-                </div>
-
-                {% if user.profile.english_level or user.profile.lang_cert %}
-                <div class="rc-labeled-block">
-                    <span class="rc-field-lbl">زبان انگلیسی</span>
-                    <p class="rc-field-txt">
-                        {% if user.profile.english_level %}{{ user.profile.english_level }}{% endif %}
-                        {% if user.profile.lang_cert %}{% if user.profile.english_level %} —
-                        {% endif %}{{ user.profile.lang_cert }}{% endif %}
-                    </p>
-                </div>
-                {% endif %}
-                {% if user.profile.other_langs %}
-                <div class="rc-labeled-block">
-                    <span class="rc-field-lbl">سایر زبان‌ها</span>
-                    <p class="rc-field-txt">{{ user.profile.other_langs }}</p>
-                </div>
-                {% endif %}
-                {% if records %}
-                <div class="rc-labeled-block">
-                    <span class="rc-field-lbl">سوابق اجرایی و عضویت</span>
-                    <p class="rc-field-txt">{{ records|length }} مورد ثبت‌شده</p>
-                </div>
-                {% endif %}
-                {% if user.profile.extracurricular %}
-                <div class="rc-labeled-block">
-                    <span class="rc-field-lbl">فعالیت‌های فوق برنامه</span>
-                    <p class="rc-field-txt">{{ user.profile.extracurricular }}</p>
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-            {% endwith %}
-
-            <!-- اهداف -->
-            {% if user.profile.goal or user.profile.goal_notes %}
-            <div class="rc-card">
-                <div class="rc-card-head">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <circle cx="12" cy="12" r="6" />
-                        <circle cx="12" cy="12" r="2" /></svg>
-                    اهداف و چشم‌انداز
-                </div>
-                {% if user.profile.goal %}
-                <div class="rc-goal-box">
-                    <span class="rc-goal-label">هدف نهایی</span>
-                    <p class="rc-goal-text">{{ user.profile.goal }}</p>
-                    {% if user.profile.specialty %}
-                    <span class="rc-badge rc-badge--blue">{{ user.profile.specialty }}</span>
-                    {% endif %}
-                </div>
-                {% endif %}
-                {% if user.profile.goal_notes %}
-                <div class="rc-labeled-block">
-                    <span class="rc-field-lbl">توضیحات تکمیلی</span>
-                    <p class="rc-field-txt">{{ user.profile.goal_notes }}</p>
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-
-            {% endif %}
-        </div><!-- end col-resume -->
-    </div><!-- end content -->
-
-
-</div>
-<!-- ═══ مودال پردازش ═══ -->
-<div id="processingModal" class="processing-modal" style="display:none;">
-    <div class="processing-content">
-        <div class="processing-animation">
-            <div class="brain-icon">
-                <svg viewBox="0 0 100 100" width="80" height="80">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.3" />
-                    <circle cx="50" cy="50" r="35" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.5" />
-                    <circle cx="50" cy="50" r="25" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.7" />
-                    <circle cx="50" cy="50" r="15" fill="#4A90D9">
-                        <animate attributeName="r" values="15;18;15" dur="1s" repeatCount="indefinite" />
-                        <animate attributeName="opacity" values="1;0.7;1" dur="1s" repeatCount="indefinite" />
-                    </circle>
-                    <circle cx="20" cy="30" r="3" fill="#4A90D9">
-                        <animate attributeName="cy" values="30;20;30" dur="1.5s" repeatCount="indefinite" />
-                        <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite" />
-                    </circle>
-                    <circle cx="80" cy="40" r="3" fill="#4A90D9">
-                        <animate attributeName="cy" values="40;30;40" dur="1.8s" repeatCount="indefinite" />
-                        <animate attributeName="opacity" values="0;1;0" dur="1.8s" repeatCount="indefinite" />
-                    </circle>
-                    <circle cx="30" cy="70" r="3" fill="#4A90D9">
-                        <animate attributeName="cy" values="70;60;70" dur="1.3s" repeatCount="indefinite" />
-                        <animate attributeName="opacity" values="0;1;0" dur="1.3s" repeatCount="indefinite" />
-                    </circle>
-                    <circle cx="70" cy="65" r="3" fill="#4A90D9">
-                        <animate attributeName="cy" values="65;75;65" dur="1.6s" repeatCount="indefinite" />
-                        <animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite" />
-                    </circle>
-                </svg>
-            </div>
-            <div class="processing-text">
-                <h3>در حال ایجاد نقشه راه...</h3>
-                <p>هوش مصنوعی در حال تحلیل پروفایل شما است</p>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill"></div>
-            </div>
-        </div>
+<style>
+  :root{
+    --bg-outer:#d9dce3;
+    --bg-page:#eef0f4;
+    --card:#ffffff;
+    --card-soft:#f6f7fa;
+    --blue:#2f5cf5;
+    --blue-light:#c9d6ff;
+    --blue-lighter:#e3e9ff;
+    --text-dark:#15182b;
+    --text-mid:#6b7080;
+    --text-soft:#9498a5;
+    --radius-lg:26px;
+    --radius-md:18px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',Helvetica,Arial,sans-serif;
+    background:var(--bg-outer);
+    padding:26px;
+    display:flex;
+    justify-content:center;
+  }
+  .frame{
+    width:1200px;
+    background:var(--bg-page);
+    border-radius:34px;
+    padding:34px 40px 40px;
+  }
+
+  /* ---------- Header ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:34px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .icon-btn{
+    width:44px;height:44px;border-radius:50%;
+    background:#fff;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 6px rgba(20,20,50,.05);
+    flex-shrink:0;
+  }
+  .logo-shape{
+    width:26px;height:26px;border-radius:8px;
+    background:var(--blue);
+    transform:rotate(20deg);
+  }
+  .brand-text .title{font-weight:700;font-size:15px;color:var(--text-dark);}
+  .brand-text .sub{font-size:12px;color:var(--text-soft);}
+
+  .search{
+    flex:1;
+    max-width:430px;
+    margin:0 40px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#fff;
+    border-radius:16px;
+    padding:12px 16px;
+    color:var(--text-soft);
+    font-size:13px;
+    box-shadow:0 2px 6px rgba(20,20,50,.05);
+  }
+  .search input{
+    border:none;outline:none;background:transparent;flex:1;font-size:13px;
+    font-family:inherit;color:var(--text-dark);
+  }
+  .search span.k{
+    margin-inline-start:auto;
+    background:var(--card-soft);
+    border-radius:8px;
+    padding:3px 8px;
+    font-size:11px;
+    color:var(--text-mid);
+    border:none;cursor:pointer;
+  }
+
+  .right-cluster{display:flex;align-items:center;gap:14px;}
+  .avatar{
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,#333,#111);
+    background-size:cover;background-position:center;
+  }
+  .user-meta .name{font-weight:700;font-size:13px;color:var(--text-dark);}
+  .user-meta .loc{font-size:11px;color:var(--text-soft);}
+  .user-block{display:flex;align-items:center;gap:10px;}
+
+  /* ---------- Greeting ---------- */
+  .greeting{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:30px;
+  }
+  .greeting h1{
+    font-size:26px;
+    margin:0 0 4px;
+    color:var(--text-dark);
+  }
+  .greeting p{
+    margin:0;
+    color:var(--text-soft);
+    font-size:15px;
+  }
+  .greet-left{display:flex;align-items:center;gap:20px;}
+  .mic-btn{
+    width:56px;height:56px;border-radius:50%;
+    background:#fff;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 8px rgba(20,20,50,.06);
+    font-size:20px;
+  }
+  .date-cluster{display:flex;align-items:center;gap:14px;}
+  .date-badge{
+    width:56px;height:56px;border-radius:50%;
+    border:1.5px solid #d7d9e2;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:#fff;
+  }
+  .date-badge .num{font-size:18px;font-weight:700;color:var(--text-dark);}
+  .date-text{font-size:12px;color:var(--text-mid);line-height:1.3;}
+  .date-text b{color:var(--text-dark);display:block;font-size:13px;}
+  .range-pill{
+    display:flex;align-items:center;gap:8px;
+    background:#fff;border-radius:14px;
+    padding:10px 14px;font-size:13px;color:var(--text-dark);
+    box-shadow:0 2px 6px rgba(20,20,50,.05);
+  }
+
+  /* ---------- Grid ---------- */
+  .top-row{
+    display:grid;
+    grid-template-columns:1fr 1.28fr;
+    gap:22px;
+    margin-bottom:22px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:var(--radius-lg);
+    padding:26px;
+  }
+  .card-soft{background:var(--card-soft);}
+
+  .reporting h3{
+    display:flex;align-items:center;gap:8px;
+    margin:0 0 10px;font-size:16px;color:var(--text-dark);
+  }
+  .reporting p{
+    margin:0 0 26px;color:var(--text-soft);font-size:13px;line-height:1.6;max-width:340px;
+  }
+  .bars{display:flex;align-items:flex-end;gap:6px;height:60px;}
+  .bars .gap{width:18px;}
+  .bars .bar{width:9px;border-radius:4px;background:var(--blue-light);}
+  .bars .bar.on{background:var(--blue);}
+
+  .income-card{
+    display:flex;flex-direction:column;justify-content:space-between;
+  }
+  .income-top{display:flex;align-items:center;justify-content:space-between;}
+  .dollar-badge{
+    width:38px;height:38px;border-radius:12px;border:1.5px solid #e2e4ec;
+    display:flex;align-items:center;justify-content:center;color:var(--text-mid);font-weight:700;
+  }
+  .income-amount{font-size:30px;font-weight:700;color:var(--text-dark);}
+  .wave{width:100%;height:80px;}
+  .income-bottom{display:flex;align-items:center;justify-content:space-between;}
+  .income-bottom .label{font-weight:600;color:var(--text-dark);font-size:14px;}
+  .pill-green{
+    background:var(--blue-lighter);color:var(--blue);
+    border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;
+  }
+
+  .main-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr 1fr;
+    gap:22px;
+    margin-bottom:22px;
+  }
+  .col{display:flex;flex-direction:column;gap:22px;}
+
+  /* Visa card */
+  .visa-card{display:flex;flex-direction:column;gap:18px;}
+  .visa-top{display:flex;align-items:center;justify-content:space-between;}
+  .visa-logo{font-style:italic;font-weight:800;font-size:17px;color:var(--text-dark);letter-spacing:.5px;}
+  .chip{
+    display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-mid);
+    background:var(--card-soft);border-radius:10px;padding:6px 10px;
+  }
+  .linked{font-size:12px;color:var(--text-soft);}
+  .card-number{font-size:16px;letter-spacing:3px;color:var(--text-dark);font-weight:600;}
+  .visa-actions{display:flex;gap:10px;}
+  .btn-dark{
+    background:var(--text-dark);color:#fff;border:none;border-radius:12px;
+    padding:11px 22px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;
+  }
+  .btn-light{
+    background:var(--card-soft);color:var(--text-dark);border:none;border-radius:12px;
+    padding:11px 22px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;
+  }
+  .fee-row{
+    display:flex;align-items:center;justify-content:space-between;
+    border-top:1px solid #eef0f4;padding-top:16px;
+  }
+  .fee-label{font-size:12px;color:var(--text-soft);}
+  .fee-amount{font-size:17px;font-weight:700;color:var(--text-dark);}
+  .edit-limit{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-mid);}
+  .edit-icon{
+    width:26px;height:26px;border-radius:50%;background:var(--blue);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;flex-shrink:0;
+  }
+
+  /* Sales card */
+  .sales-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .sales-title{font-size:15px;font-weight:700;color:var(--text-dark);}
+  .sales-amount{font-size:22px;font-weight:700;color:var(--text-dark);margin-top:6px;}
+  .daily-pill{
+    background:var(--card-soft);border-radius:14px;padding:8px 12px;text-align:center;font-size:11px;color:var(--text-soft);
+  }
+  .daily-pill b{display:block;color:var(--text-dark);font-size:13px;}
+
+  /* Business Plans */
+  .card-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .card-title-row h4{margin:0;font-size:15px;color:var(--text-dark);}
+  .info-dot{
+    width:22px;height:22px;border-radius:50%;background:var(--text-dark);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:12px;
+  }
+  .plan-item{display:flex;align-items:center;gap:12px;position:relative;padding-bottom:26px;}
+  .plan-item:last-child{padding-bottom:0;}
+  .plan-item::before{
+    content:'';position:absolute;top:26px;right:13px;width:1.5px;height:26px;background:#e2e4ec;
+  }
+  .plan-item:last-child::before{display:none;}
+  .plan-dot{
+    width:26px;height:26px;border-radius:50%;background:#eef0f5;color:var(--blue);
+    display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;z-index:1;
+  }
+  .plan-pill{
+    background:var(--card-soft);border-radius:12px;padding:9px 14px;font-size:13px;color:var(--text-dark);
+    display:flex;align-items:center;gap:6px;flex:1;
+  }
+  .plan-pill.plain{background:none;padding:9px 0;}
+
+  /* Traffic donut */
+  .donut-wrap{display:flex;flex-direction:column;align-items:center;padding-top:6px;}
+  .donut{
+    width:150px;height:150px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .donut::before{
+    content:'';position:absolute;width:104px;height:104px;border-radius:50%;background:#fff;
+  }
+  .donut-label{position:relative;font-size:26px;font-weight:700;color:var(--text-dark);}
+
+  /* Traffic timeline (tall) */
+  .timeline-card{display:flex;flex-direction:column;justify-content:flex-end;min-height:640px;}
+  .timeline{
+    flex:1;display:flex;align-items:flex-end;justify-content:space-around;
+    background-image:linear-gradient(#eef0f4 1px,transparent 1px);
+    background-size:100% 40px;
+    margin-top:10px;
+    padding-top:20px;
+  }
+  .tline{display:flex;flex-direction:column;align-items:center;gap:0;position:relative;}
+  .tline .stem{width:2px;background:var(--blue);}
+  .tline .yr{
+    background:var(--card-soft);color:var(--text-dark);font-weight:700;font-size:13px;
+    border-radius:20px;padding:8px 16px;margin-bottom:10px;
+  }
+  .tline.active .yr{background:var(--blue);color:#fff;}
+
+  /* Total income card */
+  .ti-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .ti-row .wtag{
+    display:flex;align-items:center;gap:4px;background:var(--card-soft);border-radius:10px;
+    padding:6px 10px;font-size:11px;color:var(--text-mid);
+  }
+  .wallet-icon{
+    width:30px;height:30px;border-radius:9px;background:var(--card-soft);
+    display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-mid);
+  }
+  .ti-label{font-size:11px;color:var(--text-soft);margin:14px 0 2px;}
+  .ti-amount{font-size:19px;font-weight:700;color:var(--text-dark);}
+  .ti-divider{border:none;border-top:1px solid #eef0f4;margin:16px 0;}
+  .view-chart{font-size:11px;color:var(--blue);display:flex;align-items:center;gap:4px;}
+
+  /* Stock product */
+  .stock-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .stock-head h4{margin:0;font-size:14px;color:var(--text-dark);}
+  .view-all{font-size:11px;color:var(--text-mid);display:flex;align-items:center;gap:4px;text-decoration:none;}
+  .stock-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .stock-name{font-size:11px;color:var(--text-mid);width:56px;flex-shrink:0;}
+  .heat{width:16px;height:16px;border-radius:4px;}
+  .days{display:flex;gap:8px;margin-top:10px;padding-right:64px;}
+  .days span{font-size:10px;color:var(--text-soft);width:16px;text-align:center;}
+
+  svg{display:block;}
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <!-- Header -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="icon-btn">☰</div>
+      <div class="icon-btn"><div class="logo-shape"></div></div>
+      <div class="brand-text">
+        <div class="title">داشبورد</div>
+        <div class="sub">پنل کاربری</div>
+      </div>
     </div>
-</div>
 
-<!-- ═══ مودال خطا ═══ -->
-<div id="errorModal" class="processing-modal" style="display:none;">
-    <div class="processing-content">
-        <div class="processing-text">
-            <h3>خطا در پردازش</h3>
-            <p>در حال حاضر سرویس هوش مصنوعی در دسترس نیست.</p>
-            <p>لطفاً چند دقیقه دیگر دوباره تلاش کنید.</p>
-            <button onclick="closeErrorModal()" class="btn-submit" style="margin-top:16px;">
-                بستن
-            </button>
+    <form class="search" id="dashboard-search" onsubmit="return false;">
+      🔍
+      <input type="text" id="dashboard-search-input" placeholder="جستجو در دوره‌ها، پروژه‌ها، کاربران و ابزارها...">
+      <span class="k">⌘ K</span>
+    </form>
+
+    <div class="right-cluster">
+      <div class="icon-btn">＋</div>
+      <div class="icon-btn">🔔</div>
+      <div class="user-block">
+        <div class="avatar"></div>
+        <div class="user-meta">
+          {% if profile %}
+            <div class="name">{{ profile.first_name }} {{ profile.last_name }}</div>
+            <div class="loc">{{ profile.city|default:profile.country|default:"—" }}</div>
+          {% else %}
+            <div class="name">{{ request.user.get_username|default:"مهمان" }}</div>
+            <div class="loc">—</div>
+          {% endif %}
         </div>
+      </div>
     </div>
+  </div>
+
+  <!-- Greeting -->
+  <div class="greeting">
+    <div class="greet-left">
+      <div>
+        {% if profile %}
+          <h1>سلام {{ profile.first_name }} 👋</h1>
+          {% if weak_point %}
+            <p>{{ weak_point.1 }}</p>
+          {% else %}
+            <p>خلاصه‌ی وضعیت پژوهشی و پروفایل شما در یک نگاه</p>
+          {% endif %}
+        {% else %}
+          <h1>خوش آمدید 👋</h1>
+          <p>برای مشاهده گزارش‌های شخصی‌سازی‌شده وارد حساب کاربری خود شوید</p>
+        {% endif %}
+      </div>
+      <div class="mic-btn">🎙️</div>
+    </div>
+    <div class="date-cluster">
+      <div class="date-badge"><div class="num">{% now "d" %}</div></div>
+      <div class="date-text">{% now "D" %},<b>{% now "F" %}</b></div>
+      <div class="range-pill">
+        📅
+        {% if roadmap %}
+          {{ roadmap.start_date|date:"Y/m/d" }} - {{ roadmap.target_end_date|date:"Y/m/d" }}
+        {% else %}
+          رودمپ فعالی ندارید
+        {% endif %}
+        ⌄
+      </div>
+    </div>
+  </div>
+
+  <!-- Top row: top activities + roadmap progress -->
+  <div class="top-row">
+    <div class="card reporting">
+      <h3>📄 فعالیت‌های پرتکرار پلتفرم</h3>
+      <p>۵ فعالیتی که در کل پلتفرم بیشترین تعداد تکمیل‌شدن را داشته‌اند — راهنمای خوبی برای انتخاب فعالیت بعدی شماست.</p>
+      {% if top_activities_global %}
+        <div class="bars">
+          {% for act in top_activities_global %}
+            <div class="bar {% if forloop.first %}on{% endif %}"
+                 style="height:{% widthratio act.usage_count top_activities_global.0.usage_count 52 %}px"
+                 title="{{ act.activity__title }} ({{ act.usage_count }} بار)"></div>
+            {% if not forloop.last %}<div class="gap"></div>{% endif %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="bars"><span style="color:var(--text-soft);font-size:12px;">هنوز داده‌ای برای این نمودار ثبت نشده است.</span></div>
+      {% endif %}
+    </div>
+
+    <div class="card income-card">
+      <div class="income-top">
+        <div class="dollar-badge">%</div>
+        <div class="income-amount">{{ dashboard_stats.1.percent|default:0 }}٪</div>
+      </div>
+      <svg class="wave" viewBox="0 0 760 90" preserveAspectRatio="none">
+        <path d="M0,45 C40,10 80,10 120,45 C160,80 200,80 240,45 C280,10 320,10 360,45 C400,80 440,80 480,45 C520,10 560,10 600,45 C640,80 680,80 720,45 C740,30 750,30 760,45"
+          fill="none" stroke="#2f5cf5" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <div class="income-bottom">
+        <div class="label">پیشرفت رودمپ فعال</div>
+        {% if roadmap_timeline %}
+          {% if roadmap_timeline.status == 'ahead' %}
+            <div class="pill-green">▲ جلوتر از برنامه</div>
+          {% elif roadmap_timeline.status == 'behind' %}
+            <div class="pill-green">▼ عقب‌تر از برنامه</div>
+          {% else %}
+            <div class="pill-green">● مطابق برنامه</div>
+          {% endif %}
+        {% else %}
+          <div class="pill-green">بدون رودمپ فعال</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Main 4-column grid : ردیف اول -->
+  <div class="main-grid">
+
+    <!-- Column 1: پروژه اصلی + فعالیت‌های من -->
+    <div class="col">
+      <div class="card visa-card">
+        {% if main_project %}
+          <div class="visa-top">
+            <div class="visa-logo">{{ main_project.title|truncatechars:22 }}</div>
+            <div class="chip">{{ main_project.get_status_display }} ⌄</div>
+          </div>
+          <div class="linked">{{ main_project.short_description|truncatechars:60 }}</div>
+          <div class="card-number">{{ main_project.category|default:"—" }}</div>
+          <div class="visa-actions">
+            <a class="btn-dark" href="#">مشاهده پروژه</a>
+            <a class="btn-light" href="#">اشتراک‌گذاری</a>
+          </div>
+          <div class="fee-row">
+            <div>
+              <div class="fee-label">تعداد بازدید</div>
+              <div class="fee-amount">{{ main_project.views_count }}</div>
+            </div>
+            <div class="edit-limit">
+              <div class="edit-icon">✎</div>
+              {{ main_project.applications_count }} درخواست<br>{{ main_project.members_count }} عضو
+            </div>
+          </div>
+        {% else %}
+          <div class="visa-top">
+            <div class="visa-logo">پروژه‌ای ثبت نشده</div>
+            <div class="chip">—</div>
+          </div>
+          <div class="linked">هنوز هیچ پروژه‌ی تحقیقاتی برای خود ثبت نکرده‌اید.</div>
+          <div class="visa-actions">
+            <a class="btn-dark" href="#">ثبت پروژه جدید</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <div class="sales-top">
+          <div>
+            <div class="sales-title">فعالیت‌های من</div>
+            <div class="sales-amount">{{ user_activity_counts.completed }} از {{ user_activity_counts.total }}</div>
+          </div>
+          <div class="daily-pill">در حال انجام<b>{{ user_activity_counts.in_progress }}</b></div>
+        </div>
+        {% if user_activity_counts.total %}
+          <div class="bars" style="margin-top:10px;">
+            <div class="bar on" style="height:{% widthratio user_activity_counts.completed user_activity_counts.total 55 %}px" title="تکمیل‌شده: {{ user_activity_counts.completed }}"></div>
+            <div class="gap"></div>
+            <div class="bar" style="height:{% widthratio user_activity_counts.in_progress user_activity_counts.total 55 %}px" title="در حال انجام: {{ user_activity_counts.in_progress }}"></div>
+            <div class="gap"></div>
+            <div class="bar" style="height:{% widthratio user_activity_counts.pending user_activity_counts.total 55 %}px" title="در صف: {{ user_activity_counts.pending }}"></div>
+          </div>
+        {% else %}
+          <p style="color:var(--text-soft);font-size:12px;margin:10px 0 0;">هنوز هیچ فعالیتی برای شما ثبت نشده است.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Column 2: کاربران هم‌هدف + تکمیل پروفایل -->
+    <div class="col">
+      <div class="card">
+        <div class="card-title-row">
+          <h4>کاربران هم‌هدف</h4>
+          <div class="info-dot">i</div>
+        </div>
+        {% if same_goal_users %}
+          {% for u in same_goal_users|slice:":3" %}
+            <div class="plan-item" data-search="{{ u.first_name }} {{ u.last_name }}">
+              <div class="plan-dot">👤</div>
+              <div class="plan-pill {% if not forloop.first %}plain{% endif %}">{{ u.first_name }} {{ u.last_name }} ⌄</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-soft);font-size:12px;">کاربر دیگری با هدف مشابه یافت نشد.</p>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <div class="card-title-row">
+          <h4>تکمیل پروفایل</h4>
+          <div class="info-dot">i</div>
+        </div>
+        <div class="donut-wrap">
+          <div class="donut" style="background:conic-gradient(var(--blue) 0% {{ dashboard_stats.0.percent|default:0 }}%, var(--blue-light) {{ dashboard_stats.0.percent|default:0 }}% 100%);">
+            <div class="donut-label">{{ dashboard_stats.0.percent|default:0 }}٪</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 3: خط زمانی رودمپ -->
+    <div class="col">
+      <div class="card timeline-card">
+        <div class="card-title-row">
+          <h4>خط زمانی رودمپ</h4>
+          <div class="info-dot">i</div>
+        </div>
+        {% if roadmap_timeline %}
+          <p style="margin:0 0 4px;font-size:12px;color:var(--text-soft);">
+            پیشرفت واقعی {{ roadmap_timeline.actual_progress }}٪ در برابر پیشرفت ایده‌آل {{ roadmap_timeline.ideal_progress }}٪
+          </p>
+          <div class="timeline">
+            {% for stage in roadmap_timeline.stages %}
+              <div class="tline {% if stage.status == 'active' %}active{% endif %}">
+                <div class="yr">{{ stage.title|truncatechars:10 }}</div>
+                <div class="stem" style="height:{% widthratio stage.progress 100 320 %}px" title="{{ stage.progress }}٪"></div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p style="color:var(--text-soft);font-size:12px;">رودمپی برای نمایش وجود ندارد.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Column 4: ارزیابی + حضور کاربر -->
+    <div class="col">
+      <div class="card">
+        <div class="ti-row">
+          <div class="wallet-icon">🧾</div>
+          <div class="wtag">ارزیابی ⌄</div>
+        </div>
+        {% if regulation_assessment %}
+          <div class="ti-label">امتیاز کل ارزیابی</div>
+          <div class="ti-amount">{{ regulation_assessment.total_score }}</div>
+          <hr class="ti-divider">
+          <div class="ti-row">
+            <div class="wallet-icon">🕒</div>
+            <div class="wtag">بروزرسانی ⌄</div>
+          </div>
+          <div class="ti-label">آخرین بروزرسانی</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="ti-amount">{{ regulation_assessment.updated_at|date:"Y/m/d" }}</div>
+            <div class="view-chart">🔵 مشاهده<br>جزئیات</div>
+          </div>
+        {% else %}
+          <div class="ti-label">ارزیابی</div>
+          <div class="ti-amount">ثبت نشده</div>
+          <hr class="ti-divider">
+          <p style="color:var(--text-soft);font-size:12px;margin:0;">هنوز ارزیابی‌ای برای شما ثبت نشده است.</p>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <div class="stock-head">
+          <h4>حضور اخیر شما</h4>
+          <a class="view-all" href="#">مشاهده همه ⌄</a>
+        </div>
+        <div id="heatmap"></div>
+        <div class="days">
+          <span></span>
+          <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ردیف دوم: دوره‌ها و پروژه‌های مشابه -->
+  <div class="main-grid">
+
+    <div class="col">
+      <div class="card">
+        <div class="card-title-row">
+          <h4>دوره‌های جدید</h4>
+          <div class="info-dot">i</div>
+        </div>
+        {% if courses_new %}
+          {% for c in courses_new %}
+            <div class="plan-item" data-search="{{ c.title }}">
+              <div class="plan-dot">📚</div>
+              <div class="plan-pill {% if not forloop.first %}plain{% endif %}">{{ c.title|truncatechars:26 }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-soft);font-size:12px;">دوره‌ای ثبت نشده است.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <div class="card-title-row">
+          <h4>دوره‌های پیشنهادی برای شما</h4>
+          <div class="info-dot">i</div>
+        </div>
+        {% if courses_recommended %}
+          {% for c in courses_recommended %}
+            <div class="plan-item" data-search="{{ c.title }}">
+              <div class="plan-dot">🎯</div>
+              <div class="plan-pill {% if not forloop.first %}plain{% endif %}">{{ c.title|truncatechars:26 }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-soft);font-size:12px;">دوره‌ی پیشنهادی یافت نشد.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <div class="card-title-row">
+          <h4>پروژه‌های مشابه پروژه شما</h4>
+          <div class="info-dot">i</div>
+        </div>
+        {% if similar_projects %}
+          {% for p in similar_projects %}
+            <div class="plan-item" data-search="{{ p.title }}">
+              <div class="plan-dot">🧪</div>
+              <div class="plan-pill {% if not forloop.first %}plain{% endif %}">{{ p.title|truncatechars:26 }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-soft);font-size:12px;">پروژه مشابهی یافت نشد.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <div class="card-title-row">
+          <h4>کاربران با پروفایل مشابه</h4>
+          <div class="info-dot">i</div>
+        </div>
+        {% if similar_users %}
+          {% for u in similar_users|slice:":3" %}
+            <div class="plan-item" data-search="{{ u.first_name }} {{ u.last_name }}">
+              <div class="plan-dot">🧑‍🤝‍🧑</div>
+              <div class="plan-pill {% if not forloop.first %}plain{% endif %}">{{ u.first_name }} {{ u.last_name }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-soft);font-size:12px;">کاربر مشابهی یافت نشد.</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ردیف سوم: پربازدیدها، ابزارها و آمار کلی -->
+  <div class="main-grid">
+
+    <div class="col">
+      <div class="card">
+        <div class="card-title-row">
+          <h4>دوره‌های پربازدید</h4>
+          <div class="info-dot">i</div>
+        </div>
+        {% if courses_popular %}
+          {% for c in courses_popular %}
+            <div class="plan-item" data-search="{{ c.title }}">
+              <div class="plan-dot">{{ forloop.counter }}</div>
+              <div class="plan-pill {% if not forloop.first %}plain{% endif %}">{{ c.title|truncatechars:24 }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-soft);font-size:12px;">داده‌ای موجود نیست.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <div class="card-title-row">
+          <h4>رویدادهای پربازدید</h4>
+          <div class="info-dot">i</div>
+        </div>
+        {% if events_popular %}
+          {% for e in events_popular %}
+            <div class="plan-item" data-search="{{ e.title }}">
+              <div class="plan-dot">{{ forloop.counter }}</div>
+              <div class="plan-pill {% if not forloop.first %}plain{% endif %}">{{ e.title|truncatechars:24 }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-soft);font-size:12px;">داده‌ای موجود نیست.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <div class="card-title-row">
+          <h4>ابزارهای جدید</h4>
+          <div class="info-dot">i</div>
+        </div>
+        {% if new_tools %}
+          {% for t in new_tools %}
+            <div class="plan-item" data-search="{{ t.title }}">
+              <div class="plan-dot">🛠</div>
+              <div class="plan-pill {% if not forloop.first %}plain{% endif %}">{{ t.title|truncatechars:24 }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-soft);font-size:12px;">ابزار جدیدی ثبت نشده است.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card income-card">
+        <div class="income-top">
+          <div class="dollar-badge">👥</div>
+        </div>
+        <div class="income-amount">{{ total_profiles_count }}</div>
+        <div class="income-bottom">
+          <div class="label">تعداد کل کاربران پلتفرم</div>
+          <div class="pill-green">{{ total_roadmaps_count }} رودمپ من</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
 </div>
 
+{{ login_activity|json_script:"login-activity-data" }}
+<script>
+  // ---------------- سرچ زنده ----------------
+  const searchInput = document.getElementById('dashboard-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', function () {
+      const q = this.value.trim().toLowerCase();
+      document.querySelectorAll('[data-search]').forEach(function (el) {
+        const text = (el.getAttribute('data-search') || '').toLowerCase();
+        el.style.display = (!q || text.includes(q)) ? '' : 'none';
+      });
+    });
+  }
+
+  // ---------------- نمودار حضور اخیر (heatmap) ----------------
+  const heatmap = document.getElementById('heatmap');
+  const loginDataEl = document.getElementById('login-activity-data');
+  const loginData = loginDataEl ? JSON.parse(loginDataEl.textContent) : [];
+
+  if (heatmap) {
+    if (loginData.length === 0) {
+      const empty = document.createElement('p');
+      empty.style.cssText = 'color:var(--text-soft);font-size:12px;margin:0;';
+      empty.textContent = 'هنوز داده‌ای برای حضور آنلاین ثبت نشده است.';
+      heatmap.appendChild(empty);
+    } else {
+      const maxDuration = Math.max.apply(null, loginData.map(function (d) { return d.duration_minutes || 0; })) || 1;
+      const shades = ['#eef0f4', '#dce4ff', '#aebfff', '#2f5cf5'];
+      // تقسیم روزهای موجود به هفته‌های ۷تایی
+      for (let w = 0; w < Math.ceil(loginData.length / 7); w++) {
+        const row = document.createElement('div');
+        row.className = 'stock-row';
+        const label = document.createElement('div');
+        label.className = 'stock-name';
+        label.textContent = 'هفته ' + (w + 1);
+        row.appendChild(label);
+        const week = loginData.slice(w * 7, w * 7 + 7);
+        week.forEach(function (d) {
+          const cell = document.createElement('div');
+          cell.className = 'heat';
+          const ratio = (d.duration_minutes || 0) / maxDuration;
+          const idx = Math.min(shades.length - 1, Math.floor(ratio * shades.length));
+          cell.style.background = shades[idx];
+          cell.title = d.date + ' — ' + (d.duration_minutes || 0) + ' دقیقه';
+          row.appendChild(cell);
+        });
+        heatmap.appendChild(row);
+      }
+    }
+  }
+</script>
 
 
 

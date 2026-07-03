@@ -60,7 +60,8 @@ def roadmap_create(request):
             except:
                 return render(request, 'roadmap/roadmap_create.html', {
                     'form': form,
-                    'error': 'لطفاً ابتدا پروفایل خود را کامل کنید.'
+                    'error': 'لطفاً ابتدا پروفایل خود را کامل کنید.',
+                    'show_error_modal': True
                 })
             
             # تولید رودمپ با AI
@@ -69,7 +70,7 @@ def roadmap_create(request):
             except Exception as e:
                 return render(request, 'roadmap/roadmap_create.html', {
                     'form': form,
-                    'error': f'خطا در تولید رودمپ: {str(e)}'
+                    'show_error_modal': True
                 })
             
             # ذخیره رودمپ
@@ -113,7 +114,7 @@ def roadmap_create(request):
                     # ایجاد فعالیت‌ها
                     for activity_data in stage_data.get('activities', []):
                         raw_id = f"{roadmap.id}_{stage.id}_{activity_data.get('title', '')}"
-                        external_id = raw_id[:50]  # جلوگیری از value too long for varchar(50)
+                        external_id = raw_id[:50]
 
                         activity, _ = Activity.objects.get_or_create(
                             external_id=external_id,

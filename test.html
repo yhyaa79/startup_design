@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>Mirai Dashboard</title>
+<style>
+  :root{
+    --bg-outer:#d9dce3;
+    --bg-page:#eef0f4;
+    --card:#ffffff;
+    --card-soft:#f6f7fa;
+    --blue:#2f5cf5;
+    --blue-light:#c9d6ff;
+    --blue-lighter:#e3e9ff;
+    --text-dark:#15182b;
+    --text-mid:#6b7080;
+    --text-soft:#9498a5;
+    --radius-lg:26px;
+    --radius-md:18px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',Helvetica,Arial,sans-serif;
+    background:var(--bg-outer);
+    padding:26px;
+    display:flex;
+    justify-content:center;
+  }
+  .frame{
+    width:1200px;
+    background:var(--bg-page);
+    border-radius:34px;
+    padding:34px 40px 40px;
+  }
+
+  /* ---------- Header ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:34px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .icon-btn{
+    width:44px;height:44px;border-radius:50%;
+    background:#fff;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 6px rgba(20,20,50,.05);
+    flex-shrink:0;
+  }
+  .logo-shape{
+    width:26px;height:26px;border-radius:8px;
+    background:var(--blue);
+    transform:rotate(20deg);
+  }
+  .brand-text .title{font-weight:700;font-size:15px;color:var(--text-dark);}
+  .brand-text .sub{font-size:12px;color:var(--text-soft);}
+
+  .search{
+    flex:1;
+    max-width:430px;
+    margin:0 40px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#fff;
+    border-radius:16px;
+    padding:12px 16px;
+    color:var(--text-soft);
+    font-size:13px;
+    box-shadow:0 2px 6px rgba(20,20,50,.05);
+  }
+  .search span.k{
+    margin-inline-start:auto;
+    background:var(--card-soft);
+    border-radius:8px;
+    padding:3px 8px;
+    font-size:11px;
+    color:var(--text-mid);
+  }
+
+  .right-cluster{display:flex;align-items:center;gap:14px;}
+  .avatar{
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,#333,#111);
+    background-size:cover;background-position:center;
+  }
+  .user-meta .name{font-weight:700;font-size:13px;color:var(--text-dark);}
+  .user-meta .loc{font-size:11px;color:var(--text-soft);}
+  .user-block{display:flex;align-items:center;gap:10px;}
+
+  /* ---------- Greeting ---------- */
+  .greeting{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:30px;
+  }
+  .greeting h1{
+    font-size:26px;
+    margin:0 0 4px;
+    color:var(--text-dark);
+  }
+  .greeting p{
+    margin:0;
+    color:var(--text-soft);
+    font-size:15px;
+  }
+  .greet-left{display:flex;align-items:center;gap:20px;}
+  .mic-btn{
+    width:56px;height:56px;border-radius:50%;
+    background:#fff;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 8px rgba(20,20,50,.06);
+    font-size:20px;
+  }
+  .date-cluster{display:flex;align-items:center;gap:14px;}
+  .date-badge{
+    width:56px;height:56px;border-radius:50%;
+    border:1.5px solid #d7d9e2;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:#fff;
+  }
+  .date-badge .num{font-size:18px;font-weight:700;color:var(--text-dark);}
+  .date-text{font-size:12px;color:var(--text-mid);line-height:1.3;}
+  .date-text b{color:var(--text-dark);display:block;font-size:13px;}
+  .range-pill{
+    display:flex;align-items:center;gap:8px;
+    background:#fff;border-radius:14px;
+    padding:10px 14px;font-size:13px;color:var(--text-dark);
+    box-shadow:0 2px 6px rgba(20,20,50,.05);
+  }
+
+  /* ---------- Grid ---------- */
+  .top-row{
+    display:grid;
+    grid-template-columns:1fr 1.28fr;
+    gap:22px;
+    margin-bottom:22px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:var(--radius-lg);
+    padding:26px;
+  }
+  .card-soft{background:var(--card-soft);}
+
+  .reporting h3{
+    display:flex;align-items:center;gap:8px;
+    margin:0 0 10px;font-size:16px;color:var(--text-dark);
+  }
+  .reporting p{
+    margin:0 0 26px;color:var(--text-soft);font-size:13px;line-height:1.6;max-width:340px;
+  }
+  .bars{display:flex;align-items:flex-end;gap:6px;height:60px;}
+  .bars .gap{width:18px;}
+  .bars .bar{width:9px;border-radius:4px;background:var(--blue-light);}
+  .bars .bar.on{background:var(--blue);}
+
+  .income-card{
+    display:flex;flex-direction:column;justify-content:space-between;
+  }
+  .income-top{display:flex;align-items:center;justify-content:space-between;}
+  .dollar-badge{
+    width:38px;height:38px;border-radius:12px;border:1.5px solid #e2e4ec;
+    display:flex;align-items:center;justify-content:center;color:var(--text-mid);font-weight:700;
+  }
+  .income-amount{font-size:30px;font-weight:700;color:var(--text-dark);}
+  .wave{width:100%;height:80px;}
+  .income-bottom{display:flex;align-items:center;justify-content:space-between;}
+  .income-bottom .label{font-weight:600;color:var(--text-dark);font-size:14px;}
+  .pill-green{
+    background:var(--blue-lighter);color:var(--blue);
+    border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;
+  }
+
+  .main-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr 1fr;
+    gap:22px;
+  }
+  .col{display:flex;flex-direction:column;gap:22px;}
+
+  /* Visa card */
+  .visa-card{display:flex;flex-direction:column;gap:18px;}
+  .visa-top{display:flex;align-items:center;justify-content:space-between;}
+  .visa-logo{font-style:italic;font-weight:800;font-size:17px;color:var(--text-dark);letter-spacing:.5px;}
+  .chip{
+    display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-mid);
+    background:var(--card-soft);border-radius:10px;padding:6px 10px;
+  }
+  .linked{font-size:12px;color:var(--text-soft);}
+  .card-number{font-size:16px;letter-spacing:3px;color:var(--text-dark);font-weight:600;}
+  .visa-actions{display:flex;gap:10px;}
+  .btn-dark{
+    background:var(--text-dark);color:#fff;border:none;border-radius:12px;
+    padding:11px 22px;font-size:13px;font-weight:600;cursor:pointer;
+  }
+  .btn-light{
+    background:var(--card-soft);color:var(--text-dark);border:none;border-radius:12px;
+    padding:11px 22px;font-size:13px;font-weight:600;cursor:pointer;
+  }
+  .fee-row{
+    display:flex;align-items:center;justify-content:space-between;
+    border-top:1px solid #eef0f4;padding-top:16px;
+  }
+  .fee-label{font-size:12px;color:var(--text-soft);}
+  .fee-amount{font-size:17px;font-weight:700;color:var(--text-dark);}
+  .edit-limit{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-mid);}
+  .edit-icon{
+    width:26px;height:26px;border-radius:50%;background:var(--blue);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;flex-shrink:0;
+  }
+
+  /* Sales card */
+  .sales-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .sales-title{font-size:15px;font-weight:700;color:var(--text-dark);}
+  .sales-amount{font-size:22px;font-weight:700;color:var(--text-dark);margin-top:6px;}
+  .daily-pill{
+    background:var(--card-soft);border-radius:14px;padding:8px 12px;text-align:center;font-size:11px;color:var(--text-soft);
+  }
+  .daily-pill b{display:block;color:var(--text-dark);font-size:13px;}
+
+  /* Business Plans */
+  .card-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .card-title-row h4{margin:0;font-size:15px;color:var(--text-dark);}
+  .info-dot{
+    width:22px;height:22px;border-radius:50%;background:var(--text-dark);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:12px;
+  }
+  .plan-item{display:flex;align-items:center;gap:12px;position:relative;padding-bottom:26px;}
+  .plan-item:last-child{padding-bottom:0;}
+  .plan-item::before{
+    content:'';position:absolute;top:26px;right:13px;width:1.5px;height:26px;background:#e2e4ec;
+  }
+  .plan-item:last-child::before{display:none;}
+  .plan-dot{
+    width:26px;height:26px;border-radius:50%;background:#eef0f5;color:var(--blue);
+    display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;z-index:1;
+  }
+  .plan-pill{
+    background:var(--card-soft);border-radius:12px;padding:9px 14px;font-size:13px;color:var(--text-dark);
+    display:flex;align-items:center;gap:6px;flex:1;
+  }
+  .plan-pill.plain{background:none;padding:9px 0;}
+
+  /* Traffic donut */
+  .donut-wrap{display:flex;flex-direction:column;align-items:center;padding-top:6px;}
+  .donut{
+    width:150px;height:150px;border-radius:50%;
+    background:conic-gradient(var(--blue) 0% 78%, var(--blue-light) 78% 100%);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .donut::before{
+    content:'';position:absolute;width:104px;height:104px;border-radius:50%;background:#fff;
+  }
+  .donut-label{position:relative;font-size:26px;font-weight:700;color:var(--text-dark);}
+
+  /* Traffic timeline (tall) */
+  .timeline-card{display:flex;flex-direction:column;justify-content:flex-end;min-height:640px;}
+  .timeline{
+    flex:1;display:flex;align-items:flex-end;justify-content:space-around;
+    background-image:linear-gradient(#eef0f4 1px,transparent 1px);
+    background-size:100% 40px;
+    margin-top:10px;
+    padding-top:20px;
+  }
+  .tline{display:flex;flex-direction:column;align-items:center;gap:0;position:relative;}
+  .tline .stem{width:2px;background:var(--blue);}
+  .tline .yr{
+    background:var(--card-soft);color:var(--text-dark);font-weight:700;font-size:13px;
+    border-radius:20px;padding:8px 16px;margin-bottom:10px;
+  }
+  .tline.active .yr{background:var(--blue);color:#fff;}
+
+  /* Total income card */
+  .ti-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .ti-row .wtag{
+    display:flex;align-items:center;gap:4px;background:var(--card-soft);border-radius:10px;
+    padding:6px 10px;font-size:11px;color:var(--text-mid);
+  }
+  .wallet-icon{
+    width:30px;height:30px;border-radius:9px;background:var(--card-soft);
+    display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-mid);
+  }
+  .ti-label{font-size:11px;color:var(--text-soft);margin:14px 0 2px;}
+  .ti-amount{font-size:19px;font-weight:700;color:var(--text-dark);}
+  .ti-divider{border:none;border-top:1px solid #eef0f4;margin:16px 0;}
+  .view-chart{font-size:11px;color:var(--blue);display:flex;align-items:center;gap:4px;}
+
+  /* Stock product */
+  .stock-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .stock-head h4{margin:0;font-size:14px;color:var(--text-dark);}
+  .view-all{font-size:11px;color:var(--text-mid);display:flex;align-items:center;gap:4px;}
+  .stock-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .stock-name{font-size:11px;color:var(--text-mid);width:56px;flex-shrink:0;}
+  .heat{width:16px;height:16px;border-radius:4px;}
+  .days{display:flex;gap:8px;margin-top:10px;padding-right:64px;}
+  .days span{font-size:10px;color:var(--text-soft);width:16px;text-align:center;}
+
+  svg{display:block;}
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <!-- Header -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="icon-btn">☰</div>
+      <div class="icon-btn"><div class="logo-shape"></div></div>
+      <div class="brand-text">
+        <div class="title">Mirai</div>
+        <div class="sub">Dashbaord</div>
+      </div>
+    </div>
+
+    <div class="search">
+      🔍 Search Task
+      <span class="k">⌘ K</span>
+    </div>
+
+    <div class="right-cluster">
+      <div class="icon-btn">＋</div>
+      <div class="icon-btn">🔔</div>
+      <div class="user-block">
+        <div class="avatar"></div>
+        <div class="user-meta">
+          <div class="name">Kim Dokja</div>
+          <div class="loc">Seol, Korea</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Greeting -->
+  <div class="greeting">
+    <div class="greet-left">
+      <div>
+        <h1>Hey, need assistance? 👋</h1>
+        <p>Feel free to ask me anything!</p>
+      </div>
+      <div class="mic-btn">🎙️</div>
+    </div>
+    <div class="date-cluster">
+      <div class="date-badge"><div class="num">21</div></div>
+      <div class="date-text">Thu,<b>Desember</b></div>
+      <div class="range-pill">📅 Des 21 - Sep 25 ⌄</div>
+    </div>
+  </div>
+
+  <!-- Top row: reporting + income -->
+  <div class="top-row">
+    <div class="card reporting">
+      <h3>📄 Reporting</h3>
+      <p>Unleash the Power of Precision: Elevate Your Business Insights with Seamless Reporting on our SaaS Platform</p>
+      <div class="bars">
+        <div class="bar" style="height:26px"></div>
+        <div class="bar on" style="height:44px"></div>
+        <div class="bar" style="height:18px"></div>
+        <div class="bar" style="height:32px"></div>
+        <div class="gap"></div>
+        <div class="bar on" style="height:50px"></div>
+        <div class="bar" style="height:22px"></div>
+        <div class="bar" style="height:34px"></div>
+        <div class="bar" style="height:16px"></div>
+        <div class="bar" style="height:26px"></div>
+        <div class="gap"></div>
+        <div class="bar on" style="height:46px"></div>
+        <div class="bar" style="height:20px"></div>
+        <div class="bar" style="height:36px"></div>
+        <div class="bar on" style="height:52px"></div>
+        <div class="bar" style="height:24px"></div>
+      </div>
+    </div>
+
+    <div class="card income-card">
+      <div class="income-top">
+        <div class="dollar-badge">$</div>
+        <div class="income-amount">$69.455</div>
+      </div>
+      <svg class="wave" viewBox="0 0 760 90" preserveAspectRatio="none">
+        <path d="M0,45 C40,10 80,10 120,45 C160,80 200,80 240,45 C280,10 320,10 360,45 C400,80 440,80 480,45 C520,10 560,10 600,45 C640,80 680,80 720,45 C740,30 750,30 760,45"
+          fill="none" stroke="#2f5cf5" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <div class="income-bottom">
+        <div class="label">Monthly Income</div>
+        <div class="pill-green">+8,34%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main 4-column grid -->
+  <div class="main-grid">
+
+    <!-- Column 1: Visa + Sales -->
+    <div class="col">
+      <div class="card visa-card">
+        <div class="visa-top">
+          <div class="visa-logo">VISA</div>
+          <div class="chip">Direct Debits ⌄</div>
+        </div>
+        <div class="linked">Linked to main account</div>
+        <div class="card-number">**** 64534</div>
+        <div class="visa-actions">
+          <button class="btn-dark">Receive</button>
+          <button class="btn-light">Send</button>
+        </div>
+        <div class="fee-row">
+          <div>
+            <div class="fee-label">Monthly reguler fee</div>
+            <div class="fee-amount">$ 27.00</div>
+          </div>
+          <div class="edit-limit">
+            <div class="edit-icon">✎</div>
+            Edit<br>cards limitation
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sales-top">
+          <div>
+            <div class="sales-title">Sales</div>
+            <div class="sales-amount">$ 453.343</div>
+          </div>
+          <div class="daily-pill">Daily Income<b>$23.43</b></div>
+        </div>
+        <svg viewBox="0 0 300 80" width="100%" height="80" preserveAspectRatio="none">
+          <path d="M0,60 C30,55 40,20 70,25 C100,30 110,60 140,55 C170,50 180,15 210,20 C240,25 250,55 280,50 L300,48 L300,80 L0,80 Z"
+            fill="#dce4ff"/>
+          <path d="M0,60 C30,55 40,20 70,25 C100,30 110,60 140,55 C170,50 180,15 210,20 C240,25 250,55 280,50 L300,48"
+            fill="none" stroke="#2f5cf5" stroke-width="2.5"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Column 2: Business Plans + Traffic donut -->
+    <div class="col">
+      <div class="card">
+        <div class="card-title-row">
+          <h4>Bussines Plans</h4>
+          <div class="info-dot">i</div>
+        </div>
+        <div class="plan-item">
+          <div class="plan-dot">📈</div>
+          <div class="plan-pill">Marketing and Sales ⌄</div>
+        </div>
+        <div class="plan-item">
+          <div class="plan-dot">🔁</div>
+          <div class="plan-pill plain">Operations and Supply Chain</div>
+        </div>
+        <div class="plan-item">
+          <div class="plan-dot">⚙️</div>
+          <div class="plan-pill plain">Product development</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-row">
+          <h4>Traffic Status</h4>
+          <div class="info-dot">i</div>
+        </div>
+        <div class="donut-wrap">
+          <div class="donut"><div class="donut-label">78%</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 3: Traffic timeline (tall) -->
+    <div class="col">
+      <div class="card timeline-card">
+        <div class="card-title-row">
+          <h4>Traffic Status</h4>
+          <div class="info-dot">i</div>
+        </div>
+        <div class="timeline">
+          <div class="tline"><div class="yr">2018</div><div class="stem" style="height:120px"></div></div>
+          <div class="tline"><div class="yr">2020</div><div class="stem" style="height:220px"></div></div>
+          <div class="tline"><div class="yr">2021</div><div class="stem" style="height:170px"></div></div>
+          <div class="tline active"><div class="yr">2023</div><div class="stem" style="height:320px"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 4: Total income + Stock product -->
+    <div class="col">
+      <div class="card">
+        <div class="ti-row">
+          <div class="wallet-icon">💳</div>
+          <div class="wtag">Weekly ⌄</div>
+        </div>
+        <div class="ti-label">Total Income</div>
+        <div class="ti-amount">$234.347,489</div>
+        <hr class="ti-divider">
+        <div class="ti-row">
+          <div class="wallet-icon">💳</div>
+          <div class="wtag">Weekly ⌄</div>
+        </div>
+        <div class="ti-label">Total Paid</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="ti-amount">$18.43,44</div>
+          <div class="view-chart">🔵 View<br>Chart Mode</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="stock-head">
+          <h4>Stock Product</h4>
+          <div class="view-all">View All ⌄</div>
+        </div>
+        <div id="heatmap"></div>
+        <div class="days">
+          <span></span>
+          <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const rows = ['Fashion','Food','Sniker','Cosmetic','Electronic'];
+  const shades = ['#dce4ff','#aebfff','#2f5cf5','#7d94ff'];
+  const heatmap = document.getElementById('heatmap');
+  rows.forEach(name=>{
+    const row = document.createElement('div');
+    row.className='stock-row';
+    const label = document.createElement('div');
+    label.className='stock-name';
+    label.textContent=name;
+    row.appendChild(label);
+    for(let i=0;i<7;i++){
+      const cell = document.createElement('div');
+      cell.className='heat';
+      cell.style.background = shades[Math.floor(Math.random()*shades.length)];
+      row.appendChild(cell);
+    }
+    heatmap.appendChild(row);
+  });
+</script>
+</body>
+</html>
