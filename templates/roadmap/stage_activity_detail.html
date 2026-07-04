@@ -1075,146 +1075,122 @@
 
 {{ stage_activity.checkpoints|json_script:"__unused_checkpoints" }}
 
+
 <script>
-    const ACTIVITY_ID = {
-        {
-            stage_activity.id
-        }
-    };
-    const ROADMAP_ID = {
-        {
-            roadmap.id
-        }
-    };
+const ACTIVITY_ID = {{ stage_activity.id }};
+const ROADMAP_ID = {{ roadmap.id }};
 
-    // ═══════════════════════════════════════════
-    // SOURCE SWITCH (لیست آماده / دستی)
-    // ═══════════════════════════════════════════
 
-    function switchSource(source) {
-        document.getElementById('panel-static').classList.toggle('active', source === 'static');
-        document.getElementById('panel-custom').classList.toggle('active', source === 'custom');
-        document.getElementById('btn-switch-static').classList.toggle('active', source === 'static');
-        document.getElementById('btn-switch-custom').classList.toggle('active', source === 'custom');
-    }
 
-    // ═══════════════════════════════════════════
-    // PROGRESS
-    // ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// SOURCE SWITCH (لیست آماده / دستی)
+// ═══════════════════════════════════════════
 
-    document.getElementById('progressSlider').addEventListener('input', function (e) {
-        const value = e.target.value;
-        document.getElementById('progressValue').textContent = value + '%';
-        document.getElementById('progressFill').style.width = value + '%';
+function switchSource(source) {
+    document.getElementById('panel-static').classList.toggle('active', source === 'static');
+    document.getElementById('panel-custom').classList.toggle('active', source === 'custom');
+    document.getElementById('btn-switch-static').classList.toggle('active', source === 'static');
+    document.getElementById('btn-switch-custom').classList.toggle('active', source === 'custom');
+}
 
-        fetch(`/roadmap/activity/${ACTIVITY_ID}/update/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({
-                progress_percentage: value
-            })
-        });
+// ═══════════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════════
+
+document.getElementById('progressSlider').addEventListener('input', function (e) {
+    const value = e.target.value;
+    document.getElementById('progressValue').textContent = value + '%';
+    document.getElementById('progressFill').style.width = value + '%';
+
+    fetch(`/roadmap/activity/${ACTIVITY_ID}/update/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ progress_percentage: value })
     });
+});
 
-    // ═══════════════════════════════════════════
-    // STATIC ITEMS
-    // ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// STATIC ITEMS
+// ═══════════════════════════════════════════
 
-    function filterStaticItems() {
-        const category = document.getElementById('categoryFilter').value;
-        document.querySelectorAll('.static-item-card').forEach(item => {
-            item.style.display = (!category || item.dataset.category === category) ? '' : 'none';
-        });
-    }
+function filterStaticItems() {
+    const category = document.getElementById('categoryFilter').value;
+    document.querySelectorAll('.static-item-card').forEach(item => {
+        item.style.display = (!category || item.dataset.category === category) ? '' : 'none';
+    });
+}
 
-    function selectStaticItem(itemId, element) {
-        document.querySelectorAll('.static-item-card').forEach(card => card.classList.remove('selected'));
-        element.classList.add('selected');
+function selectStaticItem(itemId, element) {
+    document.querySelectorAll('.static-item-card').forEach(card => card.classList.remove('selected'));
+    element.classList.add('selected');
 
-        fetch(`/roadmap/activity/${ACTIVITY_ID}/select-static/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    static_item_id: itemId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showAlert('success', data.message);
-                    setTimeout(() => location.reload(), 800);
-                } else {
-                    showAlert('danger', data.error || 'خطا در انتخاب آیتم');
-                }
-            })
-            .catch(() => showAlert('danger', 'خطا در انتخاب آیتم'));
-    }
-
-    // ═══════════════════════════════════════════
-    // CUSTOM ACTIVITY
-    // ═══════════════════════════════════════════
-
-    function createCustomActivity() {
-        const form = document.getElementById('customActivityForm');
-        const data = Object.fromEntries(new FormData(form));
-
-        fetch(`/roadmap/activity/${ACTIVITY_ID}/create-custom/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showAlert('success', data.message);
-                    setTimeout(() => location.reload(), 800);
-                } else {
-                    showAlert('danger', data.error);
-                }
-            });
-    }
-
-    // ═══════════════════════════════════════════
-    // CHECKPOINTS
-    // ═══════════════════════════════════════════
-
-    function addCheckpoint() {
-        const title = document.getElementById('checkpointTitle').value;
-        const description = document.getElementById('checkpointDesc').value;
-
-        if (!title) {
-            showAlert('warning', 'لطفاً عنوان نقطه کنترل را وارد کنید');
-            return;
+    fetch(`/roadmap/activity/${ACTIVITY_ID}/select-static/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ static_item_id: itemId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', data.message);
+            setTimeout(() => location.reload(), 800);
+        } else {
+            showAlert('danger', data.error || 'خطا در انتخاب آیتم');
         }
+    })
+    .catch(() => showAlert('danger', 'خطا در انتخاب آیتم'));
+}
 
-        fetch(`/roadmap/activity/${ACTIVITY_ID}/checkpoint/add/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    title,
-                    description
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const list = document.getElementById('checkpointsList');
-                    const emptyState = list.querySelector('.empty-state');
-                    if (emptyState) emptyState.remove();
+// ═══════════════════════════════════════════
+// CUSTOM ACTIVITY
+// ═══════════════════════════════════════════
 
-                    const html = `
+function createCustomActivity() {
+    const form = document.getElementById('customActivityForm');
+    const data = Object.fromEntries(new FormData(form));
+
+    fetch(`/roadmap/activity/${ACTIVITY_ID}/create-custom/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', data.message);
+            setTimeout(() => location.reload(), 800);
+        } else {
+            showAlert('danger', data.error);
+        }
+    });
+}
+
+// ═══════════════════════════════════════════
+// CHECKPOINTS
+// ═══════════════════════════════════════════
+
+function addCheckpoint() {
+    const title = document.getElementById('checkpointTitle').value;
+    const description = document.getElementById('checkpointDesc').value;
+
+    if (!title) {
+        showAlert('warning', 'لطفاً عنوان نقطه کنترل را وارد کنید');
+        return;
+    }
+
+    fetch(`/roadmap/activity/${ACTIVITY_ID}/checkpoint/add/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ title, description })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const list = document.getElementById('checkpointsList');
+            const emptyState = list.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+
+            const html = `
                 <div class="checkpoint-item" data-checkpoint-id="${data.checkpoint.id}">
                     <input type="checkbox" class="checkpoint-checkbox" onchange="toggleCheckpoint(${ACTIVITY_ID}, ${data.checkpoint.id})">
                     <div class="checkpoint-content">
@@ -1223,77 +1199,59 @@
                     </div>
                     <button class="icon-btn-delete" onclick="deleteCheckpoint(${ACTIVITY_ID}, ${data.checkpoint.id})">حذف</button>
                 </div>`;
-                    list.insertAdjacentHTML('beforeend', html);
+            list.insertAdjacentHTML('beforeend', html);
 
-                    document.getElementById('checkpointTitle').value = '';
-                    document.getElementById('checkpointDesc').value = '';
-                    showAlert('success', 'نقطه کنترل اضافه شد');
-                }
-            });
-    }
-
-    function toggleCheckpoint(activityId, checkpointId) {
-        fetch(`/roadmap/activity/${activityId}/checkpoint/${checkpointId}/toggle/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) location.reload();
-            });
-    }
-
-    function deleteCheckpoint(activityId, checkpointId) {
-        if (confirm('آیا مطمئن هستید؟')) {
-            document.querySelector(`[data-checkpoint-id="${checkpointId}"]`).remove();
+            document.getElementById('checkpointTitle').value = '';
+            document.getElementById('checkpointDesc').value = '';
+            showAlert('success', 'نقطه کنترل اضافه شد');
         }
+    });
+}
+
+function toggleCheckpoint(activityId, checkpointId) {
+    fetch(`/roadmap/activity/${activityId}/checkpoint/${checkpointId}/toggle/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+    })
+    .then(response => response.json())
+    .then(data => { if (data.success) location.reload(); });
+}
+
+function deleteCheckpoint(activityId, checkpointId) {
+    if (confirm('آیا مطمئن هستید؟')) {
+        document.querySelector(`[data-checkpoint-id="${checkpointId}"]`).remove();
+    }
+}
+
+// ═══════════════════════════════════════════
+// RESOURCES
+// ═══════════════════════════════════════════
+
+function addResource() {
+    const title = document.getElementById('resourceTitle').value;
+    const type = document.getElementById('resourceType').value;
+    const url = document.getElementById('resourceUrl').value;
+    const description = document.getElementById('resourceDesc').value;
+
+    if (!title) {
+        showAlert('warning', 'لطفاً عنوان منبع را وارد کنید');
+        return;
     }
 
-    // ═══════════════════════════════════════════
-    // RESOURCES
-    // ═══════════════════════════════════════════
+    fetch(`/roadmap/activity/${ACTIVITY_ID}/resource/add/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ title, type, url, description })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const list = document.getElementById('resourcesList');
+            const emptyState = list.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
 
-    function addResource() {
-        const title = document.getElementById('resourceTitle').value;
-        const type = document.getElementById('resourceType').value;
-        const url = document.getElementById('resourceUrl').value;
-        const description = document.getElementById('resourceDesc').value;
-
-        if (!title) {
-            showAlert('warning', 'لطفاً عنوان منبع را وارد کنید');
-            return;
-        }
-
-        fetch(`/roadmap/activity/${ACTIVITY_ID}/resource/add/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    title,
-                    type,
-                    url,
-                    description
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const list = document.getElementById('resourcesList');
-                    const emptyState = list.querySelector('.empty-state');
-                    if (emptyState) emptyState.remove();
-
-                    const icons = {
-                        link: '🔗',
-                        file: '📄',
-                        book: '📖',
-                        course: '🎓',
-                        other: '📌'
-                    };
-                    const html = `
+            const icons = { link: '🔗', file: '📄', book: '📖', course: '🎓', other: '📌' };
+            const html = `
                 <div class="resource-item" data-resource-id="${data.resource.id}">
                     <div class="resource-icon">${icons[data.resource.type]}</div>
                     <div class="resource-content">
@@ -1304,145 +1262,127 @@
                     </div>
                     <button class="icon-btn-delete" onclick="deleteResource(${ACTIVITY_ID}, ${data.resource.id})">حذف</button>
                 </div>`;
-                    list.insertAdjacentHTML('beforeend', html);
+            list.insertAdjacentHTML('beforeend', html);
 
-                    document.getElementById('resourceTitle').value = '';
-                    document.getElementById('resourceUrl').value = '';
-                    document.getElementById('resourceDesc').value = '';
-                    document.getElementById('resourceType').value = 'link';
-                    showAlert('success', 'منبع اضافه شد');
-                }
-            });
-    }
-
-    function deleteResource(activityId, resourceId) {
-        if (confirm('آیا مطمئن هستید؟')) {
-            fetch(`/roadmap/activity/${activityId}/resource/${resourceId}/delete/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.querySelector(`[data-resource-id="${resourceId}"]`).remove();
-                        showAlert('success', 'منبع حذف شد');
-                    }
-                });
+            document.getElementById('resourceTitle').value = '';
+            document.getElementById('resourceUrl').value = '';
+            document.getElementById('resourceDesc').value = '';
+            document.getElementById('resourceType').value = 'link';
+            showAlert('success', 'منبع اضافه شد');
         }
+    });
+}
+
+function deleteResource(activityId, resourceId) {
+    if (confirm('آیا مطمئن هستید؟')) {
+        fetch(`/roadmap/activity/${activityId}/resource/${resourceId}/delete/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector(`[data-resource-id="${resourceId}"]`).remove();
+                showAlert('success', 'منبع حذف شد');
+            }
+        });
     }
+}
 
-    // ═══════════════════════════════════════════
-    // NOTES
-    // ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// NOTES
+// ═══════════════════════════════════════════
 
-    function saveNotes() {
-        const notes = document.getElementById('notesTextarea').value;
-        const result_summary = document.getElementById('resultSummary').value;
+function saveNotes() {
+    const notes = document.getElementById('notesTextarea').value;
+    const result_summary = document.getElementById('resultSummary').value;
 
-        fetch(`/roadmap/activity/${ACTIVITY_ID}/update/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    notes,
-                    result_summary
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) showAlert('success', data.message);
-                else showAlert('danger', data.error);
-            });
+    fetch(`/roadmap/activity/${ACTIVITY_ID}/update/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ notes, result_summary })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) showAlert('success', data.message);
+        else showAlert('danger', data.error);
+    });
+}
+
+// ═══════════════════════════════════════════
+// DATES
+// ═══════════════════════════════════════════
+
+function updateDates() {
+    const actual_start_date = document.getElementById('actualStartDate').value;
+    const actual_end_date = document.getElementById('actualEndDate').value;
+
+    fetch(`/roadmap/activity/${ACTIVITY_ID}/update/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ actual_start_date, actual_end_date })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) showAlert('success', data.message);
+        else showAlert('danger', data.error);
+    });
+}
+
+// ═══════════════════════════════════════════
+// COMPLETE ACTIVITY
+// ═══════════════════════════════════════════
+
+function completeActivity() {
+    if (confirm('آیا مطمئن هستید که این فعالیت تکمیل شده است؟')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `{% url 'roadmap:stage_activity_toggle' stage_activity.id %}`;
+
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = getCookie('csrftoken');
+
+        form.appendChild(csrfInput);
+        document.body.appendChild(form);
+        form.submit();
     }
+}
 
-    // ═══════════════════════════════════════════
-    // DATES
-    // ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
 
-    function updateDates() {
-        const actual_start_date = document.getElementById('actualStartDate').value;
-        const actual_end_date = document.getElementById('actualEndDate').value;
-
-        fetch(`/roadmap/activity/${ACTIVITY_ID}/update/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    actual_start_date,
-                    actual_end_date
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) showAlert('success', data.message);
-                else showAlert('danger', data.error);
-            });
-    }
-
-    // ═══════════════════════════════════════════
-    // COMPLETE ACTIVITY
-    // ═══════════════════════════════════════════
-
-    function completeActivity() {
-        if (confirm('آیا مطمئن هستید که این فعالیت تکمیل شده است؟')) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `{% url 'roadmap:stage_activity_toggle' stage_activity.id %}`;
-
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = 'csrfmiddlewaretoken';
-            csrfInput.value = getCookie('csrftoken');
-
-            form.appendChild(csrfInput);
-            document.body.appendChild(form);
-            form.submit();
-        }
-    }
-
-    // ═══════════════════════════════════════════
-    // UTILITIES
-    // ═══════════════════════════════════════════
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
         }
-        return cookieValue;
     }
+    return cookieValue;
+}
 
-    function showAlert(type, message) {
-        const icons = {
-            success: '✅',
-            danger: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
-        };
-        const html = `
+function showAlert(type, message) {
+    const icons = { success: '✅', danger: '❌', warning: '⚠️', info: 'ℹ️' };
+    const html = `
         <div class="alert alert-${type} toast-alert">
             <span>${icons[type] || 'ℹ️'}</span>
             <div>${message}</div>
         </div>`;
-        document.body.insertAdjacentHTML('beforeend', html);
-        setTimeout(() => {
-            const el = document.querySelector('.toast-alert');
-            if (el) el.remove();
-        }, 3500);
-    }
+    document.body.insertAdjacentHTML('beforeend', html);
+    setTimeout(() => {
+        const el = document.querySelector('.toast-alert');
+        if (el) el.remove();
+    }, 3500);
+}
+
 </script>
 
 {% endblock %}

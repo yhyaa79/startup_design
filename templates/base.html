@@ -28,7 +28,7 @@
     <meta property="og:url" content="https://resumemd.ir/" />
     <meta property="og:locale" content="fa_IR" />
 
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles1.css' %}">
     <script src="{% static 'js/script-head.js' %}"></script>
 
     <!-- Schema.org -->
@@ -47,7 +47,7 @@
 
 <body>
     {% if user.is_authenticated %}
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
             <a href="{% url 'core:home' %}" class="logo-mark">
                 <div class="logo-icon">
@@ -213,8 +213,8 @@
     </aside>
     {% endif %}
 
-    <div class="{% if user.is_authenticated %}main{% else %}main-logout{% endif %}">
-        <header class="topbar">
+    <div class="main" id="main">
+<!--         <header class="topbar">
 
             <div class="topbar-page-title-svg">
                 <span class="topbar-page-title">{% block topbar_title %}{% endblock %}</span>
@@ -256,7 +256,7 @@
                 {% endblock %}
             </div>
 
-        </header>
+        </header> -->
 
         {% block content %}{% endblock %}
 

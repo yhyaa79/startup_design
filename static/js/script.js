@@ -33,3 +33,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 400);
     }
 });
+
+
+
+
+
+
+
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const main = document.getElementById('main');
+
+menuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('closed');
+    main.classList.toggle('full');
+});
