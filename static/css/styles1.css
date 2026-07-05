@@ -220,7 +220,7 @@ option {
     --bg-page: #eef0f5;
     --card: #ffffff;
     --card-soft: #f5f6fa;
-    --line: #e9ebf1;
+    --line: #e9ebf16d;
 
     --ink-900: #171b2e;
     /* متن اصلی */
@@ -233,6 +233,8 @@ option {
     --primary-ink: #1f3fc9;
     --primary-soft: #dee6ff;
     --primary-softer: #eef1ff;
+
+    --purple: #c629cd;
 
     --gold: #b8873a;
     --gold-soft: #f6ecda;
@@ -250,6 +252,22 @@ option {
 
     --shadow-sm: 0 4px 10px rgba(20, 26, 46, .02);
     --shadow-md: 0 10px 30px rgba(20, 26, 46, .08);
+
+
+
+
+
+    --fs-xs: 12px;
+    --fs-sm: 14px;
+    --fs-base: 16px;
+    --fs-md: 18px;
+    --fs-lg: 20px;
+    --fs-xl: 24px;
+    --fs-2xl: 28px;
+    --fs-3xl: 32px;
+    --fs-4xl: 40px;
+    --fs-5xl: 48px;
+
 }
 
 * {
@@ -308,6 +326,10 @@ a {
     border-radius: 50%;
     background: var(--red);
     border: 2px solid #fff;
+}
+
+.logo-aside {
+    width: stretch;
 }
 
 .logo-shape {
@@ -592,6 +614,10 @@ a {
 
 .grid-2 {
     grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-2-1 {
+    grid-template-columns: 2fr 1fr;
 }
 
 .grid-3 {
@@ -979,21 +1005,373 @@ a {
     font-weight: 700;
 }
 
+
+
+.margin-top {
+    margin-top: var(--gap);
+}
+
+.home-card-0nline-activity {
+    margin-top: 37px;
+    margin-right: 10px;
+}
+
+/* ---------- نمودار پنج ضلعی ---------- */
+
+.radar-wrap {
+    position: relative;
+    width: 260px;
+    height: 260px;
+    margin: 0 auto;
+}
+
+.radar-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.radar-grid {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 1;
+}
+
+.radar-axis {
+    stroke: var(--line);
+    stroke-width: 1;
+}
+
+.radar-data {
+    fill: var(--primary-soft);
+    stroke: var(--primary);
+    stroke-width: 2;
+}
+
+.radar-labels {
+    position: absolute;
+    inset: 0;
+}
+
+.radar-label {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-600);
+    white-space: nowrap;
+}
+
+.radar-label b {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-900);
+}
+
+
+/* ---------- نمودار فعالیت ها ---------- */
+
+.card-stage-activities {
+    margin-bottom: var(--gap);
+}
+
+.chart-legend {
+    display: flex;
+    gap: var(--gap-smmm);
+    margin-bottom: 14px;
+    font-size: 11.5px;
+    color: var(--ink-600);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend-duration {
+    background: var(--primary);
+}
+
+.legend-impact {
+    background: var(--purple);
+}
+
+.activities-chart-wrap {
+    position: relative;
+}
+
+.chart-grid-lines {
+    position: absolute;
+    top: 10px;
+    right: 0;
+    left: 0;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+.chart-grid-lines span {
+    display: block;
+    height: 1px;
+    background: var(--line);
+}
+
+.activities-chart-list {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: var(--gap-smmm);
+    overflow-x: auto;
+    padding: 10px 4px 4px;
+}
+
+.activities-chart-list::-webkit-scrollbar {
+    height: 6px;
+}
+
+.activities-chart-list::-webkit-scrollbar-thumb {
+    background: #d7dae3;
+    border-radius: 6px;
+}
+
+.activity-chart-item {
+    flex: 0 0 84px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 120px;
+}
+
+.bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    gap: 6px;
+}
+
+.bar-track {
+    width: 14px;
+    height: 100px;
+    border-radius: 8px;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+.bar-fill {
+    width: 100%;
+    border-radius: 8px;
+    transition: height .3s ease;
+}
+
+.bar-duration {
+    background: var(--primary);
+}
+
+.bar-impact {
+    background: var(--purple);
+}
+
+.bar-value {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--ink-900);
+}
+
+.chart-item-title {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ink-900);
+    text-decoration: none;
+    text-align: center;
+    max-width: 84px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chart-item-title:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+.difficulty-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 20px;
+}
+
+
+.heatmap-nav {
+    align-items: center;
+    margin: 0 15px 5px;
+}
+
+.heatmap-nav-btns {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.heatmap-nav-btns .btn-ghost {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border, #e5e7eb);
+    background: transparent;
+    color: var(--ink-500);
+    cursor: pointer;
+}
+
+.heatmap-nav-btns .btn-ghost:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+.heatmap-scroll {
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.heatmap-wrap {
+    display: flex;
+    align-items: flex-start;
+    width: max-content;
+    overflow: unset;
+    min-width: 100%;
+}
+
+/* ستون روزهای هفته — همیشه سمت راست ثابت می‌ماند */
+.heatmap-weekdays {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: sticky;
+    right: 0;
+    background: var(--card, #fff);
+    padding-inline-start: 6px;
+    z-index: 2;
+}
+
+.heatmap-weekdays span {
+    font-size: 12px;
+    color: var(--ink-400);
+    height: 12px;
+    line-height: 12px;
+}
+
+.heatmap-months-scroll {
+    direction: ltr;
+    /* قدیمی‌ترین ماه سمت چپ، جدیدترین نزدیک ستون روزها */
+    overflow: visible;
+}
+
+.heatmap-months-container {
+    display: flex;
+    gap: 22px;
+    /* فاصله‌ی بین هر ماه */
+    padding-right: 20px;
+}
+
+.month-block {
+    display: flex;
+    flex-direction: column;
+}
+
+.month-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-700);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.month-grid {
+    display: grid;
+    grid-template-rows: repeat(7, 12px);
+    grid-auto-flow: column;
+    gap: 10px;
+}
+
+.heat {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    background: var(--card-soft, #ebedf0);
+}
+
+.heat.empty-cell {
+    background: transparent !important;
+}
+
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 10px;
+    color: var(--ink-400);
+    direction: ltr;
+    margin-right: 10px;
+}
+
+.heatmap-legend .heat {
+    width: 18px;
+    height: 18px;
+}
+
+.heatmap-tooltip {
+    position: fixed;
+    background: #1f2937;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.6;
+    pointer-events: none;
+    z-index: 1000;
+    display: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+
 /* ---------- میله‌های افقی ---------- */
 .hbar-list {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 15px;
 }
 
 .hbar-item {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .hbar-name {
-    width: 130px;
+    width: 280px;
     flex-shrink: 0;
     font-size: 12px;
     color: var(--ink-600);
@@ -1160,6 +1538,7 @@ a {
 .plan-pill .ppl-top {
     display: flex;
     justify-content: space-between;
+    gap: 10px;
 }
 
 .plan-pill .ppl-track {
@@ -1383,6 +1762,9 @@ a {
     background: var(--primary);
 }
 
+
+
+
 svg {
     display: block;
 }
@@ -1445,28 +1827,26 @@ svg {
 }
 
 .sidebar-logo {
-    padding: 28px 20px 20px;
+    padding: 16px 20px 20px;
     border-bottom: 1px solid var(--border);
 }
 
 .sidebar-logo .logo-mark {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display: grid;
+    gap: 5px;
+    text-align: center;
 }
 
 .logo-text-sub {
-    width: 150px;
+    width: 100%;
 }
 
 .logo-icon {
-    width: 42px;
-    height: 42px;
-    background: var(--primary);
-    border-radius: var(--radius-sm);
+    width: 136px;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 auto;
 }
 
 .logo-icon svg {
@@ -1475,11 +1855,19 @@ svg {
 }
 
 .logo-text {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 700;
     color: var(--black);
     letter-spacing: -0.5px;
     display: inline-flex;
+}
+
+.logo-text span {
+    background: linear-gradient(90deg, var(--primary) 0%, var(--purple) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
 }
 
 .logo-sub {
@@ -1794,4 +2182,3 @@ svg {
     color: #64748b;
     margin-top: 40px;
 }
-

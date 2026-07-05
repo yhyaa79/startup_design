@@ -11,4 +11,5 @@ urlpatterns = [
     path('tools/', views.tools, name='tools'),
     path('about/', views.about, name='about'),
     path('contact/', views.contact, name='contact'),
+    path('online-activity-range/', views.online_activity_range, name='online_activity_range'),
 ]

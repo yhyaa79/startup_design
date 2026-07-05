@@ -34,14 +34,19 @@ from datetime import date
 
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
-from django.db.models import Count, Q
-
+from django.db.models import Count, Q, F, Case, When, IntegerField, Sum, Value, Min, Max
+from django.db.models.functions import Coalesce, Lower, Trim
 from accounts.models import Profile
 from roadmap.models import Roadmap, Stage, Activity, StageActivity
 from activity.models import ActivityLog
 from project.models import ResearchProject
 from course.models import Course
 from event_hub.models import Event
+from django.utils import timezone
+from datetime import timedelta
+import json
+from django.utils.safestring import mark_safe
+from .models import DailyOnlineActivity, Tool
 
 
 class ComingSoonView(TemplateView):
@@ -67,8 +72,8 @@ PROFILE_SECTIONS = {
     'بالینی': ['clinical_certs', 'clinical_exp', 'procedures'],
     'زبان': ['english_level', 'lang_cert'],
     'اهداف': ['goal', 'specialty', 'goal_notes'],
-    'فوق‌برنامه': ['extracurricular'],
 }
+
 
 
 def _calc_profile_completion(profile):
@@ -122,15 +127,87 @@ def _profile_section_completion(profile):
 
 
 # ======================================================================
+# نمودار پنج صلعی از اطلاعات پروفایل کاربر
+# ======================================================================
+
+
+import math
+
+def _get_profile_radar_chart(profile, size=260):
+    """
+    مختصات SVG برای نمودار پنج‌ضلعی (radar) بر اساس درصد هر بخش پروفایل.
+    """
+    sections = _profile_section_completion(profile)['sections']
+    n = len(sections)
+    if n == 0:
+        return None
+
+    cx = cy = size / 2
+    radius = size / 2 - 40  # فاصله برای لیبل‌ها
+
+    def point(angle_deg, r):
+        angle_rad = math.radians(angle_deg)
+        x = cx + r * math.sin(angle_rad)
+        y = cy - r * math.cos(angle_rad)
+        return x, y
+
+    angle_step = 360 / n
+    data_points, labels, axis_lines = [], [], []
+
+    for i, sec in enumerate(sections):
+        angle = i * angle_step
+        x, y = point(angle, radius * (sec['percent'] / 100))
+        data_points.append(f'{x:.1f},{y:.1f}')
+
+        lx, ly = point(angle, radius + 28)
+        labels.append({'x': lx, 'y': ly, 'label': sec['label'], 'percent': sec['percent']})
+
+        ax, ay = point(angle, radius)
+        axis_lines.append({'x1': cx, 'y1': cy, 'x2': ax, 'y2': ay})
+
+    grid_polygons = []
+    for level in (20, 40, 60, 80, 100):
+        pts = [f'{point(i * angle_step, radius * level / 100)[0]:.1f},'
+               f'{point(i * angle_step, radius * level / 100)[1]:.1f}' for i in range(n)]
+        grid_polygons.append(' '.join(pts))
+
+    return {
+        'size': size,
+        'data_polygon': ' '.join(data_points),
+        'labels': labels,
+        'axis_lines': axis_lines,
+        'grid_polygons': grid_polygons,
+    }
+
+
+
+# ======================================================================
 # بخش ۲: فعالیت‌های پراستفاده (گلوبال، بین همه‌ی کاربران)
 # ======================================================================
 
-def _get_top_activities(limit=5):
+def _get_top_activities(limit=8):
+    """
+    محبوب‌ترین فعالیت‌ها بر اساس تعداد دفعاتی که در StageActivity
+    (توسط همه‌ی کاربران، در همه‌ی رودمپ‌ها) انتخاب شده‌اند.
+
+    چون هر ساخت رودمپ توسط AI یک رکورد Activity تازه با external_id
+    جدید ولی همان title می‌سازد، شمارش روی Activity.id همیشه ۱ می‌شود.
+    برای رفع این موضوع، فعالیت‌ها بر اساس title نرمال‌شده (lower+trim)
+    یکی می‌شوند و شمارش StageActivity روی همه‌ی رکوردهای هم‌عنوان جمع
+    می‌شود.
+    """
     qs = (
-        Activity.objects.annotate(usage_count=Count('stage_activities'))
+        Activity.objects
+        .annotate(norm_title=Lower(Trim('title')))
+        .values('norm_title')
+        .annotate(
+            id=Min('id'),
+            title=Max('title'),
+            category=Max('category'),
+            usage_count=Count('stage_activities'),
+        )
         .filter(usage_count__gt=0)
         .order_by('-usage_count')[:limit]
-        .values('id', 'title', 'category', 'usage_count')
     )
     return list(qs)
 
@@ -180,6 +257,34 @@ def _get_roadmap_timeline(roadmap):
         'start_date': roadmap.start_date,
         'target_end_date': roadmap.target_end_date,
     }
+
+
+def _get_selected_roadmap_counts(roadmap):
+    """
+    آمار مراحل و فعالیت‌های فقط رودمپ انتخاب‌شده
+    """
+    if not roadmap:
+        return {
+            'total_stages': 0,
+            'completed_stages': 0,
+            'total_activities': 0,
+            'completed_activities': 0,
+        }
+
+    total_stages = roadmap.stages.count()
+    completed_stages = roadmap.stages.filter(status='completed').count()
+
+    stage_activities = StageActivity.objects.filter(stage__roadmap=roadmap)
+    total_activities = stage_activities.count()
+    completed_activities = stage_activities.filter(is_completed=True).count()
+
+    return {
+        'total_stages': total_stages,
+        'completed_stages': completed_stages,
+        'total_activities': total_activities,
+        'completed_activities': completed_activities,
+    }
+
 
 
 # ======================================================================
@@ -245,7 +350,7 @@ def _get_courses_data(profile):
 # ======================================================================
 
 def _get_top_events(limit=5):
-    qs = Event.objects.order_by('-updated_at')[:limit].values('id', 'title', 'section')
+    qs = Event.objects.order_by('-updated_at')[:limit].values('id', 'title', 'short_description')
     return list(qs)
 
 
@@ -272,6 +377,10 @@ def _get_user_projects(profile):
     ]
 
 
+# ======================================================================
+# اطلاعات فعالیت ها
+# ======================================================================
+
 def _get_similar_projects(profile, limit=5):
     if not profile:
         return []
@@ -290,6 +399,35 @@ def _get_similar_projects(profile, limit=5):
         .values('id', 'title', 'category', 'status', 'views_count')
     )
     return list(qs)
+
+
+
+def _get_all_user_stage_activities(roadmaps):
+    """
+    همه فعالیت‌های کاربر را برای نمایش کارت افقی برمی‌گرداند
+    """
+    items = []
+
+    for roadmap in roadmaps:
+        for stage in roadmap.stages.all().order_by('order'):
+            for sa in stage.stage_activities.all().order_by('order'):
+                activity = sa.activity
+                items.append({
+                    'id': sa.id,
+                    'title': activity.title,
+                    'category': activity.get_category_display(),
+                    'duration_days': activity.duration_days,
+                    'impact_score': activity.impact_score,
+                    'difficulty': activity.difficulty_rating,
+                    'difficulty_label': activity.get_difficulty_rating_display(),
+                    'impact_level': activity.get_impact_level_display(),
+                    'is_completed': sa.is_completed,
+                    'progress_percentage': sa.progress_percentage,
+                    'stage_title': stage.title,
+                    'roadmap_title': roadmap.title,
+                })
+
+    return items
 
 
 # ======================================================================
@@ -336,31 +474,13 @@ def _get_community_stats(profile):
 # بخش ۸: ابزارهای جدید
 # ======================================================================
 
+
 def _get_new_tools(limit=6):
     """
-    FIX 5: قبلاً همیشه [] برمی‌گشت. حالا مثل regulation_assessment با
-    try/except به دنبال مدل Tool می‌گردد (چند مسیر رایج امتحان می‌شود).
-    تا وقتی این مدل/اپ در پروژه ساخته نشود، خروجی طبیعتاً خالی است —
-    این یک باگ نیست، چون داده‌ای برای نمایش وجود ندارد. به‌محض ساختن مدل
-    Tool (مثلاً در اپ tools یا core)، این تابع بدون تغییر بیشتری کار می‌کند.
+    FIX 5 (نسخه نهایی): ابزارها حالا مستقیماً از core.models.Tool خوانده
+    می‌شوند — مدلی که در پنل ادمین به‌صورت دستی مدیریت می‌شود.
     """
-    model = None
-    for module_path in ('tools.models', 'core.models', 'toolbox.models'):
-        try:
-            module = __import__(module_path, fromlist=['Tool'])
-            model = getattr(module, 'Tool', None)
-            if model is not None:
-                break
-        except ImportError:
-            continue
-
-    if model is None:
-        return []
-
-    qs = model.objects.all()
-    if hasattr(model, 'is_active'):
-        qs = qs.filter(is_active=True)
-    return list(qs.order_by('-created_at')[:limit].values('id', 'title'))
+    return list(Tool.objects.filter(is_active=True)[:limit])
 
 
 # ======================================================================
@@ -369,55 +489,185 @@ def _get_new_tools(limit=6):
 
 def _get_activity_log_stats(user):
     """
-    FIX 3: قبلاً فقط `ActivityLog.objects.filter(user=user)` امتحان می‌شد.
-    اگر مدل واقعی ActivityLog به Profile وصل باشد (نه مستقیم به User)،
-    این فیلتر همیشه صفر برمی‌گرداند، دقیقاً همان چیزی که گزارش شده
-    («۳۸ فعالیت دارم ولی پیام خالی است»). حالا اگر فیلتر روی user چیزی
-    پیدا نکرد و کاربر پروفایل دارد، روی profile هم امتحان می‌شود.
-
-    ⚠️ اگر باز هم مشکل برطرف نشد، اسم دقیق فیلد رابطه در مدل ActivityLog
-    (و اسم واقعی مقادیر status) را بدهید تا دقیق‌تر اصلاح شود.
+    اگر ActivityLog داده نداشت یا ساختارش با فرض‌های فعلی سازگار نبود،
+    آمار «وضعیت فعالیت‌ها» از StageActivityهای رودمپ‌های کاربر ساخته می‌شود
+    تا کارت داشبورد خالی نماند.
     """
-    logs = ActivityLog.objects.filter(user=user)
 
-    if not logs.exists():
-        profile = getattr(user, 'profile', None)
-        if profile is not None and hasattr(ActivityLog, 'profile'):
-            logs = ActivityLog.objects.filter(profile=profile)
+    def _empty():
+        return {
+            'total': 0,
+            'completed': 0,
+            'pending': 0,
+            'in_progress': 0,
+            'paused': 0,
+            'cancelled': 0,
+        }
 
-    total = logs.count()
-    return {
-        'total': total,
-        'completed': logs.filter(status='completed').count(),
-        'pending': logs.filter(status='pending').count(),
-        'in_progress': logs.filter(status='in_progress').count(),
-        'paused': logs.filter(status='paused').count(),
-        'cancelled': logs.filter(status='cancelled').count(),
-    }
+    def _from_stage_activities():
+        stage_activities = StageActivity.objects.filter(stage__roadmap__user=user)
+
+        if not stage_activities.exists():
+            return _empty()
+
+        completed = stage_activities.filter(is_completed=True).count()
+
+        in_progress = stage_activities.filter(
+            is_completed=False,
+            progress_percentage__gt=0
+        ).count()
+
+        pending = stage_activities.filter(
+            is_completed=False,
+            progress_percentage=0
+        ).count()
+
+        total = stage_activities.count()
+
+        return {
+            'total': total,
+            'completed': completed,
+            'pending': pending,
+            'in_progress': in_progress,
+            'paused': 0,
+            'cancelled': 0,
+        }
+
+    # تلاش اول: استفاده از ActivityLog
+    try:
+        logs = ActivityLog.objects.filter(user=user)
+
+        if not logs.exists():
+            profile = getattr(user, 'profile', None)
+            if profile is not None:
+                try:
+                    logs = ActivityLog.objects.filter(profile=profile)
+                except Exception:
+                    pass
+
+        if logs.exists():
+            return {
+                'total': logs.count(),
+                'completed': logs.filter(status='completed').count(),
+                'pending': logs.filter(status='pending').count(),
+                'in_progress': logs.filter(status='in_progress').count(),
+                'paused': logs.filter(status='paused').count(),
+                'cancelled': logs.filter(status='cancelled').count(),
+            }
+
+    except Exception:
+        pass
+
+    # fallback واقعی و قابل اتکا: StageActivity
+    return _from_stage_activities()
 
 
 # ======================================================================
 # بخش ۱۰: آنلاین بودن کاربر (placeholder — نیاز به مدل جدید)
 # ======================================================================
 
-def _get_online_activity_stats(user):
+from calendar import monthrange
+
+def _get_online_activity_stats(user, months=3, end_year=None, end_month=None):
     """
-    ⚠️ هنوز نیاز به مدل UserLoginLog (یا مشابه) دارد؛ این بخش عمداً
-    غیرفعال است تا داده‌ی جعلی نمایش داده نشود. جزئیات ساخت مدل در
-    نسخه‌ی قبلی این فایل توضیح داده شده بود.
+    آمار فعالیت آنلاین کاربر برای heatmap ماهانه.
+    - months: چند ماه نمایش داده شود (پیش‌فرض ۳ ماه اخیر)
+    - end_year/end_month: آخرین ماهِ بازه (پیش‌فرض: ماه جاری). با این دو پارامتر
+      دکمه‌های «ماه قبل/بعد» می‌توانند کل بازه را جابه‌جا کنند.
+    همیشه calendar_grid کامل (حتی همه صفر) برمی‌گرداند، حتی برای کاربر مهمان
+    یا کاربری که هنوز هیچ فعالیتی ثبت نکرده است.
     """
+    from .models import DailyOnlineActivity
+
+    today = timezone.now().date()
+    end_year = end_year or today.year
+    end_month = end_month or today.month
+
+    # آخرین روز ماهِ پایانی بازه
+    end_date = date(end_year, end_month, monthrange(end_year, end_month)[1])
+
+    # اولین روزِ ماهِ شروع بازه (months ماه قبل‌تر)
+    start_month = end_month - (months - 1)
+    start_year = end_year
+    while start_month <= 0:
+        start_month += 12
+        start_year -= 1
+    start_date = date(start_year, start_month, 1)
+
+    if getattr(user, 'is_authenticated', False):
+        records = DailyOnlineActivity.objects.filter(
+            user=user, date__gte=start_date, date__lte=end_date
+        )
+    else:
+        records = DailyOnlineActivity.objects.none()
+
+    records_by_date = {r.date: r for r in records}
+
+    calendar_grid = []
+    current = start_date
+    while current <= end_date:
+        rec = records_by_date.get(current)
+        calendar_grid.append({
+            'date': current.isoformat(),
+            'duration_minutes': rec.duration_minutes if rec else 0,
+        })
+        current += timedelta(days=1)
+
+    total_online_days = sum(1 for d in calendar_grid if d['duration_minutes'] > 0)
+    total_online_duration_minutes = sum(d['duration_minutes'] for d in calendar_grid)
+
+    # مقادیر ماه قبل/بعد برای دکمه‌های ناوبری
+    prev_month, prev_year = (12, end_year - 1) if end_month == 1 else (end_month - 1, end_year)
+    next_month, next_year = (1, end_year + 1) if end_month == 12 else (end_month + 1, end_year)
+    is_current_month = (end_year == today.year and end_month == today.month)
+
     return {
-        'total_online_days': 0,
-        'total_online_duration_minutes': 0,
-        'last_7_days': [],
-        'available': False,
+        'available': True,
+        'calendar_grid': calendar_grid,
+        'start_date': start_date.isoformat(),
+        'end_date': end_date.isoformat(),
+        'end_year': end_year,
+        'end_month': end_month,
+        'prev_year': prev_year,
+        'prev_month': prev_month,
+        'next_year': next_year,
+        'next_month': next_month,
+        'next_disabled': is_current_month,  # نمی‌توان به ماه‌های آینده رفت
+        'total_online_days': total_online_days,
+        'total_online_duration_minutes': total_online_duration_minutes,
     }
 
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from datetime import date
+from calendar import monthrange
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+
+
+@login_required
+def online_activity_range(request):
+    """
+    AJAX endpoint برای بارگذاری بازه‌ی ۳ ماهه‌ی دیگر (ماه قبل/بعد) بدون رفرش.
+    GET params: year, month → آخرین ماهِ بازه‌ی جدید
+    """
+    try:
+        year = int(request.GET.get('year'))
+        month = int(request.GET.get('month'))
+    except (TypeError, ValueError):
+        year, month = None, None
+
+    stats = _get_online_activity_stats(request.user, months=3, end_year=year, end_month=month)
+    return JsonResponse(stats)
 
 # ======================================================================
 # بخش ۱۱: regulation_assessment
 # ======================================================================
-
+""" 
 def _get_regulation_assessment(user):
     try:
         from regulation_assessment.models import RegulationAssessment
@@ -437,7 +687,7 @@ def _get_regulation_assessment(user):
         'updated_at': assessment.updated_at,
     }
 
-
+ """
 # ======================================================================
 # بخش ۱۲: آمار کلی داشبورد
 # ======================================================================
@@ -571,6 +821,7 @@ def home(request):
     completed_activity_count = 0
 
     profile_sections = {'sections': [], 'open_ended': []}
+    profile_radar = None
     top_activities = []
     roadmap_timeline = None
     courses_data = {'newest': [], 'recommended': [], 'most_viewed': [], 'most_viewed_is_real_data': False}
@@ -580,8 +831,18 @@ def home(request):
     community_stats = {'total_profiles': Profile.objects.count(), 'same_goal_users': [], 'similar_profile_users': []}
     new_tools = _get_new_tools()
     activity_log_stats = {'total': 0, 'completed': 0, 'pending': 0, 'in_progress': 0, 'paused': 0, 'cancelled': 0}
-    online_stats = _get_online_activity_stats(None)
-    regulation_assessment = None
+
+    # FIX: این تابع فقط یک بار فراخوانی می‌شود (چه کاربر لاگین باشد چه نباشد).
+    # قبلاً داخل بلاک `if request.user.is_authenticated:` دوباره صدا زده می‌شد
+    # و مقدار قبلی (همراه با calendar_grid_json) را بدون آن کلید overwrite می‌کرد،
+    # به همین دلیل تقویم هیچ‌وقت در تمپلیت رندر نمی‌شد.
+    online_stats = _get_online_activity_stats(request.user)
+
+    #regulation_assessment = None
+
+    selected_roadmap_counts = {'total_stages': 0, 'completed_stages': 0, 'total_activities': 0, 'completed_activities': 0}
+
+    all_user_stage_activities = []
 
     if request.user.is_authenticated:
         profile = getattr(request.user, 'profile', None)
@@ -628,8 +889,11 @@ def home(request):
                         active_stage = stage
                         break
 
+            selected_roadmap_counts = _get_selected_roadmap_counts(roadmap)
+
         if profile:
             profile_sections = _profile_section_completion(profile)
+            profile_radar = _get_profile_radar_chart(profile) 
             courses_data = _get_courses_data(profile)
             user_projects = _get_user_projects(profile)
             similar_projects = _get_similar_projects(profile)
@@ -639,9 +903,17 @@ def home(request):
         top_events = _get_top_events()
         community_stats = _get_community_stats(profile)
         activity_log_stats = _get_activity_log_stats(request.user)
-        online_stats = _get_online_activity_stats(request.user)
-        regulation_assessment = _get_regulation_assessment(request.user)
+        #regulation_assessment = _get_regulation_assessment(request.user)
         new_tools = _get_new_tools()
+        all_user_stage_activities = _get_all_user_stage_activities(roadmaps)
+
+    # FIX: بررسی available و ساخت calendar_grid_json حالا *بعد* از هر دو مسیر
+    # (مهمان/لاگین) انجام می‌شود تا هیچ‌وقت توسط override داخل بلاک بالا از
+    # بین نرود. همچنین چون تابع همیشه calendar_grid کامل (حتی همه صفر) را
+    # برمی‌گرداند، برای کاربری که هیچ فعالیتی ثبت نکرده هم تقویم خالی نمایش
+    # داده می‌شود، نه بلوک "غیرفعال".
+    if online_stats.get('available'):
+        online_stats['calendar_grid_json'] = mark_safe(json.dumps(online_stats['calendar_grid']))
 
     # FIX 1: پاس‌دادن آمار همه‌ی رودمپ‌ها به‌جای فقط رودمپ انتخاب‌شده
     dashboard_stats = _get_stats(
@@ -682,6 +954,7 @@ def home(request):
         'is_guest': not request.user.is_authenticated,
 
         'profile_sections': profile_sections,
+        'profile_radar': profile_radar,
         'top_activities': top_activities,
         'roadmap_timeline': roadmap_timeline,
         'courses_data': courses_data,
@@ -692,11 +965,18 @@ def home(request):
         'new_tools': new_tools,
         'activity_log_stats': activity_log_stats,
         'online_stats': online_stats,
-        'regulation_assessment': regulation_assessment,
+        #'regulation_assessment': regulation_assessment,
+
+        'selected_roadmap_total_stages': selected_roadmap_counts['total_stages'],
+        'selected_roadmap_completed_stages': selected_roadmap_counts['completed_stages'],
+        'selected_roadmap_total_activities': selected_roadmap_counts['total_activities'],
+        'selected_roadmap_completed_activities': selected_roadmap_counts['completed_activities'],
+
+        'all_user_stage_activities': all_user_stage_activities,
+
     }
 
     return render(request, 'core/home.html', context)
-
 
 def about(request):
     return render(request, 'core/about.html')

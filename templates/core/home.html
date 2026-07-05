@@ -10,601 +10,1113 @@
 {% load dashboard_extras %}
 
 <style>
-  /* آیکون‌های SVG آفلاین جایگزین ایموجی — بدون نیاز به فونت/CDN */
-  .icon { width: 18px; height: 18px; stroke: currentColor; fill: none;
-          stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
-          vertical-align: middle; display: inline-block; }
-  .icon-lg { width: 26px; height: 26px; }
+    /* آیکون‌های SVG آفلاین جایگزین ایموجی — بدون نیاز به فونت/CDN */
+    .icon {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        vertical-align: middle;
+        display: inline-block;
+    }
+
+    .icon-lg {
+        width: 26px;
+        height: 26px;
+    }
 </style>
 
 <div class="page">
 
-  <!-- Header -->
-  <div class="topbar">
-    <div class="brand">
-      <button class="icon-btn" type="button" title="منو" id="menuToggle">
-        <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <div class="icon-btn"><div class="logo-shape"></div></div>
-      <div class="brand-text">
-        <div class="title">Mirai</div>
-        <div class="sub">داشبورد</div>
-      </div>
+    <!-- Header -->
+    <div class="topbar">
+        <div class="brand">
+            <button class="icon-btn" type="button" title="منو" id="menuToggle">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" /></svg>
+            </button>
+            <div class="icon-btn">
+                <div class="logo-shape"></div>
+            </div>
+            <div class="brand-text">
+                <div class="title">Mirai</div>
+                <div class="sub">داشبورد</div>
+            </div>
+        </div>
+
+        <form class="search" method="get" action="">
+            <span><svg class="icon" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="7" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" /></svg></span>
+            <input type="text" name="q" value="{{ request.GET.q|default:'' }}"
+                placeholder="جستجوی رودمپ، دوره، رویداد، پروژه...">
+            <button type="submit"><span class="k">⌘K</span></button>
+        </form>
+
+        <div class="right-cluster">
+            <a class="icon-btn" href="#" title="افزودن سریع">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" /></svg>
+            </a>
+            <a class="icon-btn" href="#" title="اعلان‌ها">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
+                {% if weak_point %}<span class="dot-badge"></span>{% endif %}
+            </a>
+            <div class="user-block">
+                <div class="avatar">
+                    {% if request.user.is_authenticated %}{{ request.user.first_name|default:request.user.username|slice:":1" }}{% else %}?{% endif %}
+                </div>
+                <div class="user-meta">
+                    <div class="name">
+                        {% if request.user.is_authenticated %}
+                        {{ profile.first_name|default:request.user.first_name|default:request.user.username }}
+                        {{ profile.last_name|default:'' }}
+                        {% else %}
+                        کاربر مهمان
+                        {% endif %}
+                    </div>
+                    <div class="loc">{% if profile.city %}{{ profile.city }}{% else %}مهمان سایت{% endif %}</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <form class="search" method="get" action="">
-      <span><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-      <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="جستجوی رودمپ، دوره، رویداد، پروژه...">
-      <button type="submit"><span class="k">⌘K</span></button>
-    </form>
-
-    <div class="right-cluster">
-      <a class="icon-btn" href="#" title="افزودن سریع">
-        <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </a>
-      <a class="icon-btn" href="#" title="اعلان‌ها">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        {% if weak_point %}<span class="dot-badge"></span>{% endif %}
-      </a>
-      <div class="user-block">
-        <div class="avatar">
-          {% if request.user.is_authenticated %}{{ request.user.first_name|default:request.user.username|slice:":1" }}{% else %}?{% endif %}
+    <!-- Greeting -->
+    <div class="greeting">
+        <div class="greet-left">
+            <div>
+                <h1>
+                    {% if request.user.is_authenticated %}
+                    سلام {{ profile.first_name|default:request.user.first_name|default:request.user.username }} 👋
+                    {% else %}
+                    خوش آمدید 👋
+                    {% endif %}
+                </h1>
+                <p>
+                    {% if is_guest %}
+                    برای مشاهده داشبورد شخصی‌سازی‌شده وارد حساب خود شوید.
+                    {% elif weak_point %}
+                    نقطه‌ی قابل بهبود این هفته: {{ weak_point.1 }}
+                    {% else %}
+                    رودمپ و فعالیت‌های شما به‌روز است. عالی پیش می‌روید!
+                    {% endif %}
+                </p>
+            </div>
+            <div class="mic-btn">
+                <svg class="icon icon-lg" viewBox="0 0 24 24">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                    <line x1="12" y1="19" x2="12" y2="23" />
+                    <line x1="8" y1="23" x2="16" y2="23" /></svg>
+            </div>
         </div>
-        <div class="user-meta">
-          <div class="name">
-            {% if request.user.is_authenticated %}
-              {{ profile.first_name|default:request.user.first_name|default:request.user.username }} {{ profile.last_name|default:'' }}
+        <div class="date-cluster">
+            <div class="date-badge">
+                <div class="num">{% now "d" %}</div>
+            </div>
+            <div class="date-text">{% now "l" %},<b>{% now "F Y" %}</b></div>
+            {% if roadmap_timeline %}
+            <div class="range-pill">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" /></svg>
+                {{ roadmap_timeline.start_date|date:"d M" }} - {{ roadmap_timeline.target_end_date|date:"d M" }} ⌄
+            </div>
             {% else %}
-              کاربر مهمان
+            <div class="range-pill">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" /></svg>
+                بدون رودمپ فعال ⌄
+            </div>
             {% endif %}
-          </div>
-          <div class="loc">{% if profile.city %}{{ profile.city }}{% else %}مهمان سایت{% endif %}</div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Greeting -->
-  <div class="greeting">
-    <div class="greet-left">
-      <div>
-        <h1>
-          {% if request.user.is_authenticated %}
-            سلام {{ profile.first_name|default:request.user.first_name|default:request.user.username }} 👋
-          {% else %}
-            خوش آمدید 👋
-          {% endif %}
-        </h1>
-        <p>
-          {% if is_guest %}
-            برای مشاهده داشبورد شخصی‌سازی‌شده وارد حساب خود شوید.
-          {% elif weak_point %}
-            نقطه‌ی قابل بهبود این هفته: {{ weak_point.1 }}
-          {% else %}
-            رودمپ و فعالیت‌های شما به‌روز است. عالی پیش می‌روید!
-          {% endif %}
-        </p>
-      </div>
-      <div class="mic-btn">
-        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-      </div>
-    </div>
-    <div class="date-cluster">
-      <div class="date-badge"><div class="num">{% now "d" %}</div></div>
-      <div class="date-text">{% now "l" %},<b>{% now "F Y" %}</b></div>
-      {% if roadmap_timeline %}
-        <div class="range-pill">
-          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          {{ roadmap_timeline.start_date|date:"d M" }} - {{ roadmap_timeline.target_end_date|date:"d M" }} ⌄
-        </div>
-      {% else %}
-        <div class="range-pill">
-          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          بدون رودمپ فعال ⌄
-        </div>
-      {% endif %}
-    </div>
-  </div>
-
-  <!-- =========================================================
+    <!-- =========================================================
        SECTION 1 — نمای کلی
   ========================================================== -->
-  <section class="section">
-    <div class="section-head">
-      <div class="s-title">
-        <span class="s-icon"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span>
-        نمای کلی
-      </div>
-    </div>
-
-    <div class="grid grid-4" style="margin-bottom:var(--gap);">
-      {% for stat in dashboard_stats %}
-      <div class="card-small kpi-card">
-        <svg width="60" height="60" viewBox="0 0 60 60">
-          <circle cx="30" cy="30" r="24" fill="none" stroke="var(--primary-soft)" stroke-width="7"/>
-          <circle cx="30" cy="30" r="24" fill="none" stroke="var(--primary)" stroke-width="7"
-                  stroke-linecap="round" stroke-dasharray="{{ stat.percent|radial_arc:24 }}"
-                  transform="rotate(-90 30 30)"/>
-          <text x="30" y="34" text-anchor="middle" class="ring-text">{{ stat.percent }}٪</text>
-        </svg>
-        <div class="kpi-meta">
-          <div class="kpi-value">{{ stat.value }}</div>
-          <div class="kpi-label">{{ stat.sub }}</div>
+    <section class="section">
+        <div class="section-head">
+            <div class="s-title">
+                <span class="s-icon"><svg class="icon" viewBox="0 0 24 24">
+                        <line x1="12" y1="20" x2="12" y2="10" />
+                        <line x1="18" y1="20" x2="18" y2="4" />
+                        <line x1="6" y1="20" x2="6" y2="16" /></svg></span>
+                نمای کلی
+            </div>
         </div>
-      </div>
-      {% endfor %}
-    </div>
 
-    {% if weak_point %}
-    <div class="card alert-card level-{{ weak_point.0 }}">
-      <div class="alert-icon">
-        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      </div>
-      <div class="alert-body">
-        <div class="alert-tag">اولویت {{ weak_point.0|level_label }}</div>
-        <h4>{{ weak_point.1 }}</h4>
-        <p>{{ weak_point.2 }}</p>
-      </div>
-    </div>
-    {% endif %}
-  </section>
+        <div class="grid grid-4" style="margin-bottom:var(--gap);">
+            {% for stat in dashboard_stats %}
+            <div class="card-small kpi-card">
+                <svg width="60" height="60" viewBox="0 0 60 60">
+                    <circle cx="30" cy="30" r="24" fill="none" stroke="var(--primary-soft)" stroke-width="7" />
+                    <circle cx="30" cy="30" r="24" fill="none" stroke="var(--primary)" stroke-width="7"
+                        stroke-linecap="round" stroke-dasharray="{{ stat.percent|radial_arc:24 }}"
+                        transform="rotate(-90 30 30)" />
+                    <text x="30" y="34" text-anchor="middle" class="ring-text">{{ stat.percent }}٪</text>
+                </svg>
+                <div class="kpi-meta">
+                    <div class="kpi-value">{{ stat.value }}</div>
+                    <div class="kpi-label">{{ stat.sub }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
 
-  <!-- =========================================================
+        {% if weak_point %}
+        <div class="card alert-card level-{{ weak_point.0 }}">
+            <div class="alert-icon">
+                <svg class="icon icon-lg" viewBox="0 0 24 24">
+                    <path
+                        d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+            </div>
+            <div class="alert-body">
+                <div class="alert-tag">اولویت {{ weak_point.0|level_label }}</div>
+                <h4>{{ weak_point.1 }}</h4>
+                <p>{{ weak_point.2 }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- =========================================================
        SECTION 2 — رودمپ‌های من (پشتیبانی از چند رودمپ)
   ========================================================== -->
-  <section class="section">
-    <div class="section-head">
-      <div class="s-title">
-        <span class="s-icon"><svg class="icon" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>
-        رودمپ‌های من
-      </div>
-      {% if roadmaps %}<div class="s-note">{{ roadmaps|length }} رودمپ ثبت‌شده</div>{% endif %}
-    </div>
-
-    {% if roadmaps %}
-    <div class="roadmap-switcher">
-      {% for rm in roadmaps %}
-      <a class="rm-chip {% if roadmap and rm.id == roadmap.id %}is-active{% endif %}"
-         href="?roadmap_id={{ rm.id }}">
-        <svg width="42" height="42" viewBox="0 0 42 42">
-          <circle cx="21" cy="21" r="16" fill="none" stroke="var(--primary-soft)" stroke-width="6"/>
-          <circle cx="21" cy="21" r="16" fill="none"
-                  stroke="{% if rm.id == roadmap.id %}var(--gold){% else %}var(--primary){% endif %}"
-                  stroke-width="6" stroke-linecap="round"
-                  stroke-dasharray="{{ rm.get_progress|radial_arc:16 }}"
-                  transform="rotate(-90 21 21)"/>
-        </svg>
-        <div class="rm-meta">
-          <div class="rm-title">{{ rm.title }}</div>
-          <div class="rm-goal">{{ rm.get_goal_display }}</div>
-          <span class="rm-status" style="background:{{ rm.status|status_color }}22;color:{{ rm.status|status_color }};">
-            {{ rm.get_status_display }}
-          </span>
+    <section class="section">
+        <div class="section-head">
+            <div class="s-title">
+                <span class="s-icon"><svg class="icon" viewBox="0 0 24 24">
+                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+                        <line x1="8" y1="2" x2="8" y2="18" />
+                        <line x1="16" y1="6" x2="16" y2="22" /></svg></span>
+                رودمپ‌های من
+            </div>
+            {% if roadmaps %}<div class="s-note">{{ roadmaps|length }} رودمپ ثبت‌شده</div>{% endif %}
         </div>
-      </a>
-      {% endfor %}
-      <a class="rm-chip rm-add" href="#">
-        <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        رودمپ جدید
-      </a>
-    </div>
-    {% endif %}
 
-    <div class="grid grid-5-7">
-      <!-- کارت رودمپ انتخاب‌شده -->
-      <div class="card rm-detail">
-        {% if roadmap %}
-          <div class="rm-detail-top">
-            <div>
-              <div class="rm-detail-title">{{ roadmap.title }}</div>
-              <div class="rm-detail-goal">{{ roadmap.get_goal_display }}</div>
-            </div>
-            {% if roadmap_timeline %}
-              <div class="status-pill" style="background:{{ roadmap_timeline.status|status_color }}22;color:{{ roadmap_timeline.status|status_color }};">
-                {{ roadmap_timeline.status|persian_status }}
-              </div>
-            {% endif %}
-          </div>
-
-          {% if roadmap_timeline %}
-          <div>
-            <div class="compare-row"><span>زمان سپری‌شده</span><span>{{ roadmap_timeline.time_percent }}٪</span></div>
-            <div class="compare-track"><div class="compare-fill" style="width:{{ roadmap_timeline.time_percent }}%;background:var(--primary-soft);"></div></div>
-            <div class="compare-row"><span>پیشرفت واقعی</span><span>{{ roadmap_timeline.actual_percent }}٪</span></div>
-            <div class="compare-track"><div class="compare-fill" style="width:{{ roadmap_timeline.actual_percent }}%;background:var(--primary);"></div></div>
-          </div>
-          {% else %}
-            <p style="color:var(--ink-400);font-size:13px;margin:6px 0;">اطلاعات زمان‌بندی برای این رودمپ موجود نیست.</p>
-          {% endif %}
-
-          <div class="rm-dates">
-            <div>
-              <div class="fee-label">شروع</div>
-              <div class="fee-amount">{{ roadmap.start_date|date:"Y/m/d" }}</div>
-            </div>
-            <div>
-              <div class="fee-label">پایان هدف</div>
-              <div class="fee-amount">{{ roadmap.target_end_date|date:"Y/m/d" }}</div>
-            </div>
-            <div>
-              <div class="fee-label">مراحل</div>
-              <div class="fee-amount">{{ completed_stage_count }}/{{ total_stage_count }}</div>
-            </div>
-            <div>
-              <div class="fee-label">فعالیت ها</div>
-              <div class="fee-amount">{{ completed_stage_count }}/{{ total_stage_count }}</div>
-            </div>
-          </div>
-
-          <div class="rm-actions">
-            <a class="btn-dark" href="#">مشاهده رودمپ</a>
-            <a class="btn-light" href="#">افزودن فعالیت</a>
-          </div>
-        {% else %}
-          <div class="empty-state">
-            <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></div>
-            <p>هنوز رودمپی برای شما ثبت نشده است. یک رودمپ بسازید تا پیشرفتتان اینجا نمایش داده شود.</p>
-            <a class="btn-dark" href="#">ساخت رودمپ</a>
-          </div>
-        {% endif %}
-      </div>
-
-      <!-- تایم‌لاین SVG مراحل رودمپ انتخاب‌شده -->
-      <div class="card">
-        <div class="card-title-row">
-          <h4>خط زمانی مراحل</h4>
-          <div class="info-dot">i</div>
+        {% if roadmaps %}
+        <div class="roadmap-switcher">
+            {% for rm in roadmaps %}
+            <a class="rm-chip {% if roadmap and rm.id == roadmap.id %}is-active{% endif %}"
+                href="?roadmap_id={{ rm.id }}">
+                <svg width="42" height="42" viewBox="0 0 42 42">
+                    <circle cx="21" cy="21" r="16" fill="none" stroke="var(--primary-soft)" stroke-width="6" />
+                    <circle cx="21" cy="21" r="16" fill="none"
+                        stroke="{% if rm.id == roadmap.id %}var(--primary){% else %}var(--primary){% endif %}"
+                        stroke-width="6" stroke-linecap="round" stroke-dasharray="{{ rm.get_progress|radial_arc:16 }}"
+                        transform="rotate(-90 21 21)" />
+                </svg>
+                <div class="rm-meta">
+                    <div class="rm-title">{{ rm.title }}</div>
+                    <div class="rm-goal">{{ rm.get_goal_display }}</div>
+                    <span class="rm-status"
+                        style="background:{{ rm.status|status_color }}22;color:{{ rm.status|status_color }};">
+                        {{ rm.get_status_display }}
+                    </span>
+                </div>
+            </a>
+            {% endfor %}
+            <a class="rm-chip rm-add" href="#">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" /></svg>
+                رودمپ جدید
+            </a>
         </div>
-        {% if roadmap_timeline.stages %}
-          {% line_chart_data roadmap_timeline.stages "progress" 640 190 34 as chart %}
-          <div class="timeline-svg-wrap">
-            <svg class="timeline-svg" viewBox="0 0 640 190" preserveAspectRatio="none">
-              <line x1="0" y1="34" x2="640" y2="34" class="tl-grid-line"/>
-              <line x1="0" y1="82" x2="640" y2="82" class="tl-grid-line"/>
-              <line x1="0" y1="130" x2="640" y2="130" class="tl-grid-line"/>
-              <polygon points="{{ chart.area_points }}" class="tl-area"/>
-              <polyline points="{{ chart.points }}" class="tl-line"/>
-              {% for node in chart.nodes %}
-                <circle cx="{{ node.x }}" cy="{{ node.y }}" r="5.5"
-                        class="tl-node {% if node.item.status == 'active' %}active{% elif node.value == 100 %}done{% else %}upcoming{% endif %}"/>
-                <text x="{{ node.x }}" y="{{ node.y|add:'-12' }}" text-anchor="middle" class="tl-pct">{{ node.value }}٪</text>
-                <text x="{{ node.x }}" y="172" text-anchor="middle" class="tl-label">{{ node.item.title|truncatechars:12 }}</text>
-              {% endfor %}
-            </svg>
-          </div>
-        {% else %}
-          <div class="empty-state">
-            <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-            <p>مرحله‌ای برای این رودمپ ثبت نشده است.</p>
-          </div>
         {% endif %}
-      </div>
-    </div>
-  </section>
 
-  <!-- =========================================================
+        <div class="grid grid-5-7">
+            <!-- کارت رودمپ انتخاب‌شده -->
+            <div class="card rm-detail">
+                {% if roadmap %}
+                <div class="rm-detail-top">
+                    <div>
+                        <div class="rm-detail-title">{{ roadmap.title }}</div>
+                        <div class="rm-detail-goal">{{ roadmap.get_goal_display }}</div>
+                    </div>
+                    {% if roadmap_timeline %}
+                    <div class="status-pill"
+                        style="background:{{ roadmap_timeline.status|status_color }}22;color:{{ roadmap_timeline.status|status_color }};">
+                        {{ roadmap_timeline.status|persian_status }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if roadmap_timeline %}
+                <div>
+                    <div class="compare-row"><span>زمان سپری‌شده</span><span>{{ roadmap_timeline.time_percent }}٪</span>
+                    </div>
+                    <div class="compare-track">
+                        <div class="compare-fill"
+                            style="width:{{ roadmap_timeline.time_percent }}%;background:var(--purple);"></div>
+                    </div>
+                    <div class="compare-row"><span>پیشرفت
+                            واقعی</span><span>{{ roadmap_timeline.actual_percent }}٪</span></div>
+                    <div class="compare-track">
+                        <div class="compare-fill"
+                            style="width:{{ roadmap_timeline.actual_percent }}%;background:var(--primary);"></div>
+                    </div>
+                </div>
+                {% else %}
+                <p style="color:var(--ink-400);font-size:13px;margin:6px 0;">اطلاعات زمان‌بندی برای این رودمپ موجود
+                    نیست.</p>
+                {% endif %}
+
+                <div class="rm-dates">
+                    <div>
+                        <div class="fee-label">شروع</div>
+                        <div class="fee-amount">{{ roadmap.start_date|date:"Y/m/d" }}</div>
+                    </div>
+                    <div>
+                        <div class="fee-label">پایان هدف</div>
+                        <div class="fee-amount">{{ roadmap.target_end_date|date:"Y/m/d" }}</div>
+                    </div>
+                    <div>
+                        <div class="fee-label">مراحل</div>
+                        <div class="fee-amount">
+                            {{ selected_roadmap_completed_stages }}/{{ selected_roadmap_total_stages }}</div>
+                    </div>
+                    <div>
+                        <div class="fee-label">فعالیت ها</div>
+                        <div class="fee-amount">
+                            {{ selected_roadmap_completed_activities }}/{{ selected_roadmap_total_activities }}</div>
+                    </div>
+
+                </div>
+
+                <div class="rm-actions">
+                    <a class="btn-dark" href="#">مشاهده رودمپ</a>
+                    <a class="btn-light" href="#">افزودن فعالیت</a>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+                            <line x1="8" y1="2" x2="8" y2="18" />
+                            <line x1="16" y1="6" x2="16" y2="22" /></svg></div>
+                    <p>هنوز رودمپی برای شما ثبت نشده است. یک رودمپ بسازید تا پیشرفتتان اینجا نمایش داده شود.</p>
+                    <a class="btn-dark" href="#">ساخت رودمپ</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- تایم‌لاین SVG مراحل رودمپ انتخاب‌شده -->
+            <div class="card">
+                <div class="card-title-row">
+                    <h4>خط زمانی مراحل</h4>
+                    <div class="info-dot">i</div>
+                </div>
+                {% if roadmap_timeline.stages %}
+                {% line_chart_data roadmap_timeline.stages "progress" 640 190 34 as chart %}
+                <div class="timeline-svg-wrap">
+                    <svg class="timeline-svg" viewBox="0 0 640 190" preserveAspectRatio="none">
+                        <line x1="0" y1="34" x2="640" y2="34" class="tl-grid-line" />
+                        <line x1="0" y1="82" x2="640" y2="82" class="tl-grid-line" />
+                        <line x1="0" y1="130" x2="640" y2="130" class="tl-grid-line" />
+                        <polygon points="{{ chart.area_points }}" class="tl-area" />
+                        <polyline points="{{ chart.points }}" class="tl-line" />
+                        {% for node in chart.nodes %}
+                        <circle cx="{{ node.x }}" cy="{{ node.y }}" r="5.5"
+                            class="tl-node {% if node.item.status == 'active' %}active{% elif node.value == 100 %}done{% else %}upcoming{% endif %}" />
+                        <text x="{{ node.x }}" y="{{ node.y|add:'-12' }}" text-anchor="middle"
+                            class="tl-pct">{{ node.value }}٪</text>
+                        <text x="{{ node.x }}" y="172" text-anchor="middle"
+                            class="tl-label">{{ node.item.title|truncatechars:15 }}</text>
+                        {% endfor %}
+                    </svg>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                            <polyline points="17 6 23 6 23 12" /></svg></div>
+                    <p>مرحله‌ای برای این رودمپ ثبت نشده است.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================
        SECTION 3 — پروفایل و وضعیت فعالیت‌ها
   ========================================================== -->
-  <section class="section">
-    <div class="section-head">
-      <div class="s-title">
-        <span class="s-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M14 3v3.5a1.5 1.5 0 0 0 3 0V3h3a1 1 0 0 1 1 1v3h-3.5a1.5 1.5 0 0 0 0 3H21v3a1 1 0 0 1-1 1h-3v-3.5a1.5 1.5 0 0 0-3 0V14H10a1 1 0 0 1-1-1v-3h3.5a1.5 1.5 0 0 0 0-3H9V4a1 1 0 0 1 1-1h4z"/></svg></span>
-        پروفایل و فعالیت‌ها
-      </div>
-    </div>
-    <div class="grid grid-3">
-      <div class="card">
-        <div class="card-title-row"><h4>تکمیل پروفایل بر اساس بخش</h4><div class="info-dot">i</div></div>
-        {% if profile_sections.sections %}
-          {% for sec in profile_sections.sections %}
-          <div class="plan-item">
-            <div class="plan-dot">{{ forloop.counter }}</div>
-            <div class="plan-pill">
-              <div class="ppl-top"><span>{{ sec.label }}</span><span>{{ sec.percent }}٪ ({{ sec.filled }}/{{ sec.total }})</span></div>
-              <div class="ppl-track"><div class="ppl-fill" style="width:{{ sec.percent }}%;"></div></div>
+    <section class="section">
+        <div class="section-head">
+            <div class="s-title">
+                <span class="s-icon"><svg class="icon" viewBox="0 0 24 24">
+                        <path
+                            d="M14 3v3.5a1.5 1.5 0 0 0 3 0V3h3a1 1 0 0 1 1 1v3h-3.5a1.5 1.5 0 0 0 0 3H21v3a1 1 0 0 1-1 1h-3v-3.5a1.5 1.5 0 0 0-3 0V14H10a1 1 0 0 1-1-1v-3h3.5a1.5 1.5 0 0 0 0-3H9V4a1 1 0 0 1 1-1h4z" />
+                    </svg></span>
+                پروفایل و فعالیت‌ها
             </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="list-empty">برای مشاهده این بخش ابتدا پروفایل خود را تکمیل کنید.</div>
-        {% endif %}
-      </div>
-
-      <div class="card">
-        <div class="card-title-row"><h4>وضعیت فعالیت‌ها</h4><div class="info-dot">i</div></div>
-        {% donut_segments activity_log_stats 54 as segs %}
-        {% if segs %}
-        <div class="donut-wrap">
-          <svg width="150" height="150" viewBox="0 0 150 150">
-            <circle cx="75" cy="75" r="54" fill="none" stroke="var(--card-soft)" stroke-width="18"/>
-            {% for seg in segs %}
-            <circle cx="75" cy="75" r="54" fill="none" stroke="{{ seg.color }}" stroke-width="18"
-                    stroke-dasharray="{{ seg.dasharray }}" stroke-dashoffset="{{ seg.dashoffset }}"
-                    transform="rotate(-90 75 75)"/>
-            {% endfor %}
-            <text x="75" y="80" text-anchor="middle" font-size="22" font-weight="700" fill="var(--ink-900)">{{ activity_log_stats.total }}</text>
-          </svg>
-          <div class="donut-legend">
-            <span><i style="background:#2f5cf5;"></i>تکمیل‌شده ({{ activity_log_stats.completed }})</span>
-            <span><i style="background:#5f7ef7;"></i>در حال انجام ({{ activity_log_stats.in_progress }})</span>
-            <span><i style="background:#8fa3fa;"></i>در صف ({{ activity_log_stats.pending }})</span>
-            <span><i style="background:#bfccfc;"></i>متوقف ({{ activity_log_stats.paused }})</span>
-            <span><i style="background:#e3e9ff;"></i>لغوشده ({{ activity_log_stats.cancelled }})</span>
-          </div>
         </div>
-        {% else %}
-          <div class="list-empty">هنوز فعالیتی ثبت نشده است.</div>
-        {% endif %}
-      </div>
 
-      <div class="card">
-        <div class="card-title-row"><h4>پراستفاده‌ترین فعالیت‌ها</h4><div class="info-dot">i</div></div>
-        {% if top_activities %}
-          {% list_max top_activities "usage_count" as max_usage %}
-          <div class="hbar-list">
-            {% for act in top_activities %}
-            <div class="hbar-item">
-              <div class="hbar-name">{{ act.title }}</div>
-              <div class="hbar-track"><div class="hbar-fill" style="width:{% bar_width act.usage_count max_usage %}%;"></div></div>
-              <div class="hbar-count">{{ act.usage_count }}</div>
+        <div class="card card-stage-activities">
+            <div class="card-title-row">
+                <h4>همه فعالیت‌ها</h4>
+                <div class="info-dot">i</div>
             </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="list-empty">هنوز داده‌ای برای فعالیت‌های پراستفاده ثبت نشده است.</div>
-        {% endif %}
-      </div>
-    </div>
-  </section>
 
-  <!-- =========================================================
+            <div class="chart-legend">
+                <span class="legend-item"><i class="legend-dot legend-duration"></i> مدت (روز)</span>
+                <span class="legend-item"><i class="legend-dot legend-impact"></i> تاثیر (از ۱۰)</span>
+            </div>
+
+            {% if all_user_stage_activities %}
+            <div class="activities-chart-wrap">
+                <div class="chart-grid-lines">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
+
+                <div class="activities-chart-list">
+                    {% for item in all_user_stage_activities %}
+                    <div class="activity-chart-item">
+                        <div class="chart-bars">
+                            <div class="bar-col">
+                                <div class="bar-track">
+                                    <div class="bar-fill bar-duration"
+                                        style="height:{% widthratio item.duration_days 30 100 %}%"></div>
+                                </div>
+                                <span class="bar-value">{{ item.duration_days }}</span>
+                            </div>
+                            <div class="bar-col">
+                                <div class="bar-track">
+                                    <div class="bar-fill bar-impact"
+                                        style="height:{% widthratio item.impact_score 10 100 %}%"></div>
+                                </div>
+                                <span class="bar-value">{{ item.impact_score }}</span>
+                            </div>
+                        </div>
+
+                        <a href="{{ item.get_absolute_url }}" class="chart-item-title" title="{{ item.title }}">
+                            {{ item.title }}
+                        </a>
+
+                        <div class="difficulty-badge difficulty-{{ item.difficulty }}">
+                            {{ item.difficulty_label }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="list-empty">هنوز فعالیتی برای نمایش وجود ندارد.</div>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-2-1">
+            <div>
+                <div class="grid grid-2">
+                    <div class="card">
+                        <div class="card-title-row">
+                            <h4>تکمیل پروفایل بر اساس بخش</h4>
+                            <div class="info-dot">i</div>
+                        </div>
+                        {% if profile_radar %}
+                        <div class="radar-wrap">
+                            <svg viewBox="0 0 {{ profile_radar.size }} {{ profile_radar.size }}" class="radar-svg">
+                                {% for poly in profile_radar.grid_polygons %}
+                                <polygon points="{{ poly }}" class="radar-grid" />
+                                {% endfor %}
+                                {% for line in profile_radar.axis_lines %}
+                                <line x1="{{ line.x1 }}" y1="{{ line.y1 }}" x2="{{ line.x2 }}" y2="{{ line.y2 }}"
+                                    class="radar-axis" />
+                                {% endfor %}
+                                <polygon points="{{ profile_radar.data_polygon }}" class="radar-data" />
+                            </svg>
+                            <div class="radar-labels">
+                                {% for l in profile_radar.labels %}
+                                <div class="radar-label" style="left:{{ l.x }}px; top:{{ l.y }}px;">
+                                    <span>{{ l.label }}</span>
+                                    <b>{{ l.percent }}٪</b>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="list-empty">برای مشاهده این بخش ابتدا پروفایل خود را تکمیل کنید.</div>
+                        {% endif %}
+                    </div>
+
+
+                    <div class="card">
+                        <div class="card-title-row">
+                            <h4>وضعیت فعالیت‌ها</h4>
+                            <div class="info-dot">i</div>
+                        </div>
+                        {% donut_segments activity_log_stats 54 as segs %}
+                        {% if segs %}
+                        <div class="donut-wrap">
+                            <svg width="150" height="150" viewBox="0 0 150 150">
+                                <circle cx="75" cy="75" r="54" fill="none" stroke="var(--card-soft)"
+                                    stroke-width="18" />
+                                {% for seg in segs %}
+                                <circle cx="75" cy="75" r="54" fill="none" stroke="{{ seg.color }}" stroke-width="18"
+                                    stroke-dasharray="{{ seg.dasharray }}" stroke-dashoffset="{{ seg.dashoffset }}"
+                                    transform="rotate(-90 75 75)" />
+                                {% endfor %}
+                                <text x="75" y="80" text-anchor="middle" font-size="22" font-weight="700"
+                                    fill="var(--ink-900)">{{ activity_log_stats.total }}</text>
+                            </svg>
+                            <div class="donut-legend">
+                                <span><i style="background:#2f5cf5;"></i>تکمیل‌شده
+                                    ({{ activity_log_stats.completed }})</span>
+                                <span><i style="background:#5f7ef7;"></i>در حال انجام
+                                    ({{ activity_log_stats.in_progress }})</span>
+                                <span><i style="background:#8fa3fa;"></i>در صف ({{ activity_log_stats.pending }})</span>
+                                <span><i style="background:#bfccfc;"></i>متوقف ({{ activity_log_stats.paused }})</span>
+                                <span><i style="background:#e3e9ff;"></i>لغوشده
+                                    ({{ activity_log_stats.cancelled }})</span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="list-empty">هنوز فعالیتی ثبت نشده است.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-1 margin-top">
+                    <div class="card">
+                        <div class="card-title-row">
+                            <h4>فعالیت آنلاین</h4>
+                            <div class="info-dot">i</div>
+                        </div>
+                        <div class="grid grid-2-1">
+                            <div>
+                                <div class="stock-head heatmap-nav">
+                                    <div class="heatmap-nav-btns">
+                                        <button type="button" id="heatmap-next" class="btn-ghost">« ماه بعد</button>
+                                        <button type="button" id="heatmap-prev" class="btn-ghost">ماه قبل »</button>
+                                    </div>
+                                </div>
+
+                                <div class="heatmap-scroll">
+                                    <div class="heatmap-wrap" id="online-heatmap"
+                                        data-calendar='{{ online_stats.calendar_grid_json }}'
+                                        data-end-year="{{ online_stats.end_year }}"
+                                        data-end-month="{{ online_stats.end_month }}"
+                                        data-next-disabled="{{ online_stats.next_disabled|yesno:'1,0' }}"
+                                        data-range-url="{% url 'core:online_activity_range' %}">
+
+                                        <div class="heatmap-weekdays">
+                                            <span></span>
+                                            <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span>
+                                        </div>
+
+                                        <div class="heatmap-months-scroll">
+                                            <div class="heatmap-months-container" id="heatmap-months-container"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="heatmap-legend">
+                                    <span>کم</span>
+                                    <span class="heat" style="background:#ebedf0"></span>
+                                    <span class="heat" style="background:#bfccfc"></span>
+                                    <span class="heat" style="background:#8fa3fa"></span>
+                                    <span class="heat" style="background:#5f7ef7"></span>
+                                    <span class="heat" style="background:#2f5cf5"></span>
+                                    <span>زیاد</span>
+                                </div>
+                            </div>
+                            <div class="home-card-0nline-activity">
+                                {% if online_stats.available %}
+                                <div class="ti-label">روزهای آنلاین</div>
+                                <div class="ti-amount">{{ online_stats.total_online_days }} روز</div>
+                                <hr class="ti-divider">
+                                <div class="ti-label">مجموع مدت‌زمان</div>
+                                <div class="ti-amount">{{ online_stats.total_online_duration_minutes }} دقیقه</div>
+                                {% else %}
+                                <div class="empty-state">
+                                    <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="13" r="8" />
+                                            <polyline points="12 9 12 13 15 15" />
+                                            <line x1="9" y1="1" x2="15" y2="1" /></svg></div>
+                                    <p>ثبت زمان آنلاین بودن هنوز در این نسخه فعال نشده است.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title-row">
+                    <h4>پراستفاده‌ترین فعالیت‌ها</h4>
+                    <div class="info-dot">i</div>
+                </div>
+                {% if top_activities %}
+                {% list_max top_activities "usage_count" as max_usage %}
+                <div class="hbar-list">
+                    {% for act in top_activities %}
+                    <div class="plan-pill">
+                        <div class="ppl-top">
+                            <span class="hbar-name">{{ act.title }}</span>
+                            <span>{{ act.usage_count }}</span>
+                        </div>
+                        <div class="hbar-item">
+                            <div class="hbar-track">
+                                <div class="hbar-fill" style="width:{% bar_width act.usage_count max_usage %}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="list-empty">هنوز داده‌ای برای فعالیت‌های پراستفاده ثبت نشده است.</div>
+                {% endif %}
+            </div>
+
+    </section>
+
+    <!-- =========================================================
        SECTION 4 — پروژه‌های تحقیقاتی
   ========================================================== -->
-  <section class="section">
-    <div class="section-head">
-      <div class="s-title">
-        <span class="s-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M9 2v6l-5.5 9.5A2 2 0 0 0 5.2 21h13.6a2 2 0 0 0 1.7-3.5L15 8V2"/><line x1="8" y1="2" x2="16" y2="2"/><line x1="7" y1="15" x2="17" y2="15"/></svg></span>
-        پروژه‌های تحقیقاتی
-      </div>
-    </div>
-    <div class="grid grid-2">
-      <div class="card">
-        <div class="sales-top">
-          <div>
-            <div class="sales-title">پروژه‌های من</div>
-            <div class="sales-amount">{{ user_projects|length }} پروژه</div>
-          </div>
-          {% if user_projects %}
-            {% list_max user_projects "views_count" as max_views %}
-            <div class="daily-pill">مجموع بازدید<b>{{ max_views }}</b></div>
-          {% endif %}
+    <section class="section">
+        <div class="section-head">
+            <div class="s-title">
+                <span class="s-icon"><svg class="icon" viewBox="0 0 24 24">
+                        <path d="M9 2v6l-5.5 9.5A2 2 0 0 0 5.2 21h13.6a2 2 0 0 0 1.7-3.5L15 8V2" />
+                        <line x1="8" y1="2" x2="16" y2="2" />
+                        <line x1="7" y1="15" x2="17" y2="15" /></svg></span>
+                پروژه‌های تحقیقاتی
+            </div>
         </div>
-        {% if user_projects %}
-          {% for proj in user_projects|slice:":3" %}
-          <div class="project-row">
-            <div class="p-name"><span>{{ proj.title|truncatechars:26 }}</span><span>{{ proj.views_count }} بازدید</span></div>
-            <div class="hbar-track" style="margin-bottom:4px;"><div class="hbar-fill" style="width:{% bar_width proj.views_count max_views %}%;"></div></div>
-            <div class="hbar-track" style="height:6px;"><div class="hbar-fill" style="width:{% bar_width proj.applications_count max_views %}%;background:var(--primary-soft);"></div></div>
-          </div>
-          {% endfor %}
-          <div class="p-legend">
-            <span><i style="background:var(--primary);"></i>بازدید</span>
-            <span><i style="background:var(--primary-soft);"></i>درخواست همکاری</span>
-          </div>
-        {% else %}
-          <div class="list-empty">هنوز پروژه‌ای توسط شما ثبت نشده است.</div>
-        {% endif %}
-      </div>
+        <div class="grid grid-2">
+            <div class="card">
+                <div class="sales-top">
+                    <div>
+                        <div class="sales-title">پروژه‌های من</div>
+                        <div class="sales-amount">{{ user_projects|length }} پروژه</div>
+                    </div>
+                    {% if user_projects %}
+                    {% list_max user_projects "views_count" as max_views %}
+                    <div class="daily-pill">مجموع بازدید<b>{{ max_views }}</b></div>
+                    {% endif %}
+                </div>
+                {% if user_projects %}
+                {% for proj in user_projects|slice:":3" %}
+                <div class="project-row">
+                    <div class="p-name"><span>{{ proj.title|truncatechars:26 }}</span><span>{{ proj.views_count }}
+                            بازدید</span></div>
+                    <div class="hbar-track" style="margin-bottom:4px;">
+                        <div class="hbar-fill" style="width:{% bar_width proj.views_count max_views %}%;"></div>
+                    </div>
+                    <div class="hbar-track" style="height:6px;">
+                        <div class="hbar-fill"
+                            style="width:{% bar_width proj.applications_count max_views %}%;background:var(--primary-soft);">
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="p-legend">
+                    <span><i style="background:var(--primary);"></i>بازدید</span>
+                    <span><i style="background:var(--primary-soft);"></i>درخواست همکاری</span>
+                </div>
+                {% else %}
+                <div class="list-empty">هنوز پروژه‌ای توسط شما ثبت نشده است.</div>
+                {% endif %}
+            </div>
 
-      <div class="card">
-        <div class="card-title-row"><h4>پروژه‌های مشابه پروژه‌های شما</h4><div class="info-dot">i</div></div>
-        {% for p in similar_projects %}
-        <div class="list-row">
-          <div class="lr-main">
-            <div class="lr-title">{{ p.title }}</div>
-            <div class="lr-sub">{{ p.category }} · {{ p.status }}</div>
-          </div>
-          <div class="lr-badge">{{ p.views_count }} بازدید</div>
+            <div class="card">
+                <div class="card-title-row">
+                    <h4>پروژه‌های مشابه پروژه‌های شما</h4>
+                    <div class="info-dot">i</div>
+                </div>
+                {% for p in similar_projects %}
+                <div class="list-row">
+                    <div class="lr-main">
+                        <div class="lr-title">{{ p.title }}</div>
+                        <div class="lr-sub">{{ p.category }} · {{ p.status }}</div>
+                    </div>
+                    <div class="lr-badge">{{ p.views_count }} بازدید</div>
+                </div>
+                {% empty %}
+                <div class="list-empty">پروژه‌ی مشابهی یافت نشد.</div>
+                {% endfor %}
+            </div>
         </div>
-        {% empty %}
-        <div class="list-empty">پروژه‌ی مشابهی یافت نشد.</div>
-        {% endfor %}
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- =========================================================
+    <!-- =========================================================
        SECTION 5 — جامعه و ابزارها
   ========================================================== -->
-  <section class="section">
-    <div class="section-head">
-      <div class="s-title">
-        <span class="s-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-        جامعه و ابزارها
-      </div>
-    </div>
-    <div class="grid grid-2">
-      <div class="card">
-        <div class="ti-row">
-          <div class="wallet-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-          <div class="wtag">کل کاربران ⌄</div>
+    <section class="section">
+        <div class="section-head">
+            <div class="s-title">
+                <span class="s-icon"><svg class="icon" viewBox="0 0 24 24">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></span>
+                جامعه و ابزارها
+            </div>
         </div>
-        <div class="ti-label">مجموع پروفایل‌های ثبت‌شده</div>
-        <div class="ti-amount">{{ community_stats.total_profiles }}</div>
-        <hr class="ti-divider">
-        <div class="ti-row">
-          <div class="wallet-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12l5-5 4 4 3-3 5 5"/><path d="M11 11l2 2-2 2-2-2z"/><path d="M2 12v6h4"/><path d="M22 12v6h-4"/></svg></div>
-          <div class="wtag">مشابه شما ⌄</div>
-        </div>
-        <div class="ti-label">کاربران هم‌هدف</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="ti-amount">{{ community_stats.same_goal_users|length }} نفر</div>
-          <a class="view-chart" href="#">مشاهده<br>لیست</a>
-        </div>
-      </div>
+        <div class="grid grid-2">
+            <div class="card">
+                <div class="ti-row">
+                    <div class="wallet-icon"><svg class="icon" viewBox="0 0 24 24">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></div>
+                    <div class="wtag">کل کاربران ⌄</div>
+                </div>
+                <div class="ti-label">مجموع پروفایل‌های ثبت‌شده</div>
+                <div class="ti-amount">{{ community_stats.total_profiles }}</div>
+                <hr class="ti-divider">
+                <div class="ti-row">
+                    <div class="wallet-icon"><svg class="icon" viewBox="0 0 24 24">
+                            <path d="M2 12l5-5 4 4 3-3 5 5" />
+                            <path d="M11 11l2 2-2 2-2-2z" />
+                            <path d="M2 12v6h4" />
+                            <path d="M22 12v6h-4" /></svg></div>
+                    <div class="wtag">مشابه شما ⌄</div>
+                </div>
+                <div class="ti-label">کاربران هم‌هدف</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div class="ti-amount">{{ community_stats.same_goal_users|length }} نفر</div>
+                    <a class="view-chart" href="#">مشاهده<br>لیست</a>
+                </div>
+            </div>
 
-      <div class="card">
-        <div class="card-title-row"><h4>ابزارهای جدید</h4><div class="info-dot">i</div></div>
-        {% if new_tools %}
-          {% for tool in new_tools %}
-          <div class="list-row">
-            <div class="lr-main"><div class="lr-title">{{ tool.title }}</div></div>
-            <div class="lr-badge">باز کردن</div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="empty-state">
-            <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="2" y1="13" x2="22" y2="13"/></svg></div>
-            <p>هنوز ابزار جدیدی اضافه نشده. این بخش به‌محض افزوده‌شدن ابزارها فعال می‌شود.</p>
-          </div>
-        {% endif %}
-      </div>
-    </div>
-  </section>
+            <div class="card">
+                <div class="card-title-row">
+                    <h4>ابزارهای جدید</h4>
+                    <div class="info-dot">i</div>
+                </div>
+                {% if new_tools %}
+                {% for tool in new_tools %}
+                <div class="list-row">
+                    <div class="lr-main">
+                        <div class="lr-title">{{ tool.title }}</div>
+                        {% if tool.description %}<div class="lr-sub">{{ tool.description }}</div>{% endif %}
+                    </div>
+                    <a href="{{ tool.get_url }}" target="_blank" class="lr-badge">باز کردن</a>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                            <rect x="2" y="7" width="20" height="14" rx="2" />
+                            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                            <line x1="2" y1="13" x2="22" y2="13" /></svg></div>
+                    <p>هنوز ابزار جدیدی اضافه نشده. این بخش به‌محض افزوده‌شدن ابزارها فعال می‌شود.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
 
-  <!-- =========================================================
+    <!-- =========================================================
        SECTION 6 — دوره‌های آموزشی
   ========================================================== -->
-  <section class="section">
-    <div class="section-head">
-      <div class="s-title">
-        <span class="s-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12.5V17c0 1.5 3 3 6 3s6-1.5 6-3v-4.5"/></svg></span>
-        دوره‌های آموزشی
-      </div>
-      {% if not courses_data.most_viewed_is_real_data %}
-      <div class="s-note">«پربازدید» فعلاً بر اساس جدیدترین‌هاست — ثبت بازدید هنوز فعال نیست</div>
-      {% endif %}
-    </div>
-    <div class="grid grid-3">
-      <div class="card">
-        <div class="card-title-row"><h4>جدیدترین دوره‌ها</h4><div class="info-dot">i</div></div>
-        {% for c in courses_data.newest %}
-        <div class="list-row">
-          <div class="lr-main">
-            <div class="lr-title">{{ c.title }}</div>
-            <div class="lr-sub">{{ c.category__name|default:"بدون دسته" }}</div>
-          </div>
-          <div class="lr-badge">{% if c.discount_price %}{{ c.discount_price }}{% else %}{{ c.main_price|default:"رایگان" }}{% endif %}</div>
+    <section class="section">
+        <div class="section-head">
+            <div class="s-title">
+                <span class="s-icon"><svg class="icon" viewBox="0 0 24 24">
+                        <path d="M22 10 12 5 2 10l10 5 10-5z" />
+                        <path d="M6 12.5V17c0 1.5 3 3 6 3s6-1.5 6-3v-4.5" /></svg></span>
+                دوره‌های آموزشی
+            </div>
+            {% if not courses_data.most_viewed_is_real_data %}
+            <div class="s-note">«پربازدید» فعلاً بر اساس جدیدترین‌هاست — ثبت بازدید هنوز فعال نیست</div>
+            {% endif %}
         </div>
-        {% empty %}
-        <div class="list-empty">دوره‌ای یافت نشد.</div>
-        {% endfor %}
-      </div>
-      <div class="card">
-        <div class="card-title-row"><h4>پیشنهادی برای شما</h4><div class="info-dot">i</div></div>
-        {% for c in courses_data.recommended %}
-        <div class="list-row">
-          <div class="lr-main">
-            <div class="lr-title">{{ c.title }}</div>
-            <div class="lr-sub">{{ c.category__name|default:"بدون دسته" }}</div>
-          </div>
-          <div class="lr-badge">پیشنهادی</div>
+        <div class="grid grid-3">
+            <div class="card">
+                <div class="card-title-row">
+                    <h4>جدیدترین دوره‌ها</h4>
+                    <div class="info-dot">i</div>
+                </div>
+                {% for c in courses_data.newest %}
+                <div class="list-row">
+                    <div class="lr-main">
+                        <div class="lr-title">{{ c.title }}</div>
+                        <div class="lr-sub">{{ c.category__name|default:"بدون دسته" }}</div>
+                    </div>
+                    <div class="lr-badge">
+                        {% if c.discount_price %}{{ c.discount_price }}{% else %}{{ c.main_price|default:"رایگان" }}{% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="list-empty">دوره‌ای یافت نشد.</div>
+                {% endfor %}
+            </div>
+            <div class="card">
+                <div class="card-title-row">
+                    <h4>پیشنهادی برای شما</h4>
+                    <div class="info-dot">i</div>
+                </div>
+                {% for c in courses_data.recommended %}
+                <div class="list-row">
+                    <div class="lr-main">
+                        <div class="lr-title">{{ c.title }}</div>
+                        <div class="lr-sub">{{ c.category__name|default:"بدون دسته" }}</div>
+                    </div>
+                    <div class="lr-badge">پیشنهادی</div>
+                </div>
+                {% empty %}
+                <div class="list-empty">برای دریافت پیشنهاد، حوزه‌ی تخصصی خود را در پروفایل تکمیل کنید.</div>
+                {% endfor %}
+            </div>
+            <div class="card">
+                <div class="card-title-row">
+                    <h4>پربازدیدترین‌ها</h4>
+                    <div class="info-dot">i</div>
+                </div>
+                {% for c in courses_data.most_viewed %}
+                <div class="list-row">
+                    <div class="lr-main">
+                        <div class="lr-title">{{ c.title }}</div>
+                        <div class="lr-sub">{{ c.category__name|default:"بدون دسته" }}</div>
+                    </div>
+                    <div class="lr-badge">جدید</div>
+                </div>
+                {% empty %}
+                <div class="list-empty">دوره‌ای یافت نشد.</div>
+                {% endfor %}
+            </div>
         </div>
-        {% empty %}
-        <div class="list-empty">برای دریافت پیشنهاد، حوزه‌ی تخصصی خود را در پروفایل تکمیل کنید.</div>
-        {% endfor %}
-      </div>
-      <div class="card">
-        <div class="card-title-row"><h4>پربازدیدترین‌ها</h4><div class="info-dot">i</div></div>
-        {% for c in courses_data.most_viewed %}
-        <div class="list-row">
-          <div class="lr-main">
-            <div class="lr-title">{{ c.title }}</div>
-            <div class="lr-sub">{{ c.category__name|default:"بدون دسته" }}</div>
-          </div>
-          <div class="lr-badge">جدید</div>
-        </div>
-        {% empty %}
-        <div class="list-empty">دوره‌ای یافت نشد.</div>
-        {% endfor %}
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- =========================================================
+    <!-- =========================================================
        SECTION 7 — رویدادها
   ========================================================== -->
-  <section class="section">
-    <div class="section-head">
-      <div class="s-title">
-        <span class="s-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
-        رویدادها
-      </div>
-    </div>
-    <div class="card">
-      {% for e in top_events %}
-      <div class="list-row">
-        <div class="lr-main">
-          <div class="lr-title">{{ e.title }}</div>
-          <div class="lr-sub">{{ e.section|default:"عمومی" }}</div>
+    <section class="section">
+        <div class="section-head">
+            <div class="s-title">
+                <span class="s-icon"><svg class="icon" viewBox="0 0 24 24">
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" /></svg></span>
+                رویدادها
+            </div>
         </div>
-        <div class="lr-badge">مشاهده</div>
-      </div>
-      {% empty %}
-      <div class="list-empty">رویدادی ثبت نشده است.</div>
-      {% endfor %}
-    </div>
-  </section>
+        <div class="card">
+            {% for e in top_events %}
+            <div class="list-row">
+                <div class="lr-main">
+                    <div class="lr-title">{{ e.title }}</div>
+                    <div class="lr-sub">{{ e.short_description|default:"عمومی" }}</div>
+                </div>
+                <div class="lr-badge">مشاهده</div>
+            </div>
+            {% empty %}
+            <div class="list-empty">رویدادی ثبت نشده است.</div>
+            {% endfor %}
+        </div>
+    </section>
 
-  <!-- =========================================================
+
+    <!-- =========================================================
        SECTION 8 — ارزیابی و فعالیت آنلاین
   ========================================================== -->
-  <section class="section">
-    <div class="section-head">
-      <div class="s-title">
-        <span class="s-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
-        ارزیابی و فعالیت کلی
-      </div>
-    </div>
-    <div class="grid grid-2">
-      <div class="card">
-        <div class="card-title-row"><h4>امتیاز ارزیابی مقرراتی</h4><div class="info-dot">i</div></div>
-        {% if regulation_assessment %}
-          <div class="reg-top">
-            <svg width="84" height="84" viewBox="0 0 84 84">
-              <circle cx="42" cy="42" r="34" fill="none" stroke="var(--primary-soft)" stroke-width="9"/>
-              <circle cx="42" cy="42" r="34" fill="none" stroke="var(--primary)" stroke-width="9"
-                      stroke-linecap="round" stroke-dasharray="{{ regulation_assessment.total_score|radial_arc:34 }}"
-                      transform="rotate(-90 42 42)"/>
-              <text x="42" y="47" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink-900)">{{ regulation_assessment.total_score }}٪</text>
-            </svg>
-            <div class="reg-breakdown">
-              {% for key, val in regulation_assessment.score_breakdown.items %}
-              <div class="rb-row">
-                <span style="width:90px;flex-shrink:0;">{{ key }}</span>
-                <div class="rb-track"><div class="rb-fill" style="width:{{ val }}%;"></div></div>
-                <span>{{ val }}٪</span>
-              </div>
-              {% endfor %}
+    <section class="section">
+        <div class="section-head">
+            <div class="s-title">
+                <span class="s-icon"><svg class="icon" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" />
+                        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></svg></span>
+                ارزیابی و فعالیت کلی
             </div>
-          </div>
-          <div class="lr-sub">آخرین به‌روزرسانی: {{ regulation_assessment.updated_at|date:"Y/m/d H:i" }}</div>
-        {% else %}
-          <div class="empty-state">
-            <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 2h6a1 1 0 0 1 1 1v2H8V3a1 1 0 0 1 1-1z"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
-            <p>هنوز ارزیابی مقرراتی برای شما ثبت نشده است.</p>
-          </div>
-        {% endif %}
-      </div>
+        </div>
+        <div class="grid grid-2">
+            <div class="card">
+                <div class="card-title-row">
+                    <h4>امتیاز ارزیابی مقرراتی</h4>
+                    <div class="info-dot">i</div>
+                </div>
+                {% if regulation_assessment %}
+                <div class="reg-top">
+                    <svg width="84" height="84" viewBox="0 0 84 84">
+                        <circle cx="42" cy="42" r="34" fill="none" stroke="var(--primary-soft)" stroke-width="9" />
+                        <circle cx="42" cy="42" r="34" fill="none" stroke="var(--primary)" stroke-width="9"
+                            stroke-linecap="round"
+                            stroke-dasharray="{{ regulation_assessment.total_score|radial_arc:34 }}"
+                            transform="rotate(-90 42 42)" />
+                        <text x="42" y="47" text-anchor="middle" font-size="15" font-weight="700"
+                            fill="var(--ink-900)">{{ regulation_assessment.total_score }}٪</text>
+                    </svg>
+                    <div class="reg-breakdown">
+                        {% for key, val in regulation_assessment.score_breakdown.items %}
+                        <div class="rb-row">
+                            <span style="width:90px;flex-shrink:0;">{{ key }}</span>
+                            <div class="rb-track">
+                                <div class="rb-fill" style="width:{{ val }}%;"></div>
+                            </div>
+                            <span>{{ val }}٪</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="lr-sub">آخرین به‌روزرسانی: {{ regulation_assessment.updated_at|date:"Y/m/d H:i" }}</div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                            <rect x="5" y="4" width="14" height="18" rx="2" />
+                            <path d="M9 2h6a1 1 0 0 1 1 1v2H8V3a1 1 0 0 1 1-1z" />
+                            <line x1="9" y1="11" x2="15" y2="11" />
+                            <line x1="9" y1="15" x2="15" y2="15" /></svg></div>
+                    <p>هنوز ارزیابی مقرراتی برای شما ثبت نشده است.</p>
+                </div>
+                {% endif %}
+            </div>
 
-      <div class="card">
-        <div class="card-title-row"><h4>فعالیت آنلاین</h4><div class="info-dot">i</div></div>
-        {% if online_stats.available %}
-          <div class="ti-label">روزهای آنلاین</div>
-          <div class="ti-amount">{{ online_stats.total_online_days }} روز</div>
-          <hr class="ti-divider">
-          <div class="ti-label">مجموع مدت‌زمان</div>
-          <div class="ti-amount">{{ online_stats.total_online_duration_minutes }} دقیقه</div>
-        {% else %}
-          <div class="empty-state">
-            <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 15"/><line x1="9" y1="1" x2="15" y2="1"/></svg></div>
-            <p>ثبت زمان آنلاین بودن هنوز در این نسخه فعال نشده است.</p>
-          </div>
-        {% endif %}
-      </div>
-    </div>
-  </section>
+            <div class="card">
+                <div class="card-title-row">
+                    <h4>فعالیت آنلاین</h4>
+                    <div class="info-dot">i</div>
+                </div>
+                {% if online_stats.available %}
+                <div class="ti-label">روزهای آنلاین</div>
+                <div class="ti-amount">{{ online_stats.total_online_days }} روز</div>
+                <hr class="ti-divider">
+                <div class="ti-label">مجموع مدت‌زمان</div>
+                <div class="ti-amount">{{ online_stats.total_online_duration_minutes }} دقیقه</div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                            <circle cx="12" cy="13" r="8" />
+                            <polyline points="12 9 12 13 15 15" />
+                            <line x1="9" y1="1" x2="15" y2="1" /></svg></div>
+                    <p>ثبت زمان آنلاین بودن هنوز در این نسخه فعال نشده است.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
 
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const wrap = document.getElementById('online-heatmap');
+        if (!wrap) return;
+
+        const container = document.getElementById('heatmap-months-container');
+        const prevBtn = document.getElementById('heatmap-prev');
+        const nextBtn = document.getElementById('heatmap-next');
+        const rangeUrl = wrap.getAttribute('data-range-url');
+
+        const PERSIAN_WEEKDAY_NAMES = ['شنبه', 'یک‌شنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
+        // رنگ‌ها هم‌رنگ heatmap-legend
+        const colors = ['#ebedf0', '#bfccfc', '#8fa3fa', '#5f7ef7', '#2f5cf5'];
+
+        // ساخت تولتیپ سفارشی (یک‌بار)
+        let tooltip = document.getElementById('heatmap-tooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'heatmap-tooltip';
+            tooltip.className = 'heatmap-tooltip';
+            document.body.appendChild(tooltip);
+        }
+
+        function showTooltip(evt, text) {
+            tooltip.textContent = text;
+            tooltip.style.display = 'block';
+            positionTooltip(evt);
+        }
+
+        function positionTooltip(evt) {
+            const offset = 14;
+            let x = evt.clientX + offset;
+            let y = evt.clientY + offset;
+
+            const rect = tooltip.getBoundingClientRect();
+            if (x + rect.width > window.innerWidth) {
+                x = evt.clientX - rect.width - offset;
+            }
+            if (y + rect.height > window.innerHeight) {
+                y = evt.clientY - rect.height - offset;
+            }
+
+            tooltip.style.left = `${x}px`;
+            tooltip.style.top = `${y}px`;
+        }
+
+        function hideTooltip() {
+            tooltip.style.display = 'none';
+        }
+
+        function levelOf(min) {
+            if (min >= 120) return 4;
+            if (min >= 60) return 3;
+            if (min >= 30) return 2;
+            if (min > 0) return 1;
+            return 0;
+        }
+
+        // JS getDay(): 0=یکشنبه..6=شنبه → تبدیل به شاخص هفته‌ی فارسی (0=شنبه)
+        function persianWeekdayIndex(jsDay) {
+            return (jsDay + 1) % 7;
+        }
+
+        function formatPersianDate(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            const weekday = PERSIAN_WEEKDAY_NAMES[persianWeekdayIndex(d.getDay())];
+            const rest = d.toLocaleDateString('fa-IR-u-ca-gregory', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            return `${weekday}، ${rest}`;
+        }
+
+        function monthLabel(year, month) {
+            const d = new Date(year, month - 1, 1);
+            return d.toLocaleDateString('fa-IR-u-ca-gregory', {
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        function render(data) {
+            container.innerHTML = '';
+            if (!data || !data.length) return;
+
+            // گروه‌بندی روزها بر اساس سال-ماه
+            const months = new Map();
+            data.forEach(day => {
+                const d = new Date(day.date + 'T00:00:00');
+                const key = `${d.getFullYear()}-${d.getMonth()}`;
+                if (!months.has(key)) months.set(key, {
+                    year: d.getFullYear(),
+                    month: d.getMonth(),
+                    days: []
+                });
+                months.get(key).days.push(day);
+            });
+
+            months.forEach(monthData => {
+                const block = document.createElement('div');
+                block.className = 'month-block';
+
+                const title = document.createElement('div');
+                title.className = 'month-title';
+                title.textContent = monthLabel(monthData.year, monthData.month + 1);
+                block.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'month-grid';
+
+                // پد کردن ابتدای ماه تا هم‌راستا با روز هفته‌اش باشد
+                const firstDay = new Date(monthData.year, monthData.month, 1);
+                const leadingEmpty = persianWeekdayIndex(firstDay.getDay());
+                const cells = new Array(leadingEmpty).fill(null).concat(monthData.days);
+                while (cells.length % 7 !== 0) cells.push(null);
+
+                grid.style.gridTemplateColumns = `repeat(${cells.length / 7}, 12px)`;
+
+                cells.forEach(day => {
+                    const box = document.createElement('div');
+                    box.className = 'heat';
+                    if (day) {
+                        box.style.background = colors[levelOf(day.duration_minutes)];
+
+                        const tooltipText =
+                            `${formatPersianDate(day.date)} — ${day.duration_minutes} دقیقه`;
+
+                        box.addEventListener('mouseenter', (e) => showTooltip(e, tooltipText));
+                        box.addEventListener('mousemove', positionTooltip);
+                        box.addEventListener('mouseleave', hideTooltip);
+                    } else {
+                        box.classList.add('empty-cell');
+                    }
+                    grid.appendChild(box);
+                });
+
+                block.appendChild(grid);
+                container.appendChild(block);
+            });
+        }
+
+        function updateNavState(endYear, endMonth, nextDisabled) {
+            wrap.setAttribute('data-end-year', endYear);
+            wrap.setAttribute('data-end-month', endMonth);
+
+            const disabled = (nextDisabled === true || nextDisabled === '1');
+            wrap.setAttribute('data-next-disabled', disabled ? '1' : '0');
+            nextBtn.disabled = disabled;
+        }
+
+        async function loadRange(year, month) {
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            try {
+                const res = await fetch(`${rangeUrl}?year=${year}&month=${month}`);
+                if (!res.ok) return;
+                const json = await res.json();
+
+                render(json.calendar_grid);
+                updateNavState(json.end_year, json.end_month, json.next_disabled);
+
+                const daysEl = document.getElementById('stat-online-days');
+                const minutesEl = document.getElementById('stat-online-minutes');
+
+                if (daysEl) daysEl.textContent = `${json.total_online_days} روز`;
+                if (minutesEl) minutesEl.textContent = `${json.total_online_duration_minutes} دقیقه`;
+
+                wrap.dataset.prevYear = json.prev_year;
+                wrap.dataset.prevMonth = json.prev_month;
+                wrap.dataset.nextYear = json.next_year;
+                wrap.dataset.nextMonth = json.next_month;
+            } finally {
+                prevBtn.disabled = false;
+            }
+        }
+
+        // بارگذاری اولیه از داده‌ی سمت سرور
+        const raw = wrap.getAttribute('data-calendar');
+        let initialData = [];
+        if (raw) {
+            try {
+                initialData = JSON.parse(raw) || [];
+            } catch (e) {
+                initialData = [];
+            }
+        }
+        render(initialData);
+
+        const endYear = parseInt(wrap.getAttribute('data-end-year'), 10);
+        const endMonth = parseInt(wrap.getAttribute('data-end-month'), 10);
+        const nextDisabled = wrap.getAttribute('data-next-disabled') === '1';
+        nextBtn.disabled = nextDisabled;
+
+        loadRange(endYear, endMonth);
+
+        prevBtn.addEventListener('click', function () {
+            const y = parseInt(wrap.dataset.prevYear, 10);
+            const m = parseInt(wrap.dataset.prevMonth, 10);
+            loadRange(y, m);
+        });
+
+        nextBtn.addEventListener('click', function () {
+            if (nextBtn.disabled) return;
+            const y = parseInt(wrap.dataset.nextYear, 10);
+            const m = parseInt(wrap.dataset.nextMonth, 10);
+            loadRange(y, m);
+        });
+    });
+</script>
 
 {% endblock %}
