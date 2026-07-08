@@ -11,7 +11,7 @@ from .models import (
     SocialProfile, Education, Article, Presentation,
     ExecutiveRecord, Profile, TrainingCourse
 )
-from .ai_utils import extract_profile_from_text, _sanitize_profile_data, AIExtractionError
+from .ai_utils import extract_profile_from_text
 from .file_utils import extract_text_from_file, FileExtractionError
 from .forms import (
     ProfileForm,
@@ -128,93 +128,65 @@ def edit_profile(request):
 
 @login_required
 def edit_profile_ai(request):
+    """
+    ویرایش پروفایل با استفاده از هوش مصنوعی.
+    کاربر متن یا فایل آپلود می‌کند و AI اطلاعات را استخراج می‌کند.
+    بعد از استخراج، مستقیم به صفحه ادیت دستی می‌رود.
+    """
     profile, _ = Profile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
         text = request.POST.get('text', '').strip()
 
-        # ── ۱. استخراج متن از فایل آپلودشده (در صورت وجود) ──────────────
+        # پردازش فایل آپلود شده
         uploaded_file = request.FILES.get('file')
         if uploaded_file:
             try:
                 file_text = extract_text_from_file(uploaded_file)
                 text = (text + '\n' + file_text).strip()
-            except FileExtractionError as e:
-                # پیام دقیق و قابل‌فهم برای کاربر (فایل خراب/فرمت اشتباه/بدون متن و ...)
+            except (ImportError, ValueError) as e:
                 messages.error(request, str(e))
-                return render(
-                    request,
-                    'accounts/edit_profile_ai_details.html',
-                    {'raw_text': profile.raw_text}
-                )
+                return render(request, 'accounts/edit_profile_ai_details.html', {'raw_text': profile.raw_text})
 
-        # ── ۲. بررسی این‌که اصلاً متنی برای پردازش وجود دارد ─────────────
         if not text:
-            messages.error(
-                request,
-                "متنی برای استخراج وارد نشده است. لطفاً متن را وارد کنید یا رزومه‌ای آپلود کنید."
-            )
-            return render(
-                request,
-                'accounts/edit_profile_ai_details.html',
-                {'raw_text': profile.raw_text}
-            )
+            messages.error(request, 'لطفاً متن وارد کنید یا فایلی آپلود کنید.')
+            return render(request, 'accounts/edit_profile_ai_details.html', {'raw_text': profile.raw_text})
 
+        # ذخیره متن خام
         profile.raw_text = text
         profile.save(update_fields=['raw_text'])
 
-        # ── ۳. استخراج ساختاریافته با هوش مصنوعی (با retry روی مدل قوی‌تر) ──
         try:
+            # استخراج اطلاعات با AI
             data = extract_profile_from_text(text)
-        except AIExtractionError as e:
-            messages.error(request, str(e))
-            return render(
-                request,
-                'accounts/edit_profile_ai_details.html',
-                {'raw_text': text, 'ai_error': True}
-            )
-        except Exception:
-            logger.exception("خطای غیرمنتظره هنگام استخراج پروفایل با هوش مصنوعی")
-            messages.error(
-                request,
-                "در حال حاضر سرویس هوش مصنوعی در دسترس نیست. لطفاً بعداً دوباره تلاش کنید."
-            )
-            return render(
-                request,
-                'accounts/edit_profile_ai_details.html',
-                {'raw_text': text, 'ai_error': True}
-            )
 
-        # ── ۴. ذخیره اطلاعات پروفایل ─────────────────────────────────
-        for field, value in _sanitize_profile_data(data.get('profile', {})).items():
-            setattr(profile, field, value)
-
-        try:
+            # ذخیره اطلاعات پروفایل در دیتابیس
+            for field, value in data.get('profile', {}).items():
+                if hasattr(profile, field):
+                    setattr(profile, field, value)
             profile.save()
-        except Exception:
-            logger.exception("خطا در ذخیره پروفایل پس از استخراج AI")
-            messages.error(
-                request,
-                "اطلاعات استخراج‌شده معتبر نبودند و ذخیره نشدند. لطفاً متن را بررسی و دوباره تلاش کنید."
-            )
-            return render(
-                request,
-                'accounts/edit_profile_ai_details.html',
-                {'raw_text': text, 'ai_error': True}
-            )
 
-        # ── ۵. ذخیره بخش‌های وابسته ──────────────────────────────────
-        _bulk_append(profile.social_profiles, SocialProfile, data.get('social_profiles', []), profile)
-        _bulk_append(profile.educations, Education, data.get('educations', []), profile)
-        _bulk_append(profile.articles, Article, data.get('articles', []), profile)
-        _bulk_append(profile.presentations, Presentation, data.get('presentations', []), profile)
-        _bulk_append(profile.executive_records, ExecutiveRecord, data.get('executive_records', []), profile)
-        _bulk_append(profile.training_courses, TrainingCourse, data.get('training_courses', []), profile)
+            # پاک کردن داده‌های قبلی و ذخیره داده‌های جدید
+            _bulk_replace(profile.social_profiles, SocialProfile, data.get('social_profiles', []), profile)
+            _bulk_replace(profile.educations, Education, data.get('educations', []), profile)
+            _bulk_replace(profile.articles, Article, data.get('articles', []), profile)
+            _bulk_replace(profile.presentations, Presentation, data.get('presentations', []), profile)
+            _bulk_replace(profile.executive_records, ExecutiveRecord, data.get('executive_records', []), profile)
+            _bulk_replace(profile.training_courses, TrainingCourse, data.get('training_courses', []), profile)
 
-        messages.success(request, "اطلاعات پروفایل با موفقیت از متن استخراج شد.")
-        return redirect('accounts:edit_profile')
+            messages.success(request, 'رزومه شما پردازش شد. اطلاعات استخراج شده را می‌توانید ادیت کنید.')
+            return redirect('accounts:edit_profile')
+
+        except ValueError as e:
+            messages.error(request, f'خطا در پردازش AI: {str(e)}')
+        except ConnectionError as e:
+            messages.error(request, f'خطا در اتصال: {str(e)}')
+        except Exception as e:
+            messages.error(request, f'خطای غیرمنتظره: {str(e)}')
 
     return render(request, 'accounts/edit_profile_ai_details.html', {'raw_text': profile.raw_text})
+
+
 
 
 def _bulk_replace(related_manager, model_class, items: list, profile):

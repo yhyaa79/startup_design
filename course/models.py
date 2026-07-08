@@ -1,6 +1,7 @@
 # course/models.py
 
 from django.db import models
+from django.urls import reverse
 
 
 class Category(models.Model):
@@ -18,24 +19,26 @@ class Category(models.Model):
 
 
 class Course(models.Model):
-    course_id = models.CharField(max_length=20, unique=True)
+    course_id = models.SlugField(max_length=20, unique=True, help_text="شناسه یکتا مثل ola_001")
     title = models.CharField(max_length=200)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='courses')
-    short_desc = models.CharField(max_length=300)
-    long_desc = models.TextField()
+    short_desc = models.CharField(max_length=300, blank=True)
+    long_desc = models.TextField(blank=True)
     stars = models.PositiveSmallIntegerField(default=5)
     duration = models.CharField(max_length=50, blank=True)
     main_price = models.CharField(max_length=30, blank=True)
     discount_price = models.CharField(max_length=30, blank=True)
     percentage = models.CharField(max_length=10, blank=True)
-    instructor = models.CharField(max_length=100)
+    instructor = models.CharField(max_length=100, blank=True)
     thumbnail = models.ImageField(upload_to='image_card/', blank=True, null=True)
     video_link = models.URLField(blank=True)
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    view_count = models.PositiveIntegerField(default=0)
 
     class Meta:
-        ordering = ['category__order', 'course_id']
+        ordering = ['category__order', '-created_at']
         verbose_name = 'دوره'
         verbose_name_plural = 'دوره‌ها'
 
@@ -44,3 +47,6 @@ class Course(models.Model):
 
     def has_discount(self):
         return bool(self.discount_price and self.percentage)
+
+    def get_absolute_url(self):
+        return reverse('course:detail', args=[self.course_id])

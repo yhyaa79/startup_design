@@ -2,234 +2,359 @@
 
 import json
 import re
-import time
-import logging
 import requests
+import logging
 from django.conf import settings
-from .models import Profile
 
 logger = logging.getLogger(__name__)
 
+# ═══════════════════════════════════════════════════════════════
+# تنظیمات API - GapGPT
+# ═══════════════════════════════════════════════════════════════
+
+TIMEOUT = 120  # ثانیه
+
+GAPGPT_API_URL = settings.GAPGPT_API_BASE
+GAPGPT_API_KEY = settings.GAPGPT_API_KEY
+
 
 # ═══════════════════════════════════════════════════════════════
-# تنظیمات
+# ساختار داده‌های مورد انتظار (Schema)
 # ═══════════════════════════════════════════════════════════════
 
-DEFAULT_TIMEOUT = getattr(settings, "GAPGPT_TIMEOUT", 60)   # read timeout
-CONNECT_TIMEOUT = 10                                          # connect timeout
-MAX_RETRIES = 2                                                # تلاش مجدد برای خطاهای شبکه/۵xx روی هر مدل
+"""
+    Extract structured profile data from raw Persian text using an LLM.
 
-# مدل اصلی و مدل قوی‌تر (fallback) برای زمانی که خروجی مدل اول نامعتبر/ناقص باشد.
-# GAPGPT_MODEL_NAME_2 را در settings.py تعریف کنید؛ اگر تعریف نشود همان مدل اول استفاده می‌شود.
-MODEL_PRIMARY = settings.GAPGPT_MODEL_NAME
-MODEL_FALLBACK = getattr(settings, "GAPGPT_MODEL_NAME_2", None) or MODEL_PRIMARY
+    Returns a dict matching the schema below. All fields are optional unless marked required.
 
-
-class AIExtractionError(Exception):
-    """
-    خطای مربوط به استخراج اطلاعات توسط هوش مصنوعی.
-    پیام این exception مستقیماً قابل نمایش به کاربر است (فارسی و قابل‌فهم).
-    """
-    pass
-
-
-REQUIRED_PROFILE_FIELDS = ["first_name", "last_name", "gender", "goal"]
-
-LIST_FIELDS = [
-    "social_profiles", "educations", "articles",
-    "presentations", "executive_records", "training_courses",
-]
+    Schema:
+    {
+      "profile": {
+        "first_name": str,                    # required
+        "last_name": str,                     # required
+        "gender": "مرد" | "زن",              # required
+        "marital_status": "مجرد" | "متأهل" | "",
+        "military_status": "" | "معاف" | "طرح پزشکی" | "سرباز" | "پایان خدمت",
+        "job_title": str,
+        "birth_date": str,                    # Jalali e.g. "۱۳۷۸/۰۳/۱۵"
+        "country": str,
+        "city": str,
+        "phone": str,
+        "email": str,
+        "website": str,
+        "national_id": str,
+        "orcid": str,
+        "proposal_count": int | null,
+        "proposal_status": "" | "همه در جریان" | "همه خاتمه‌یافته" | "ترکیبی",
+        "software_skills": str,
+        "writing_skills": str,
+        "clinical_certs": str,
+        "clinical_exp": str,
+        "procedures": str,
+        "native_lang": str,
+        "english_level": "" | "A1" | "A2" | "B1" | "B2" | "C1" | "C2",
+        "lang_cert": str,
+        "other_langs": str,
+        "extracurricular": str,
+        "goal": "استعداد درخشان" | "۴۰ امتیازی" | "هیات علمی" | "ریسرچ پوزیشن / فلوشیپ خارج",  # required
+        "specialty": str,
+        "goal_notes": str,
+        "service_plan": "" | "مشمول نیستم" | "در حال گذراندن" | "پایان یافته"
+      },
+      "social_profiles": [
+        {
+          "social_type": "LinkedIn" | "GitHub" | "Google Scholar" | "ResearchGate" | "Dribbble" | "Twitter / X" | "Instagram" | "سایر",
+          "url": str
+        }
+      ],
+      "educations": [
+        {
+          "field": "پزشکی" | "دندان‌پزشکی" | "داروسازی" | "پرستاری" | "فیزیوتراپی" | "سایر",
+          "degree": "کارشناسی" | "کارشناسی ارشد" | "دکتری عمومی" | "دکتری تخصصی",
+          "university": str,
+          "uni_type": "تیپ ۱" | "تیپ ۲" | "تیپ ۳" | "",
+          "start_date": str,   # Jalali
+          "end_date": str,     # Jalali or ""
+          "stage": "علوم پایه" | "فیزیوپات" | "استاژری" | "اینترنی" | "فارغ‌التحصیل" | "",
+          "current_term": int | null,     # 1–20
+          "remaining_terms": int | null,  # 0–20
+          "gpa": float | null             # 0–20
+        }
+      ],
+      "articles": [
+        {
+          "title": str,
+          "journal": str,
+          "impact_factor": float | null,
+          "quartile": "Q1" | "Q2" | "Q3" | "Q4" | "",
+          "year": int | null,   # Jalali year e.g. 1402
+          "author_rank": int | null,
+          "total_authors": int | null,
+          "index": "ISI / Web of Science" | "Scopus" | "PubMed" | "ISI + Scopus" | "سایر" | ""
+        }
+      ],
+      "presentations": [
+        {
+          "title": str,
+          "event": str,
+          "level": "بین‌المللی" | "ملی" | "قطبی" | "دانشگاهی" | "",
+          "result": "برگزیده / جایزه" | "ارائه عادی" | ""
+        }
+      ],
+      "executive_records": [
+        {
+          "title": str,
+          "start_date": str,  # Jalali
+          "end_date": str     # Jalali or ""
+        }
+      ],
+      "training_courses": [
+        {
+          "title": str,
+          "category": "پژوهشی" | "بالینی" | "آموزشی" | "نرم‌افزاری" | "زبان" | "سایر" | "",
+          "status": "تکمیل‌شده" | "در حال گذراندن" | "ناتمام" | "",
+          "organizer": str,
+          "date": str,        # Jalali
+          "certificate": "دارد" | "ندارد" | "",
+          "skills_gained": str
+        }
+      ]
+    }
+"""
 
 
 # ═══════════════════════════════════════════════════════════════
 # تابع کمکی برای ارتباط با API
 # ═══════════════════════════════════════════════════════════════
-
-def _call_gpt_api(messages: list, model: str, max_tokens: int = 4000) -> str:
-    """
-    فراخوانی GapGPT Chat Completion API با retry و مدیریت خطا.
-    در صورت هر گونه خطا، AIExtractionError با پیام قابل‌نمایش به کاربر صادر می‌شود.
-    """
-    if not getattr(settings, "GAPGPT_API_KEY", None) or settings.GAPGPT_API_KEY == "YOUR_API_KEY_HERE":
-        logger.error("GAPGPT_API_KEY is not configured.")
-        raise AIExtractionError("کلید API سرویس هوش مصنوعی تنظیم نشده است.")
-
-    url = f"{settings.GAPGPT_API_BASE}/chat/completions"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {settings.GAPGPT_API_KEY}",
+'''
+def _call_gpt_api(messages: list, max_tokens: int = 4000) -> str:
+    """MOCK - برای تست بدون تماس با API واقعی"""
+    sample = {
+        "profile": {
+            "first_name": "علی",
+            "last_name": "رضایی",
+            "gender": "مرد",
+            "marital_status": "مجرد",
+            "military_status": "معاف",
+            "job_title": "دانشجوی پزشکی",
+            "birth_date": "۱۳۷۸/۰۳/۱۵",
+            "country": "ایران",
+            "city": "تهران",
+            "phone": "09121234567",
+            "email": "ali@example.com",
+            "website": "",
+            "national_id": "",
+            "orcid": "",
+            "proposal_count": 2,
+            "proposal_status": "همه در جریان",
+            "software_skills": "SPSS, Python",
+            "writing_skills": "",
+            "clinical_certs": "",
+            "clinical_exp": "",
+            "procedures": "",
+            "native_lang": "فارسی",
+            "english_level": "B2",
+            "lang_cert": "IELTS 7",
+            "other_langs": "",
+            "extracurricular": "",
+            "goal": "۴۰ امتیازی",
+            "specialty": "قلب و عروق",
+            "goal_notes": "",
+            "service_plan": "در حال گذراندن"
+        },
+        "social_profiles": [
+            {"social_type": "LinkedIn", "url": "https://linkedin.com/in/ali"}
+        ],
+        "educations": [
+            {
+                "field": "پزشکی",
+                "degree": "دکتری عمومی",
+                "university": "دانشگاه علوم پزشکی تهران",
+                "uni_type": "تیپ ۱",
+                "start_date": "۱۳۹۹/۰۶/۱۵",
+                "end_date": "",
+                "stage": "اینترنی",
+                "current_term": 10,
+                "remaining_terms": 4,
+                "gpa": 17.5
+            }
+        ],
+        "articles": [
+            {
+                "title": "بررسی تاثیر ...",
+                "journal": "Journal of Cardiology",
+                "impact_factor": 3.2,
+                "quartile": "Q2",
+                "year": 1402,
+                "author_rank": 2,
+                "total_authors": 4,
+                "index": "Scopus"
+            }
+        ],
+        "presentations": [
+            {
+                "title": "ارائه پوستر",
+                "event": "کنگره سالانه قلب",
+                "level": "ملی",
+                "result": "ارائه عادی"
+            }
+        ],
+        "executive_records": [
+            {"title": "دبیر انجمن علمی", "start_date": "۱۴۰۰/۰۱/۰۱", "end_date": "۱۴۰۱/۰۱/۰۱"}
+        ],
+        "training_courses": [
+            {
+                "title": "دوره احیای قلبی ریوی",
+                "category": "بالینی",
+                "status": "تکمیل‌شده",
+                "organizer": "دانشگاه علوم پزشکی تهران",
+                "date": "۱۴۰۱/۰۵/۱۰",
+                "certificate": "دارد",
+                "skills_gained": "CPR"
+            }
+        ]
     }
+    return json.dumps(sample, ensure_ascii=False)
+
+'''
+
+
+
+def _call_gpt_api(messages: list, max_tokens: int = 4000) -> str:
+    """
+    فراخوانی واقعی API با تضمین خروجی JSON معتبر
+    """
+    headers = {
+        "Authorization": f"Bearer {GAPGPT_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
     payload = {
-        "model": model,
+        "model": "gpt-4o-mini",
         "messages": messages,
         "max_tokens": max_tokens,
-        "temperature": 0.2,
-        # اجبار مدل به خروجی خالص JSON (اگر مدل پشتیبانی نکند، خودکار حذف و دوباره تلاش می‌شود)
+        "temperature": 0.7,
         "response_format": {"type": "json_object"},
     }
 
-    last_error = None
+    try:
+        response = requests.post(
+            GAPGPT_API_URL,
+            headers=headers,
+            json=payload,
+            timeout=120,
+        )
+        response.raise_for_status()
+        data = response.json()
 
-    for attempt in range(1, MAX_RETRIES + 1):
+        content = data["choices"][0]["message"]["content"]
+
+        finish_reason = data["choices"][0].get("finish_reason")
+        if finish_reason == "length":
+            logger.warning("خروجی مدل به دلیل کمبود max_tokens قطع شده است.")
+
+        content = _strip_code_fences(content)
+
+        # اعتبارسنجی سریع قبل از برگرداندن
         try:
-            logger.info("Calling GPT API model=%s (attempt %s/%s)", model, attempt, MAX_RETRIES)
-            start_time = time.monotonic()
+            json.loads(content)
+        except json.JSONDecodeError as e:
+            logger.error(f"خروجی مدل JSON معتبر نیست: {e}\nمتن خام: {content[:500]}")
+            raise ValueError(f"پاسخ مدل JSON معتبر نبود: {e}")
 
-            response = requests.post(
-                url,
-                headers=headers,
-                json=payload,
-                timeout=(CONNECT_TIMEOUT, DEFAULT_TIMEOUT),
-            )
+        return content
 
-            elapsed = time.monotonic() - start_time
-            logger.info("GPT API (%s) responded in %.2fs -> status %s", model, elapsed, response.status_code)
-
-            if response.status_code == 200:
-                data = response.json()
-                return data["choices"][0]["message"]["content"]
-
-            # اگر مدل پارامتر response_format را پشتیبانی نکند (خطای ۴۰۰ رایج)، بدون آن دوباره تلاش کن
-            if response.status_code == 400 and "response_format" in payload:
-                logger.warning("response_format may not be supported by model=%s; retrying without it.", model)
-                payload.pop("response_format", None)
-                continue
-
-            # خطاهای موقت سرویس → retry با backoff
-            if response.status_code in (429, 502, 503, 504):
-                logger.warning("Upstream error %s on attempt %s (model=%s)", response.status_code, attempt, model)
-                last_error = AIExtractionError(
-                    "سرویس هوش مصنوعی موقتاً در دسترس نیست یا شلوغ است. لطفاً چند دقیقه بعد دوباره تلاش کنید."
-                )
-                if attempt < MAX_RETRIES:
-                    time.sleep(2 ** attempt)
-                    continue
-                raise last_error
-
-            # سایر خطاهای HTTP
-            logger.error("HTTP error %s from GPT API (%s): %s", response.status_code, model, response.text[:500])
-            raise AIExtractionError(f"خطای سرویس هوش مصنوعی (کد {response.status_code}).")
-
-        except requests.exceptions.ReadTimeout:
-            logger.warning("Read timeout on attempt %s (model=%s)", attempt, model)
-            last_error = AIExtractionError("سرویس هوش مصنوعی دیر پاسخ داد. لطفاً دوباره تلاش کنید.")
-            if attempt < MAX_RETRIES:
-                time.sleep(2 ** attempt)
-                continue
-            raise last_error
-
-        except requests.exceptions.ConnectionError:
-            logger.exception("Connection error while calling GPT API (model=%s).", model)
-            raise AIExtractionError("خطا در اتصال به سرویس هوش مصنوعی. اتصال اینترنت سرور را بررسی کنید.")
-
-        except (KeyError, IndexError, json.JSONDecodeError):
-            logger.exception("Invalid API response structure (model=%s).", model)
-            raise AIExtractionError("پاسخ دریافتی از سرویس هوش مصنوعی نامعتبر است.")
-
-        except AIExtractionError:
-            raise
-
-        except Exception:
-            logger.exception("Unexpected error in _call_gpt_api (model=%s).", model)
-            raise AIExtractionError("خطای غیرمنتظره در ارتباط با سرویس هوش مصنوعی.")
-
-    if last_error:
-        raise last_error
-    raise AIExtractionError("خطای نامشخص در ارتباط با سرویس هوش مصنوعی.")
+    except requests.exceptions.Timeout:
+        logger.error("درخواست به GapGPT API با تایم‌اوت مواجه شد.")
+        raise
+    except requests.exceptions.RequestException as e:
+        logger.error(f"خطا در فراخوانی GapGPT API: {e}")
+        raise
+    except (KeyError, IndexError) as e:
+        logger.error(f"ساختار پاسخ API غیرمنتظره است: {e}")
+        raise
 
 
-# ═══════════════════════════════════════════════════════════════
-# Parse و اعتبارسنجی خروجی JSON
-# ═══════════════════════════════════════════════════════════════
+import re
+
+def _strip_code_fences(text: str) -> str:
+    """
+    حذف بلاک‌های کد مارک‌داون و برگرداندن محتوای داخل آن.
+    """
+    if not text or not text.strip():
+        return text.strip()
+
+    # حذف فنس‌های مارک‌داون با regex (قوی‌تر و تمیزتر)
+    text = re.sub(r'^```(?:json|JSON)?\s*\n', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\n```\s*$', '', text)
+    
+    return text.strip()
+
 
 def _parse_json_response(response_text: str) -> dict:
     """
-    استخراج و parse کردن JSON از پاسخ مدل، حتی اگر مدل متن اضافه دور آن
-    گذاشته باشد یا داخل بلوک کد markdown برگردانده باشد.
+    پارس کردن پاسخ JSON از مدل.
+    در صورتی که پاسخ داخل بلوک کد باشد، ابتدا آن را استخراج می‌کند.
     """
-    text = (response_text or "").strip()
-    if not text:
-        raise AIExtractionError("پاسخ خالی از سرویس هوش مصنوعی دریافت شد.")
-
-    # حذف بلوک‌های کد ```json ... ``` یا ``` ... ```
-    code_block = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text)
-    if code_block:
-        text = code_block.group(1).strip()
-
-    # تلاش مستقیم
+    # حتل کردن بلوک‌های کد markdown
+    text = response_text.strip()
+    
+    # بررسی بلوک کد ```json ... ```
+    json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', text)
+    if json_match:
+        text = json_match.group(1)
+    
+    # بررسی بلوک کد ``` ... ```
+    code_match = re.search(r'```\s*([\s\S]*?)\s*```', text)
+    if code_match:
+        text = code_match.group(1)
+    
     try:
         return json.loads(text)
-    except json.JSONDecodeError:
-        pass
-
-    # فقط بخش بین اولین { و آخرین } را نگه دار (برای حذف توضیحات اضافه مدل)
-    start = text.find("{")
-    end = text.rfind("}")
-    if start != -1 and end != -1 and end > start:
-        candidate = text[start:end + 1]
-        try:
-            return json.loads(candidate)
-        except json.JSONDecodeError:
-            # حذف کاماهای اضافه قبل از } یا ] که باعث خطای رایج JSON می‌شود
-            fixed = re.sub(r",\s*([}\]])", r"\1", candidate)
-            try:
-                return json.loads(fixed)
-            except json.JSONDecodeError as e:
-                logger.warning("Could not parse JSON from AI response: %s", text[:300])
-                raise AIExtractionError("پاسخ مدل هوش مصنوعی به فرمت JSON معتبر نبود.") from e
-
-    logger.warning("No JSON object found in AI response: %s", text[:300])
-    raise AIExtractionError("پاسخ مدل هوش مصنوعی به فرمت JSON معتبر نبود.")
-
-
-def _validate_extracted_data(data) -> None:
-    """
-    بررسی می‌کند خروجی مدل حداقل ساختار موردنیاز را دارد.
-    اگر معتبر نبود، AIExtractionError صادر می‌شود تا caller با مدل قوی‌تر دوباره تلاش کند.
-    """
-    if not isinstance(data, dict):
-        raise AIExtractionError("ساختار خروجی هوش مصنوعی نامعتبر است.")
-
-    profile = data.get("profile")
-    if not isinstance(profile, dict):
-        raise AIExtractionError("بخش «profile» در خروجی هوش مصنوعی یافت نشد.")
-
-    missing = [f for f in REQUIRED_PROFILE_FIELDS if not str(profile.get(f, "")).strip()]
-    if missing:
-        raise AIExtractionError(
-            "برخی اطلاعات ضروری (نام، نام‌خانوادگی، جنسیت یا هدف) در متن یافت نشد."
-        )
-
-    for key in LIST_FIELDS:
-        if key in data and data[key] is not None and not isinstance(data[key], list):
-            raise AIExtractionError(f"بخش «{key}» در خروجی هوش مصنوعی باید لیست باشد.")
+    except json.JSONDecodeError as e:
+        raise ValueError(f"خطا در پارس JSON: {str(e)}\n\nمتن دریافتی:\n{text}")
 
 
 # ═══════════════════════════════════════════════════════════════
-# ساخت پرامپت‌ها
+# تابع اصلی: استخراج پروفایل از متن
 # ═══════════════════════════════════════════════════════════════
 
-def _build_messages(text: str) -> list:
-    system_prompt = """تو یک دستیار هوشمند برای استخراج اطلاعات از متن‌های فارسی هستی.
-وظیفه‌ات این است که متن زیر را بخوانی و اطلاعات موجود در آن را به صورت ساختاریافته استخراج کنی.
+def extract_profile_from_text(text: str) -> dict:
+    """
+    استخراج داده‌های ساختاریافته پروفایل از متن خام فارسی با استفاده از LLM.
+    
+    Args:
+        text: متن خام شامل اطلاعات پروفایل کاربر
+    
+    Returns:
+        دیکشنری با ساختار زیر:
+        {
+            "profile": {...},
+            "social_profiles": [...],
+            "educations": [...],
+            "articles": [...],
+            "presentations": [...],
+            "executive_records": [...],
+            "training_courses": [...]
+        }
+    """
+    import re
+    
+    system_prompt = """تو یک دستیار هوشمند برای استخراج اطلاعات از متن‌های فارسی هستیت.
+وظیفت این است که متن زیر را بخوانی و اطلاعات موجود در آن را به صورت ساختاریافته استخراج کنی.
 
 قوانین مهم:
 1. فقط اطلاعاتی را استخراج کن که صراحتاً در متن ذکر شده‌اند.
 2. اگر اطلاعاتی وجود ندارد، آن فیلد را خالی ("") یا null بگذار.
 3. تاریخ‌ها را به صورت جلالی بنویس (مثال: ۱۴۰۲/۰۳/۱۵).
 4. اعداد را به صورت انگلیسی بنویس (مثال: 1402 نه ۱۴۰۲).
-5. فقط و فقط یک شیء JSON خالص برگردان، بدون هیچ توضیح اضافی، بدون بلوک کد markdown.
-6. حتماً کلیدهای "profile"، "social_profiles"، "educations"، "articles"، "presentations"،
-   "executive_records" و "training_courses" را در خروجی بگنجان (لیست‌های خالی [] اگر موردی نبود).
-7. فیلدهای الزامی profile عبارت‌اند از: first_name، last_name، gender، goal — این‌ها را
-   حتماً از روی بهترین برداشت خودت از متن پر کن و خالی نگذار."""
+5. فقط و فقط یک شیء JSON خالص برگردان، بدون هیچ توضیح اضافی."""
 
-    user_prompt = f"""لطفاً اطلاعات زیر را از متن استخراج کن و فقط یک شیء JSON با دقیقاً این ساختار برگردان:
+    user_prompt = f"""لطفاً اطلاعات زیر را از متن استخراج کن و به صورت JSON برگردان:
 
-متن ورودی:
 {text}
 
-ساختار خروجی مورد انتظار:
+خروجی باید دقیقاً با این ساختار باشد:
 {{
   "profile": {{
     "first_name": "نام",
@@ -283,77 +408,13 @@ def _build_messages(text: str) -> list:
   ]
 }}"""
 
-    return [
+    messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
     ]
 
+    response_text = _call_gpt_api(messages, max_tokens=4000)
+    result = _parse_json_response(response_text)
+    
+    return result
 
-# ═══════════════════════════════════════════════════════════════
-# تابع اصلی: استخراج پروفایل از متن (با retry روی مدل قوی‌تر)
-# ═══════════════════════════════════════════════════════════════
-
-def extract_profile_from_text(text: str) -> dict:
-    """
-    استخراج داده‌های ساختاریافته پروفایل از متن خام فارسی با استفاده از LLM.
-
-    ابتدا با مدل اصلی (GAPGPT_MODEL_NAME) تلاش می‌شود. اگر پاسخ:
-      - قابل parse به JSON نبود، یا
-      - ساختار/فیلدهای ضروری‌اش ناقص بود،
-    آنگاه یک‌بار دیگر با مدل قوی‌تر (GAPGPT_MODEL_NAME_2) تلاش می‌شود.
-
-    اگر هر دو تلاش شکست بخورد، AIExtractionError با پیام قابل‌نمایش به کاربر صادر می‌شود.
-    """
-    if not text or not text.strip():
-        raise AIExtractionError("متنی برای استخراج وجود ندارد.")
-
-    messages = _build_messages(text)
-
-    models_to_try = [MODEL_PRIMARY]
-    if MODEL_FALLBACK and MODEL_FALLBACK != MODEL_PRIMARY:
-        models_to_try.append(MODEL_FALLBACK)
-
-    last_error = None
-    for model in models_to_try:
-        try:
-            response_text = _call_gpt_api(messages, model=model, max_tokens=4000)
-            result = _parse_json_response(response_text)
-            _validate_extracted_data(result)
-            return result
-        except AIExtractionError as e:
-            logger.warning("Extraction attempt failed with model=%s: %s", model, e)
-            last_error = e
-            continue
-
-    raise last_error or AIExtractionError("استخراج اطلاعات با هوش مصنوعی ناموفق بود.")
-
-
-# ═══════════════════════════════════════════════════════════════
-# پاکسازی داده قبل از ذخیره در دیتابیس
-# ═══════════════════════════════════════════════════════════════
-
-def _sanitize_profile_data(data: dict) -> dict:
-    """
-    تبدیل مقادیر خروجی AI به مقادیر امن و سازگار با مدل Profile:
-    - None بر اساس نوع فیلد به '' یا None تبدیل می‌شود.
-    - فیلدهای ناشناخته (که در مدل وجود ندارند) حذف می‌شوند تا خطای غیرمنتظره ندهند.
-    - مقادیر list/dict که مدل انتظارش را ندارد به رشته JSON تبدیل می‌شوند.
-    """
-    numeric_null_fields = {"proposal_count"}
-
-    valid_fields = {f.name for f in Profile._meta.get_fields() if hasattr(f, "attname")}
-
-    cleaned = {}
-    for key, value in data.items():
-        if key not in valid_fields:
-            logger.debug("Ignoring unknown profile field from AI output: %s", key)
-            continue
-
-        if value is None:
-            cleaned[key] = None if key in numeric_null_fields else ""
-        elif isinstance(value, (list, dict)):
-            cleaned[key] = json.dumps(value, ensure_ascii=False)
-        else:
-            cleaned[key] = value
-
-    return cleaned

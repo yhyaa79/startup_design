@@ -19,9 +19,10 @@ mkdir -p /var/log/startupdesign
 
 # نصب وابستگی‌ها
 cd /srv/startup_design_django
+source venv/bin/activate
+
 venv/bin/pip install -r requirements.txt
 venv/bin/pip install gunicorn
-source venv/bin/activate
 
 # migration — ساخت/آپدیت جداول دیتابیس
 venv/bin/python manage.py migrate
@@ -160,13 +161,18 @@ server {
 
 
 
-script.js
-resume html
-styles.css
+/static/logo
+static/css/styles1.css
 base.html
-stage_activity_detail.html
-roadmap/views.py
-requirements.txt
+/templates/core/home.html
+startup_design_django/core
 settings.py
+.env
 
-accounts
+# course/views.py
+# course/all
+
+
+python manage.py makemigrations course
+python manage.py migrate
+python manage.py load_courses

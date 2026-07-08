@@ -1,85 +1,64 @@
 # course/views.py
 
-from django.shortcuts import render
-from django.http import Http404
-from .data import VIDEO_DATABASE
-
-CATEGORY_LABELS = {
-    'olampiad_elmi': 'المپیاد علمی',
-    'tahghighat': 'تحقیقات',
-    'maghaleh': 'مقاله‌نویسی',
-    'maghale_congress': 'کنگره',
-    'ketab': 'تألیف کتاب',
-    'ekhtera': 'ثبت اختراع',
-    'noavari': 'نوآوری',
-    'jashnvare': 'جشنواره',
-    'bedone_dastebandi': 'متفرقه',
-}
-
-
-def _flatten(db: dict, category_filter=None, q=None):
-    result = []
-    for cat_key, courses in db.items():
-        if category_filter and cat_key != category_filter:
-            continue
-        for c in courses:
-            if not c.get('active', True):
-                continue
-            if q:
-                haystack = (
-                    c.get('title', '') +
-                    c.get('shortDesc', '') +
-                    c.get('instructor', '') +
-                    c.get('longDesc', '')
-                ).lower()
-                if q.lower() not in haystack:
-                    continue
-
-            item = c.copy()
-            item['category_label'] = CATEGORY_LABELS.get(cat_key, cat_key)
-            item['category_key'] = cat_key
-            result.append(item)
-    return result
+from django.shortcuts import render, get_object_or_404
+from django.db.models import F, Q
+from .models import Course, Category
 
 
 def course_list(request):
     query = request.GET.get('q', '').strip()
-    category = request.GET.get('category', '').strip()
+    category_slug = request.GET.get('category', '').strip()
 
-    courses = _flatten(VIDEO_DATABASE, category_filter=category or None, q=query or None)
+    courses = Course.objects.filter(active=True).select_related('category')
 
-    cat_counts = {}
-    for c in _flatten(VIDEO_DATABASE):
-        k = c['category_key']
-        cat_counts[k] = cat_counts.get(k, 0) + 1
+    if category_slug:
+        courses = courses.filter(category__slug=category_slug)
 
+    if query:
+        courses = courses.filter(
+            Q(title__icontains=query) |
+            Q(short_desc__icontains=query) |
+            Q(instructor__icontains=query) |
+            Q(long_desc__icontains=query)
+        )
+
+    categories = (
+        Category.objects
+        .filter(courses__active=True)
+        .distinct()
+        .order_by('order')
+    )
     categories = [
-        {'key': k, 'label': v, 'count': cat_counts.get(k, 0)}
-        for k, v in CATEGORY_LABELS.items()
-        if cat_counts.get(k, 0) > 0
+        {'key': cat.slug, 'label': cat.name, 'count': cat.courses.filter(active=True).count()}
+        for cat in categories
     ]
 
     context = {
         'courses': courses,
         'query': query,
-        'selected_category': category,
+        'selected_category': category_slug,
         'categories': categories,
-        'total_count': len(courses),
+        'total_count': courses.count(),
     }
     return render(request, 'course/course_list.html', context)
 
 
 def course_detail(request, course_id):
-    all_courses = _flatten(VIDEO_DATABASE)
-    course = next((c for c in all_courses if c['id'] == course_id), None)
+    course = get_object_or_404(
+        Course.objects.select_related('category'),
+        course_id=course_id,
+        active=True,
+    )
 
-    if course is None:
-        raise Http404("دوره یافت نشد")
+    Course.objects.filter(pk=course.pk).update(view_count=F('view_count') + 1)
+    course.refresh_from_db(fields=['view_count'])
 
-    related = [
-        c for c in _flatten(VIDEO_DATABASE, category_filter=course['category_key'])
-        if c['id'] != course_id
-    ][:4]
+    related = (
+        Course.objects
+        .filter(category=course.category, active=True)
+        .exclude(pk=course.pk)
+        .select_related('category')[:4]
+    )
 
     context = {
         'course': course,

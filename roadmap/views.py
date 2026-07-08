@@ -11,11 +11,14 @@ import json
 
 from .models import Roadmap, Stage, Activity, StageActivity
 from .forms import RoadmapCreateForm, StageForm, ActivityForm
-from .services.ai_roadmap import generate_roadmap
+from .ai_roadmap import generate_roadmap
 from .services.profile_data import collect_profile_data
 from .services.scoring import calculate_roadmap_score
 from .static_items import get_all_items_flat, get_item_by_id, CATEGORY_LABELS, LEVEL_LABELS, DIFFICULTY_LABELS
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════════════
 #  لیست رودمپ‌ها
@@ -44,111 +47,142 @@ def roadmap_list(request):
 @require_http_methods(["GET", "POST"])
 def roadmap_create(request):
     """ایجاد رودمپ جدید"""
-    
+
     if request.method == 'POST':
         form = RoadmapCreateForm(request.POST)
-        
+
         if form.is_valid():
             goal = form.cleaned_data['goal']
             duration_days = form.cleaned_data['duration_days']
             goal_details = form.cleaned_data.get('goal_details', '')
-            
+
             # جمع‌آوری داده‌های پروفایل
             try:
                 profile = request.user.profile
                 profile_data = collect_profile_data(profile)
-            except:
+            except Exception:
+                logger.exception(f"خطا در جمع‌آوری پروفایل کاربر {request.user.id}")
                 return render(request, 'roadmap/roadmap_create.html', {
                     'form': form,
                     'error': 'لطفاً ابتدا پروفایل خود را کامل کنید.',
                     'show_error_modal': True
                 })
-            
+
             # تولید رودمپ با AI
             try:
-                roadmap_data = generate_roadmap(profile_data, goal, duration_days)
-            except Exception as e:
+                roadmap_data = generate_roadmap(profile_data, goal, duration_days, goal_details)
+            except (ConnectionError, TimeoutError) as e:
+                logger.exception(
+                    f"سرویس AI موقتاً در دسترس نبود | کاربر {request.user.id} | "
+                    f"goal={goal} | duration_days={duration_days}"
+                )
                 return render(request, 'roadmap/roadmap_create.html', {
                     'form': form,
+                    'error': 'سرویس هوش مصنوعی موقتاً پاسخگو نیست (Timeout). لطفاً چند دقیقه دیگر دوباره تلاش کنید.',
                     'show_error_modal': True
                 })
-            
-            # ذخیره رودمپ
-            with transaction.atomic():
-                roadmap = Roadmap.objects.create(
-                    user=request.user,
-                    title=roadmap_data.get('title', f'رودمپ {goal}'),
-                    description=roadmap_data.get('description', ''),
-                    goal=goal,
-                    goal_details=goal_details,
-                    duration_days=duration_days,
-                    target_end_date=date.today() + timedelta(days=duration_days),
-                    ai_generated=True,
-                    ai_prompt=json.dumps({
-                        'goal': goal,
-                        'duration_days': duration_days,
-                        'goal_details': goal_details,
-                    }),
-                    ai_analysis=profile_data,
+            except Exception:
+                logger.exception(
+                    f"خطا در تولید رودمپ برای کاربر {request.user.id} | "
+                    f"goal={goal} | duration_days={duration_days}"
                 )
-                
-                # ایجاد مراحل
-                for stage_data in roadmap_data.get('stages', []):
-                    stage = Stage.objects.create(
-                        roadmap=roadmap,
-                        order=stage_data.get('order', 1),
-                        title=stage_data.get('title', ''),
-                        description=stage_data.get('description', ''),
-                        objectives=stage_data.get('objectives', ''),
-                        phase_type=stage_data.get('phase_type', ''),
-                        priority=stage_data.get('priority', 'medium'),
-                        duration_days=stage_data.get('duration_days', 30),
-                        start_date=date.today(),
-                        end_date=date.today() + timedelta(days=stage_data.get('duration_days', 30)),
-                        milestone=stage_data.get('milestone', ''),
-                        success_criteria=stage_data.get('success_criteria', []),
-                        risks=stage_data.get('risks', []),
-                        recommended_resources=stage_data.get('recommended_resources', []),
+                return render(request, 'roadmap/roadmap_create.html', {
+                    'form': form,
+                    'error': 'خطا در تولید نقشه راه. لطفاً دوباره تلاش کنید.',
+                    'show_error_modal': True
+                })
+            # ذخیره رودمپ
+            try:
+                with transaction.atomic():
+                    quantitative_analysis = roadmap_data.get('quantitative_analysis', {}) or {}
+
+                    roadmap = Roadmap.objects.create(
+                        user=request.user,
+                        title=roadmap_data.get('title', f'رودمپ {goal}'),
+                        description=roadmap_data.get('description', ''),
+                        goal=goal,
+                        goal_details=goal_details,
+                        duration_days=duration_days,
+                        target_end_date=date.today() + timedelta(days=duration_days),
+                        ai_generated=True,
+                        ai_prompt=json.dumps({
+                            'goal': goal,
+                            'duration_days': duration_days,
+                            'goal_details': goal_details,
+                        }),
+                        ai_analysis=profile_data,
+                        total_score=quantitative_analysis.get('total_score', 0) or 0,
+                        score_breakdown=quantitative_analysis,
                     )
-                    
-                    # ایجاد فعالیت‌ها
-                    for activity_data in stage_data.get('activities', []):
-                        raw_id = f"{roadmap.id}_{stage.id}_{activity_data.get('title', '')}"
-                        external_id = raw_id[:50]
 
-                        activity, _ = Activity.objects.get_or_create(
-                            external_id=external_id,
-                            defaults={
-                                'title': activity_data.get('title', ''),
-                                'description': activity_data.get('description', ''),
-                                'category': activity_data.get('category', 'course'),
-                                'duration_days': activity_data.get('duration_days', 7),
-                                'impact_score': activity_data.get('impact_score', 5),
-                                'difficulty_rating': activity_data.get('difficulty_rating', 'medium'),
-                                'resume_output': activity_data.get('resume_output', ''),
-                            }
+                    # ایجاد مراحل
+                    for stage_data in roadmap_data.get('stages', []):
+                        stage = Stage.objects.create(
+                            roadmap=roadmap,
+                            order=stage_data.get('order', 1),
+                            title=stage_data.get('title', ''),
+                            description=stage_data.get('description', ''),
+                            objectives=stage_data.get('objectives', ''),
+                            phase_type=stage_data.get('phase_type', ''),
+                            priority=stage_data.get('priority', 'medium'),
+                            duration_days=stage_data.get('duration_days', 30),
+                            start_date=date.today(),
+                            end_date=date.today() + timedelta(days=stage_data.get('duration_days', 30)),
+                            milestone=stage_data.get('milestone', ''),
+                            success_criteria=stage_data.get('success_criteria', []),
+                            risks=stage_data.get('risks', []),
+                            recommended_resources=stage_data.get('recommended_resources', []),
                         )
 
-                        StageActivity.objects.create(
-                            stage=stage,
-                            activity=activity,
-                            order=stage_data.get('activities', []).index(activity_data) + 1,
-                        )
-                
-                # فعال کردن اولین مرحله
-                first_stage = roadmap.stages.first()
-                if first_stage:
-                    first_stage.status = 'active'
-                    first_stage.save()
-                
-                roadmap.status = 'active'
-                roadmap.save()
-            
+                        # ایجاد فعالیت‌ها
+                        for act_order, activity_data in enumerate(stage_data.get('activities', []), start=1):
+                            raw_id = f"{roadmap.id}_{stage.id}_{activity_data.get('title', '')}"
+                            external_id = raw_id[:50]
+
+                            activity, _ = Activity.objects.get_or_create(
+                                external_id=external_id,
+                                defaults={
+                                    'title': activity_data.get('title', ''),
+                                    'description': activity_data.get('description', ''),
+                                    'category': activity_data.get('category', 'course'),
+                                    'duration_days': activity_data.get('duration_days', 7),
+                                    'impact_score': activity_data.get('impact_score', 5),
+                                    'difficulty_rating': activity_data.get('difficulty_rating', 'medium'),
+                                    'resume_output': activity_data.get('resume_output', ''),
+                                }
+                            )
+
+                            StageActivity.objects.create(
+                                stage=stage,
+                                activity=activity,
+                                order=act_order,
+                            )
+
+                    # فعال کردن اولین مرحله
+                    first_stage = roadmap.stages.first()
+                    if first_stage:
+                        first_stage.status = 'active'
+                        first_stage.save()
+
+                    roadmap.status = 'active'
+                    roadmap.save()
+
+            except Exception:
+                logger.exception(
+                    f"خطا در ذخیره رودمپ در دیتابیس برای کاربر {request.user.id}"
+                )
+                return render(request, 'roadmap/roadmap_create.html', {
+                    'form': form,
+                    'error': 'خطا در ذخیره‌سازی نقشه راه. لطفاً دوباره تلاش کنید.',
+                    'show_error_modal': True
+                })
+
+            logger.info(f"رودمپ {roadmap.id} برای کاربر {request.user.id} با موفقیت ساخته شد.")
             return redirect('roadmap:roadmap_detail', pk=roadmap.id)
-    
+
     else:
         form = RoadmapCreateForm()
-    
+
     return render(request, 'roadmap/roadmap_create.html', {'form': form})
 
 

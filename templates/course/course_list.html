@@ -56,22 +56,22 @@
             <div class="cs-course-grid">
                 {% for c in courses %}
                 <article class="cs-card-course">
-                    <a class="cs-card-course-a" href="{% url 'course:detail' c.id %}">
+                    <a class="cs-card-course-a" href="{% url 'course:detail' c.course_id %}">
                         <div class="cs-card-thumb">
                             {% if c.thumbnail %}
-                            <img src="{{ c.thumbnail }}" alt="{{ c.title }}" loading="lazy" />
+                            <img src="{{ c.thumbnail.url }}" alt="{{ c.title }}" loading="lazy" />
                             {% else %}
                             <div class="cs-card-thumb-placeholder">📚</div>
                             {% endif %}
                             {% if c.percentage %}
                             <span class="cs-discount-badge">{{ c.percentage }}% تخفیف</span>
                             {% endif %}
-                            <span class="cs-cat-badge">{{ c.category_label }}</span>
+                            <span class="cs-cat-badge">{{ c.category.name }}</span>
                         </div>
 
                         <div class="cs-card-body-course">
                             <div class="cs-card-title-course">{{ c.title }}</div>
-                            <div class="cs-card-desc">{{ c.shortDesc }}</div>
+                            <div class="cs-card-desc">{{ c.short_desc }}</div>
                             <div class="cs-card-meta">
                                 <span class="cs-meta-item">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -98,16 +98,16 @@
 
                     <div class="cs-card-footer">
                         <div class="cs-price-block">
-                            {% if c.discountPrice %}
-                            {% if c.mainPrice %}<span class="cs-price-main">{{ c.mainPrice }} تومان</span>{% endif %}
-                            <span class="cs-price-discount">{{ c.discountPrice }} تومان</span>
-                            {% elif c.mainPrice %}
-                            <span class="cs-price-discount">{{ c.mainPrice }} تومان</span>
+                            {% if c.discount_price %}
+                            {% if c.main_price %}<span class="cs-price-main">{{ c.main_price }} تومان</span>{% endif %}
+                            <span class="cs-price-discount">{{ c.discount_price }} تومان</span>
+                            {% elif c.main_price %}
+                            <span class="cs-price-discount">{{ c.main_price }} تومان</span>
                             {% else %}
                             <span class="cs-price-free">رایگان</span>
                             {% endif %}
                         </div>
-                        <a href="{% url 'course:detail' c.id %}" class="cs-btn-enroll">ثبت‌نام</a>
+                        <a href="{% url 'course:detail' c.course_id %}" class="cs-btn-enroll">ثبت‌نام</a>
                     </div>
                 </article>
                 {% endfor %}

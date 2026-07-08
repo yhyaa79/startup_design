@@ -309,39 +309,43 @@ def _active_course_filter_kwargs():
 
 
 def _get_courses_data(profile):
-    active_kwargs = _active_course_filter_kwargs()
+    from django.db.models import Q
+    from course.models import Course
 
-    newest = list(
-        Course.objects.filter(**active_kwargs)
-        .order_by('-created_at')[:5]
-        .values('id', 'title', 'category__name', 'created_at',
-                'main_price', 'discount_price')
-    )
+    all_courses = Course.objects.filter(active=True).select_related('category')
+
+    newest = list(all_courses.order_by('-created_at')[:5])
+    most_viewed = list(all_courses.order_by('-view_count')[:5])
 
     recommended = []
     if profile and (profile.specialty or profile.goal):
-        keyword = (profile.specialty or profile.get_goal_display() or '').split()
+        keyword_source = profile.specialty or profile.get_goal_display() or ''
+        keyword = keyword_source.split()
         if keyword:
+            kw = keyword[0].lower()
             recommended = list(
-                Course.objects.filter(category__name__icontains=keyword[0], **active_kwargs)
-                .order_by('-created_at')[:5]
-                .values('id', 'title', 'category__name')
+                all_courses.filter(
+                    Q(category__name__icontains=kw) | Q(title__icontains=kw)
+                )[:5]
             )
     if not recommended:
         recommended = newest[:5]
 
-    # TODO: بعد از افزودن views_count به مدل Course این را به '-views_count' تغییر دهید
-    most_viewed = list(
-        Course.objects.filter(**active_kwargs)
-        .order_by('-created_at')[:5]
-        .values('id', 'title', 'category__name')
-    )
+    def _fmt(c):
+        return {
+            'id': c.course_id,
+            'title': c.title,
+            'category__name': c.category.name if c.category_id else '',
+            'main_price': c.main_price,
+            'discount_price': c.discount_price,
+            'view_count': c.view_count,
+        }
 
     return {
-        'newest': newest,
-        'recommended': recommended,
-        'most_viewed': most_viewed,
-        'most_viewed_is_real_data': False,
+        'newest': [_fmt(c) for c in newest],
+        'recommended': [_fmt(c) for c in recommended],
+        'most_viewed': [_fmt(c) for c in most_viewed],
+        'most_viewed_is_real_data': True,
     }
 
 

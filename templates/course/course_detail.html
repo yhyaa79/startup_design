@@ -9,39 +9,47 @@
     <section class="cs-course-detail-hero">
         <div class="cs-course-detail-media">
             {% if course.thumbnail %}
-            <img src="{{ course.thumbnail }}" alt="{{ course.title }}">
+            <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}">
             {% endif %}
         </div>
 
         <div class="cs-course-detail-info">
-            <span class="cs-course-category">{{ course.category_label }}</span>
+            <span class="cs-course-category">{{ course.category.name }}</span>
             <h1>{{ course.title }}</h1>
-            <p>{{ course.shortDesc }}</p>
+            <p>{{ course.short_desc }}</p>
 
             <div class="cs-course-detail-meta">
                 <span>مدرس: {{ course.instructor }}</span>
                 <span>مدت: {{ course.duration|default:"—" }}</span>
                 <span>امتیاز: {{ course.stars }}/5</span>
+                <span class="cs-view-count">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    {{ course.view_count }} بازدید
+                </span>
             </div>
 
+
             <div class="cs-course-detail-price">
-                {% if course.discountPrice %}
-                    <span class="cs-price-main">{{ course.mainPrice }} تومان</span>
-                    <span class="cs-price-discount">{{ course.discountPrice }} تومان</span>
-                {% elif course.mainPrice %}
-                    <span class="cs-price-discount">{{ course.mainPrice }} تومان</span>
+                {% if course.discount_price %}
+                    <span class="cs-price-main">{{ course.main_price }} تومان</span>
+                    <span class="cs-price-discount">{{ course.discount_price }} تومان</span>
+                {% elif course.main_price %}
+                    <span class="cs-price-discount">{{ course.main_price }} تومان</span>
                 {% else %}
                     <span class="cs-price-free">رایگان</span>
                 {% endif %}
             </div>
 
-            <a href="#" class="cs-buy-btn">خرید دوره</a>
+            <a href="{{ course.video_link|default:'#' }}" class="cs-buy-btn">خرید دوره</a>
         </div>
     </section>
 
     <section class="cs-course-detail-body">
         <h2>توضیحات کامل</h2>
-        <p>{{ course.longDesc|linebreaksbr }}</p>
+        <p>{{ course.long_desc|linebreaksbr }}</p>
     </section>
 
     {% if related %}
@@ -50,17 +58,17 @@
         <div class="cs-course-grid">
             {% for item in related %}
             <article class="cs-card-course">
-                <a class="cs-card-course-a" href="{% url 'course:detail' item.id %}">
+                <a class="cs-card-course-a" href="{% url 'course:detail' item.course_id %}">
                     <div class="cs-card-thumb">
                         {% if item.thumbnail %}
-                        <img src="{{ item.thumbnail }}" alt="{{ item.title }}" loading="lazy" />
+                        <img src="{{ item.thumbnail.url }}" alt="{{ item.title }}" loading="lazy" />
                         {% else %}
                         <div class="cs-card-thumb-placeholder">📚</div>
                         {% endif %}
                     </div>
                     <div class="cs-card-body-course">
                         <div class="cs-card-title-course">{{ item.title }}</div>
-                        <div class="cs-card-desc">{{ item.shortDesc }}</div>
+                        <div class="cs-card-desc">{{ item.short_desc }}</div>
                     </div>
                 </a>
             </article>

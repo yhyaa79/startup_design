@@ -11767,6 +11767,19 @@ body {
     padding: .45rem .7rem;
 }
 
+.cs-view-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.cs-view-count svg {
+    stroke: #9ca3af;
+}
+
+
 .cs-course-detail-price {
     display: flex;
     align-items: center;

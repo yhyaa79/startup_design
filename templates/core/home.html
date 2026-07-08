@@ -40,11 +40,11 @@
                     <line x1="3" y1="12" x2="21" y2="12" />
                     <line x1="3" y1="18" x2="21" y2="18" /></svg>
             </button>
-            <div class="icon-btn">
+            <!--             <div class="icon-btn">
                 <div class="logo-shape"></div>
-            </div>
+            </div> -->
             <div class="brand-text">
-                <div class="title">Mirai</div>
+                <div class="title">StartupDesign</div>
                 <div class="sub">داشبورد</div>
             </div>
         </div>
@@ -59,11 +59,11 @@
         </form>
 
         <div class="right-cluster">
-            <a class="icon-btn" href="#" title="افزودن سریع">
+            <!--             <a class="icon-btn" href="#" title="افزودن سریع">
                 <svg class="icon" viewBox="0 0 24 24">
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" /></svg>
-            </a>
+            </a> -->
             <a class="icon-btn" href="#" title="اعلان‌ها">
                 <svg class="icon" viewBox="0 0 24 24">
                     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -101,13 +101,16 @@
                     {% endif %}
                 </h1>
                 <p>
-                    {% if is_guest %}
+                    <!--                     {% if is_guest %}
                     برای مشاهده داشبورد شخصی‌سازی‌شده وارد حساب خود شوید.
                     {% elif weak_point %}
                     نقطه‌ی قابل بهبود این هفته: {{ weak_point.1 }}
                     {% else %}
                     رودمپ و فعالیت‌های شما به‌روز است. عالی پیش می‌روید!
-                    {% endif %}
+                    {% endif %} -->
+
+                    تیم حرفه ای و تخصصی <br> <span>استارت اپ دیزاین</span> از شروع تا پایان <br> مسیر تحصلیلی سعی در
+                    حرفه ای شدت میکنه.
                 </p>
             </div>
             <div class="mic-btn">
@@ -144,6 +147,29 @@
             {% endif %}
         </div>
     </div>
+
+
+    <div class="page-stage">
+        <div class="stage">
+            <div class="ground" id="ground"></div>
+            <div class="perspective">
+                <div class="wheel" id="wheel"></div>
+            </div>
+        </div>
+
+        <div class="status">
+            <div class="status-normal" id="statusNormal">
+                <div class="counter" id="counter">۰ از ۰ مرحله بررسی شد</div>
+                <div class="dots" id="dots"></div>
+            </div>
+            <div class="status-complete" id="statusComplete">
+                <div class="complete-msg">همه مراحل بررسی شدند ✓</div>
+                <div class="complete-sub" id="completeSub"></div>
+            </div>
+        </div>
+    </div>
+
+
 
     <!-- =========================================================
        SECTION 1 — نمای کلی
@@ -201,10 +227,13 @@
     <section class="section">
         <div class="section-head">
             <div class="s-title">
-                <span class="s-icon"><svg class="icon" viewBox="0 0 24 24">
+                <span class="s-icon">
+                    <svg class="icon" viewBox="0 0 24 24">
                         <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
                         <line x1="8" y1="2" x2="8" y2="18" />
-                        <line x1="16" y1="6" x2="16" y2="22" /></svg></span>
+                        <line x1="16" y1="6" x2="16" y2="22" />
+                    </svg>
+                </span>
                 رودمپ‌های من
             </div>
             {% if roadmaps %}<div class="s-note">{{ roadmaps|length }} رودمپ ثبت‌شده</div>{% endif %}
@@ -215,12 +244,17 @@
             {% for rm in roadmaps %}
             <a class="rm-chip {% if roadmap and rm.id == roadmap.id %}is-active{% endif %}"
                 href="?roadmap_id={{ rm.id }}">
-                <svg width="42" height="42" viewBox="0 0 42 42">
-                    <circle cx="21" cy="21" r="16" fill="none" stroke="var(--primary-soft)" stroke-width="6" />
-                    <circle cx="21" cy="21" r="16" fill="none"
+                <svg width="60" height="60" viewBox="0 0 60 60">
+                    <!-- مرکز دایره روی ۳۰ (نصف ۶۰) -->
+                    <!-- شعاع (r) روی ۱۸ تنظیم شد -->
+                    <circle cx="30" cy="30" r="18" fill="none" stroke="var(--primary-soft)" stroke-width="5" />
+
+                    <circle cx="30" cy="30" r="18" fill="none"
                         stroke="{% if rm.id == roadmap.id %}var(--primary){% else %}var(--primary){% endif %}"
-                        stroke-width="6" stroke-linecap="round" stroke-dasharray="{{ rm.get_progress|radial_arc:16 }}"
-                        transform="rotate(-90 21 21)" />
+                        stroke-width="5" stroke-linecap="round" stroke-dasharray="{{ rm.get_progress|radial_arc:18 }}"
+                        transform="rotate(-90 30 30)" />
+
+                    <text x="30" y="34" text-anchor="middle" class="ring-text-rm">{{ rm.get_progress }}٪</text>
                 </svg>
                 <div class="rm-meta">
                     <div class="rm-title">{{ rm.title }}</div>
@@ -241,68 +275,73 @@
         </div>
         {% endif %}
 
-        <div class="grid grid-5-7">
-            <!-- کارت رودمپ انتخاب‌شده -->
-            <div class="card rm-detail">
-                {% if roadmap %}
-                <div class="rm-detail-top">
-                    <div>
-                        <div class="rm-detail-title">{{ roadmap.title }}</div>
-                        <div class="rm-detail-goal">{{ roadmap.get_goal_display }}</div>
-                    </div>
-                    {% if roadmap_timeline %}
-                    <div class="status-pill"
-                        style="background:{{ roadmap_timeline.status|status_color }}22;color:{{ roadmap_timeline.status|status_color }};">
-                        {{ roadmap_timeline.status|persian_status }}
-                    </div>
-                    {% endif %}
+        <div class="grid grid-1-2">
+
+            <!-- ============== کارت تایم‌لاین عمودی مراحل + فعالیت‌ها (نسخه بازطراحی‌شده) ============== -->
+            <div class="card rm-vertical-card">
+                <div class="card-title-row">
+                    <h4>مسیر رودمپ</h4>
+                    <div class="info-dot">i</div>
                 </div>
 
-                {% if roadmap_timeline %}
-                <div>
-                    <div class="compare-row"><span>زمان سپری‌شده</span><span>{{ roadmap_timeline.time_percent }}٪</span>
-                    </div>
-                    <div class="compare-track">
-                        <div class="compare-fill"
-                            style="width:{{ roadmap_timeline.time_percent }}%;background:var(--purple);"></div>
-                    </div>
-                    <div class="compare-row"><span>پیشرفت
-                            واقعی</span><span>{{ roadmap_timeline.actual_percent }}٪</span></div>
-                    <div class="compare-track">
-                        <div class="compare-fill"
-                            style="width:{{ roadmap_timeline.actual_percent }}%;background:var(--primary);"></div>
-                    </div>
-                </div>
-                {% else %}
-                <p style="color:var(--ink-400);font-size:13px;margin:6px 0;">اطلاعات زمان‌بندی برای این رودمپ موجود
-                    نیست.</p>
-                {% endif %}
+                {% if roadmap and stages %}
+                <div class="rm-vtl-scroll">
+                    <div class="rm-vtl-wrap">
+                        <div class="rm-vtl-title">{{ roadmap.title }}</div>
 
-                <div class="rm-dates">
-                    <div>
-                        <div class="fee-label">شروع</div>
-                        <div class="fee-amount">{{ roadmap.start_date|date:"Y/m/d" }}</div>
-                    </div>
-                    <div>
-                        <div class="fee-label">پایان هدف</div>
-                        <div class="fee-amount">{{ roadmap.target_end_date|date:"Y/m/d" }}</div>
-                    </div>
-                    <div>
-                        <div class="fee-label">مراحل</div>
-                        <div class="fee-amount">
-                            {{ selected_roadmap_completed_stages }}/{{ selected_roadmap_total_stages }}</div>
-                    </div>
-                    <div>
-                        <div class="fee-label">فعالیت ها</div>
-                        <div class="fee-amount">
-                            {{ selected_roadmap_completed_activities }}/{{ selected_roadmap_total_activities }}</div>
-                    </div>
+                        <div class="rm-vtl-line-col">
+                            {% for stage in stages %}
+                            <div
+                                class="rm-vtl-stage {% if stage.status == 'active' %}is-active{% elif stage.get_progress == 100 %}is-done{% endif %} {% if forloop.last %}is-last{% endif %}">
 
-                </div>
+                                <div class="rm-vtl-stage-node">
+                                    <span
+                                        class="rm-vtl-dot rm-vtl-dot-stage
+                        {% if stage.status == 'active' %}active{% elif stage.get_progress == 100 %}done{% else %}upcoming{% endif %}">
+                                        {% if stage.get_progress == 100 %}
+                                        <svg class="icon icon-xs" viewBox="0 0 24 24">
+                                            <polyline points="20 6 9 17 4 12" /></svg>
+                                        {% elif stage.status == 'active' %}
+                                        <span class="rm-vtl-dot-core"></span>
+                                        {% endif %}
+                                    </span>
+                                    <div class="rm-vtl-stage-info">
+                                        <span class="rm-vtl-stage-title">{{ stage.title }}</span>
+                                        {% if stage.status == 'active' %}
+                                        <span class="rm-vtl-badge">مرحله فعلی</span>
+                                        {% else %}
+                                        <span
+                                            class="rm-vtl-stage-pct {% if stage.get_progress == 100 %}is-done{% endif %}">{{ stage.get_progress }}٪</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
 
-                <div class="rm-actions">
-                    <a class="btn-dark" href="#">مشاهده رودمپ</a>
-                    <a class="btn-light" href="#">افزودن فعالیت</a>
+                                {% if stage.stage_activities.all %}
+                                <div class="rm-vtl-activities">
+                                    {% for sa in stage.stage_activities.all %}
+                                    <a href="{% url 'roadmap:stage_activity_detail' sa.id %}"
+                                        class="rm-vtl-activity {% if sa.is_completed %}is-done{% elif sa.progress_percentage > 0 %}is-progress{% endif %}">
+                                        <span class="rm-vtl-adot"></span>
+                                        <span class="rm-vtl-atitle">{{ sa.activity.title }}</span>
+                                        {% if sa.is_completed %}
+                                        <span class="rm-vtl-aring is-done">
+                                            <svg class="icon icon-xs" viewBox="0 0 24 24">
+                                                <polyline points="20 6 9 17 4 12" /></svg>
+                                        </span>
+                                        {% else %}
+                                        <span class="rm-vtl-aring" style="--p:{{ sa.progress_percentage }};">
+                                            <span class="rm-vtl-aring-hole">{{ sa.progress_percentage }}</span>
+                                        </span>
+                                        {% endif %}
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
                 {% else %}
                 <div class="empty-state">
@@ -310,45 +349,149 @@
                             <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
                             <line x1="8" y1="2" x2="8" y2="18" />
                             <line x1="16" y1="6" x2="16" y2="22" /></svg></div>
-                    <p>هنوز رودمپی برای شما ثبت نشده است. یک رودمپ بسازید تا پیشرفتتان اینجا نمایش داده شود.</p>
-                    <a class="btn-dark" href="#">ساخت رودمپ</a>
+                    <p>مرحله یا فعالیتی برای نمایش وجود ندارد.</p>
                 </div>
                 {% endif %}
             </div>
+            <div class="inter-longitudinal-card">
+                <!-- کارت رودمپ انتخاب‌شده -->
+                <div class="card rm-detail">
+                    {% if roadmap %}
+                    <div class="rm-detail-top">
+                        <div>
+                            <div class="rm-detail-title">{{ roadmap.title }}</div>
+                            <div class="rm-detail-goal">{{ roadmap.get_goal_display }}</div>
+                        </div>
+                        {% if roadmap_timeline %}
+                        <div class="status-pill"
+                            style="background:{{ roadmap_timeline.status|status_color }}22;color:{{ roadmap_timeline.status|status_color }};">
+                            {{ roadmap_timeline.status|persian_status }}
+                        </div>
+                        {% endif %}
+                    </div>
 
-            <!-- تایم‌لاین SVG مراحل رودمپ انتخاب‌شده -->
-            <div class="card">
-                <div class="card-title-row">
-                    <h4>خط زمانی مراحل</h4>
-                    <div class="info-dot">i</div>
+                    {% if roadmap_timeline %}
+                    <div>
+                        <div class="compare-row"><span>زمان
+                                سپری‌شده</span><span>{{ roadmap_timeline.time_percent }}٪</span>
+                        </div>
+                        <div class="compare-track">
+                            <div class="compare-fill"
+                                style="width:{{ roadmap_timeline.time_percent }}%;background:var(--purple);"></div>
+                        </div>
+                        <div class="compare-row"><span>پیشرفت
+                                واقعی</span><span>{{ roadmap_timeline.actual_percent }}٪</span></div>
+                        <div class="compare-track">
+                            <div class="compare-fill"
+                                style="width:{{ roadmap_timeline.actual_percent }}%;background:var(--primary);"></div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p style="color:var(--ink-400);font-size:13px;margin:6px 0;">اطلاعات زمان‌بندی برای این رودمپ موجود
+                        نیست.</p>
+                    {% endif %}
+
+                    <div class="rm-dates">
+                        <div>
+                            <div class="fee-label">شروع</div>
+                            <div class="fee-amount">{{ roadmap.start_date|date:"Y/m/d" }}</div>
+                        </div>
+                        <div>
+                            <div class="fee-label">پایان هدف</div>
+                            <div class="fee-amount">{{ roadmap.target_end_date|date:"Y/m/d" }}</div>
+                        </div>
+                        <div>
+                            <div class="fee-label">مراحل</div>
+                            <div class="fee-amount">
+                                {{ selected_roadmap_completed_stages }}/{{ selected_roadmap_total_stages }}</div>
+                        </div>
+                        <div>
+                            <div class="fee-label">فعالیت ها</div>
+                            <div class="fee-amount">
+                                {{ selected_roadmap_completed_activities }}/{{ selected_roadmap_total_activities }}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="rm-actions">
+                        <a class="btn-dark" href="#">مشاهده رودمپ</a>
+                        <a class="btn-light" href="#">افزودن فعالیت</a>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+                                <line x1="8" y1="2" x2="8" y2="18" />
+                                <line x1="16" y1="6" x2="16" y2="22" /></svg></div>
+                        <p>هنوز رودمپی برای شما ثبت نشده است. یک رودمپ بسازید تا پیشرفتتان اینجا نمایش داده شود.</p>
+                        <a class="btn-dark" href="#">ساخت رودمپ</a>
+                    </div>
+                    {% endif %}
                 </div>
-                {% if roadmap_timeline.stages %}
-                {% line_chart_data roadmap_timeline.stages "progress" 640 190 34 as chart %}
-                <div class="timeline-svg-wrap">
-                    <svg class="timeline-svg" viewBox="0 0 640 190" preserveAspectRatio="none">
-                        <line x1="0" y1="34" x2="640" y2="34" class="tl-grid-line" />
-                        <line x1="0" y1="82" x2="640" y2="82" class="tl-grid-line" />
-                        <line x1="0" y1="130" x2="640" y2="130" class="tl-grid-line" />
-                        <polygon points="{{ chart.area_points }}" class="tl-area" />
-                        <polyline points="{{ chart.points }}" class="tl-line" />
-                        {% for node in chart.nodes %}
-                        <circle cx="{{ node.x }}" cy="{{ node.y }}" r="5.5"
-                            class="tl-node {% if node.item.status == 'active' %}active{% elif node.value == 100 %}done{% else %}upcoming{% endif %}" />
-                        <text x="{{ node.x }}" y="{{ node.y|add:'-12' }}" text-anchor="middle"
-                            class="tl-pct">{{ node.value }}٪</text>
-                        <text x="{{ node.x }}" y="172" text-anchor="middle"
-                            class="tl-label">{{ node.item.title|truncatechars:15 }}</text>
-                        {% endfor %}
-                    </svg>
+
+                <!-- تایم‌لاین SVG مراحل رودمپ انتخاب‌شده -->
+                <div class="card">
+                    <div class="card-title-row">
+                        <h4>خط زمانی مراحل</h4>
+                        <div class="info-dot">i</div>
+                    </div>
+                    {% if roadmap_timeline.stages %}
+                    {% line_chart_data roadmap_timeline.stages "progress" 640 190 34 as chart %}
+                    <div class="timeline-svg-wrap">
+                        <svg class="timeline-svg" viewBox="0 0 640 220" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="tlAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.28" />
+                                    <stop offset="100%" stop-color="var(--primary)" stop-opacity="0" />
+                                </linearGradient>
+                                <marker id="tlArrowHead" markerWidth="8" markerHeight="8" refX="4" refY="7"
+                                    orient="auto">
+                                    <path d="M0,0 L4,7 L8,0" class="tl-arrow-head" />
+                                </marker>
+                            </defs>
+
+                            <line x1="0" y1="34" x2="640" y2="34" class="tl-grid-line" />
+                            <line x1="0" y1="82" x2="640" y2="82" class="tl-grid-line" />
+                            <line x1="0" y1="130" x2="640" y2="130" class="tl-grid-line" />
+
+                            <polygon points="{{ chart.area_points }}" class="tl-area" />
+                            <polyline points="{{ chart.points }}" class="tl-line" />
+
+                            {% for node in chart.nodes %}
+                            {% if node.item.status == 'active' %}
+                            <g class="tl-active-marker">
+                                <line x1="{{ node.x }}" y1="{{ node.y|add:'-34' }}" x2="{{ node.x }}"
+                                    y2="{{ node.y|add:'-14' }}" class="tl-arrow-line" marker-end="url(#tlArrowHead)" />
+                                <text x="{{ node.x }}" y="{{ node.y|add:'-38' }}" text-anchor="middle"
+                                    class="tl-active-tag">مرحله فعلی</text>
+                            </g>
+                            {% endif %}
+
+                            <circle cx="{{ node.x }}" cy="{{ node.y }}"
+                                r="{% if node.item.status == 'active' %}7{% else %}5.5{% endif %}"
+                                class="tl-node {% if node.item.status == 'active' %}active{% elif node.value == 100 %}done{% else %}upcoming{% endif %}" />
+
+                            {% if node.item.status == 'active' %}
+                            <circle cx="{{ node.x }}" cy="{{ node.y }}" r="11" class="tl-node-pulse" />
+                            {% endif %}
+
+                            <text x="{{ node.x }}" y="{{ node.y|add:'-14' }}" text-anchor="middle"
+                                class="tl-pct">{{ node.value }}٪</text>
+                            <text x="{{ node.x }}" y="200" text-anchor="middle"
+                                class="tl-label">{{ node.item.title|truncatechars:30 }}</text>
+                            {% endfor %}
+                        </svg>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                                <polyline points="17 6 23 6 23 12" /></svg></div>
+                        <p>مرحله‌ای برای این رودمپ ثبت نشده است.</p>
+                    </div>
+                    {% endif %}
                 </div>
-                {% else %}
-                <div class="empty-state">
-                    <div class="es-icon"><svg class="icon icon-lg" viewBox="0 0 24 24">
-                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                            <polyline points="17 6 23 6 23 12" /></svg></div>
-                    <p>مرحله‌ای برای این رودمپ ثبت نشده است.</p>
-                </div>
-                {% endif %}
             </div>
         </div>
     </section>
@@ -421,7 +564,7 @@
         </div>
 
         <div class="grid grid-2-1">
-            <div>
+            <div class="inter-longitudinal-card">
                 <div class="grid grid-2">
                     <div class="card">
                         <div class="card-title-row">
@@ -491,7 +634,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-1 margin-top">
+                <div class="grid grid-1">
                     <div class="card">
                         <div class="card-title-row">
                             <h4>فعالیت آنلاین</h4>
@@ -569,7 +712,7 @@
                     {% for act in top_activities %}
                     <div class="plan-pill">
                         <div class="ppl-top">
-                            <span class="hbar-name">{{ act.title }}</span>
+                            <span class="hbar-name title-ellipsis">{{ act.title }}</span>
                             <span>{{ act.usage_count }}</span>
                         </div>
                         <div class="hbar-item">
@@ -613,23 +756,17 @@
                     {% endif %}
                 </div>
                 {% if user_projects %}
-                {% for proj in user_projects|slice:":3" %}
-                <div class="project-row">
-                    <div class="p-name"><span>{{ proj.title|truncatechars:26 }}</span><span>{{ proj.views_count }}
-                            بازدید</span></div>
-                    <div class="hbar-track" style="margin-bottom:4px;">
-                        <div class="hbar-fill" style="width:{% bar_width proj.views_count max_views %}%;"></div>
-                    </div>
-                    <div class="hbar-track" style="height:6px;">
-                        <div class="hbar-fill"
-                            style="width:{% bar_width proj.applications_count max_views %}%;background:var(--primary-soft);">
+                <div class="vbar-chart">
+                    {% for proj in user_projects %}
+                    <div class="vbar-item">
+                        <div class="vbar-track">
+                            <div class="vbar-fill" style="height:{% bar_width proj.views_count max_views %}%;"></div>
                         </div>
+                        <div class="vbar-value">{{ proj.views_count }}</div>
+                        <div class="vbar-label">{{ proj.title|truncatechars:16 }}</div>
+                        <div class="vbar-applications">{{ proj.applications_count }} درخواست</div>
                     </div>
-                </div>
-                {% endfor %}
-                <div class="p-legend">
-                    <span><i style="background:var(--primary);"></i>بازدید</span>
-                    <span><i style="background:var(--primary-soft);"></i>درخواست همکاری</span>
+                    {% endfor %}
                 </div>
                 {% else %}
                 <div class="list-empty">هنوز پروژه‌ای توسط شما ثبت نشده است.</div>
@@ -750,7 +887,7 @@
                 {% for c in courses_data.newest %}
                 <div class="list-row">
                     <div class="lr-main">
-                        <div class="lr-title">{{ c.title }}</div>
+                        <div class="lr-title title-ellipsis">{{ c.title }}</div>
                         <div class="lr-sub">{{ c.category__name|default:"بدون دسته" }}</div>
                     </div>
                     <div class="lr-badge">
@@ -769,7 +906,7 @@
                 {% for c in courses_data.recommended %}
                 <div class="list-row">
                     <div class="lr-main">
-                        <div class="lr-title">{{ c.title }}</div>
+                        <div class="lr-title title-ellipsis">{{ c.title }}</div>
                         <div class="lr-sub">{{ c.category__name|default:"بدون دسته" }}</div>
                     </div>
                     <div class="lr-badge">پیشنهادی</div>
@@ -786,7 +923,7 @@
                 {% for c in courses_data.most_viewed %}
                 <div class="list-row">
                     <div class="lr-main">
-                        <div class="lr-title">{{ c.title }}</div>
+                        <div class="lr-title title-ellipsis">{{ c.title }}</div>
                         <div class="lr-sub">{{ c.category__name|default:"بدون دسته" }}</div>
                     </div>
                     <div class="lr-badge">جدید</div>
@@ -1118,5 +1255,207 @@
         });
     });
 </script>
+
+
+
+
+<script>
+    (function () {
+
+        // ================= تنظیمات قابل ویرایش =================
+        const CONFIG = {
+            cardWidth: 360,
+            cardHeight: 180,
+            steps: [{
+                    label: "دریافت درخواست",
+                    desc: " ثبت و دریافت اولیه درخواست کاربر ثبت و دریافت اولیه درخواست کاربر  ثبت و دریافت اولیه درخواست کاربر ثبت و دریافت اولیه درخواست کاربر ثبت و دریافت اولیه درخواست کاربر",
+                    result: "success"
+                },
+                {
+                    label: "تحلیل اطلاعات",
+                    desc: " ثبت و دریافت اولیه درخواستریافت اولیه درخواست کاربر  ثبت و دریافت اولیه درخواست کاربر ثبت و دریافت اولیه درخواست کاربر ثبت و ",
+                    result: "success"
+                },
+                {
+                    label: "طراحی راه‌حل",
+                    desc: " ثبت و دریافت اولیه درخواست کاربر ثبت و دریافت اولیه  و دریافت اولیه درخواست کاربر ثبت و دریافت اولیه درخواست کاربر ثبت و دریافت اولیه درخواست کاربر",
+                    result: "fail"
+                },
+                {
+                    label: "پیاده‌سازی",
+                    desc: " ثبت و دریافت اولیه  ثبت و  درخواست کاربر ثبت و دریافت اولیه درخواست کاربر",
+                    result: "success"
+                },
+                {
+                    label: "بررسی کیفیت",
+                    desc: " ثبت و دریافت اولیه درخواست کاربر ثبت و دریافت اولیه درخواست کاربر  یه درخواست کاربر ثبت و دریافت اولیه درخواست کاربر",
+                    result: "success"
+                },
+                {
+                    label: "تحویل به کاربر",
+                    desc: " ثبت و دریافت اولیه درخواست کاربر ثبت و دریافت اولیه درخواست بر ثبت و دریافت اولیه درخواست کاربر ثبت و دریافت اولیه درخواست کاربر",
+                    result: "fail"
+                }
+            ]
+        };
+        // ==========================================================
+
+        const STEPS = CONFIG.steps;
+        const n = STEPS.length;
+        const angleStep = 360 / n;
+        const cardW = CONFIG.cardWidth;
+        const cardH = CONFIG.cardHeight;
+        const radius = Math.round((cardW / 2) / Math.tan(Math.PI / n)) + 40;
+
+        const wheel = document.getElementById('wheel');
+        const counterEl = document.getElementById('counter');
+        const dotsEl = document.getElementById('dots');
+        const groundEl = document.getElementById('ground');
+        const statusNormal = document.getElementById('statusNormal');
+        const statusComplete = document.getElementById('statusComplete');
+        const completeSub = document.getElementById('completeSub');
+
+        groundEl.style.width = Math.round(radius * 2 + cardW * 0.35) + 'px';
+
+        const faDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+
+        function toFa(num) {
+            return String(num).replace(/[0-9]/g, d => faDigits[d]);
+        }
+
+        const checkSVG =
+            '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6"></polyline></svg>';
+        const crossSVG =
+            '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg>';
+
+        // ساخت آیتم‌های گردونه
+        const items = STEPS.map((step, i) => {
+            const el = document.createElement('div');
+            el.className = 'item';
+            el.style.width = cardW + 'px';
+            el.style.height = cardH + 'px';
+            el.style.marginTop = (-cardH / 2) + 'px';
+            el.style.marginRight = (-cardW / 2) + 'px';
+            el.style.transform = `rotateY(${i * angleStep}deg) translateZ(${radius}px)`;
+            const iconClass = step.result === 'fail' ? 'fail' : 'success';
+            const iconSVG = step.result === 'fail' ? crossSVG : checkSVG;
+            el.innerHTML = `
+      <div class="num">مرحله ${toFa(i + 1)}</div>
+      <div class="label">${step.label}</div>
+      <div class="desc">${step.desc || ''}</div>
+      <div class="status-circle">
+        <div class="loader"></div>
+        <div class="result-icon ${iconClass}" id="result-${i}">${iconSVG}</div>
+      </div>
+    `;
+            wheel.appendChild(el);
+            return el;
+        });
+
+        // ساخت نقطه‌های وضعیت
+        const dots = STEPS.map(() => {
+            const d = document.createElement('div');
+            d.className = 'step-dot';
+            dotsEl.appendChild(d);
+            return d;
+        });
+
+        let theta = 0;
+        let doneCount = 0;
+        let successCount = 0;
+        let failCount = 0;
+        let cancelled = false;
+
+        function wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function updateDepth() {
+            items.forEach((el, i) => {
+                let eff = ((i * angleStep + theta) % 360 + 540) % 360 - 180; // بازه [-180,180]
+                const dist = Math.abs(eff);
+                const opacity = Math.max(0.18, 1 - dist / 160);
+                const scale = Math.max(0.72, 1 - dist / 340);
+                el.style.opacity = opacity;
+                el.style.transform = `rotateY(${i * angleStep}deg) translateZ(${radius}px) scale(${scale})`;
+            });
+        }
+
+        function setActive(i) {
+            items.forEach((el, idx) => {
+                el.classList.toggle('is-active', idx === i);
+                el.classList.toggle('is-waiting', idx === i);
+            });
+            dots.forEach((d, idx) => d.classList.toggle('active', idx === i));
+        }
+
+        function markResult(i) {
+            const step = STEPS[i];
+            items[i].classList.add('is-done');
+            items[i].classList.remove('is-active', 'is-waiting');
+            document.getElementById(`result-${i}`).classList.add('show');
+            dots[i].classList.remove('active');
+            dots[i].classList.add(step.result === 'fail' ? 'done-fail' : 'done-success');
+            doneCount++;
+            if (step.result === 'fail') failCount++;
+            else successCount++;
+            counterEl.textContent = `${toFa(doneCount)} از ${toFa(n)} مرحله بررسی شد`;
+        }
+
+        // فقط وضعیت بصری کارت‌ها/شمارنده را پاک می‌کند (بدون دست‌زدن به چرخش)
+        function clearVisualState() {
+            items.forEach((el, i) => {
+                el.classList.remove('is-done', 'is-active', 'is-waiting');
+                document.getElementById(`result-${i}`).classList.remove('show');
+            });
+            dots.forEach(d => d.classList.remove('active', 'done-success', 'done-fail'));
+            doneCount = 0;
+            successCount = 0;
+            failCount = 0;
+            counterEl.textContent = `۰ از ${toFa(n)} مرحله بررسی شد`;
+            statusComplete.classList.remove('show');
+            statusNormal.classList.remove('hide');
+        }
+
+        function showComplete() {
+            completeSub.textContent = `${toFa(successCount)} تیک موفق و ${toFa(failCount)} ضربدر`;
+            statusNormal.classList.add('hide');
+            statusComplete.classList.add('show');
+            return wait(2600);
+        }
+
+        async function run() {
+            clearVisualState();
+            while (!cancelled) {
+                for (let i = 0; i < n; i++) {
+                    setActive(i);
+                    updateDepth();
+                    await wait(2000);
+                    if (cancelled) return;
+                    markResult(i);
+                    await wait(650);
+                    if (cancelled) return;
+
+                    if (i === n - 1) {
+                        // آخرین مرحله: همینجا پیام پایانی نمایش داده شود (بدون چرخش قبل از آن)
+                        await showComplete();
+                        if (cancelled) return;
+                        clearVisualState();
+                    }
+
+                    // چرخش رو به جلو، به سمت مرحله بعد (چه در میانه دوره، چه برای شروع دوره جدید)
+                    theta -= angleStep;
+                    wheel.style.transform = `rotateY(${theta}deg)`;
+                    updateDepth();
+                    await wait(900);
+                    if (cancelled) return;
+                }
+            }
+        }
+
+        run();
+    })();
+</script>
+
 
 {% endblock %}
