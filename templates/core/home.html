@@ -224,7 +224,7 @@
     <!-- =========================================================
        SECTION 2 — رودمپ‌های من (پشتیبانی از چند رودمپ)
   ========================================================== -->
-    <section class="section">
+    <section class="section" id="roadmaps-section">
         <div class="section-head">
             <div class="s-title">
                 <span class="s-icon">
@@ -242,11 +242,8 @@
         {% if roadmaps %}
         <div class="roadmap-switcher">
             {% for rm in roadmaps %}
-            <a class="rm-chip {% if roadmap and rm.id == roadmap.id %}is-active{% endif %}"
-                href="?roadmap_id={{ rm.id }}">
+            <a class="rm-chip {% if roadmap and rm.id == roadmap.id %}is-active{% endif %}" href="?roadmap_id={{ rm.id }}#roadmaps-section">
                 <svg width="60" height="60" viewBox="0 0 60 60">
-                    <!-- مرکز دایره روی ۳۰ (نصف ۶۰) -->
-                    <!-- شعاع (r) روی ۱۸ تنظیم شد -->
                     <circle cx="30" cy="30" r="18" fill="none" stroke="var(--primary-soft)" stroke-width="5" />
 
                     <circle cx="30" cy="30" r="18" fill="none"
@@ -1265,7 +1262,7 @@
         // ================= تنظیمات قابل ویرایش =================
         const CONFIG = {
             cardWidth: 360,
-            cardHeight: 180,
+            cardHeight: 160,
             steps: [{
                     label: "دریافت درخواست",
                     desc: " ثبت و دریافت اولیه درخواست کاربر ثبت و دریافت اولیه درخواست کاربر  ثبت و دریافت اولیه درخواست کاربر ثبت و دریافت اولیه درخواست کاربر ثبت و دریافت اولیه درخواست کاربر",

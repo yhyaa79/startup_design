@@ -255,7 +255,7 @@ option {
 
 
 
-    --text: 8px;
+    --text: 7px;
     --text-xs: calc(--text);
     --text-sm: calc(var(--text) + 1px);
     --text-base: calc(var(--text) + 2px);
@@ -302,7 +302,7 @@ a {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--gap-lg);
+    margin-bottom: var(--gap);
     gap: var(--gap-lg);
 }
 
@@ -606,6 +606,11 @@ a {
 .section {
     margin-bottom: var(--gap-lg);
 }
+
+#roadmaps-section {
+  scroll-margin-top: 25px;
+}
+
 
 .section-head {
     display: flex;
@@ -1158,6 +1163,7 @@ a {
 
 .rm-vtl-stage.is-active .rm-vtl-stage-title {
     color: var(--primary-ink);
+    margin-right: 4px;
 }
 
 .rm-vtl-activities {
@@ -2563,7 +2569,7 @@ svg {
 }
 
 .page-stage {
-    margin-top: -50px;
+    margin-top: -100px;
 }
 
 .eyebrow {
@@ -2656,7 +2662,7 @@ h1 {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 18px;
+    padding: 8px;
     text-align: center;
     backface-visibility: hidden;
     transition: transform .9s cubic-bezier(.65, .05, .25, 1), opacity .9s ease, box-shadow .35s ease, border-color .35s ease;
@@ -2779,7 +2785,7 @@ h1 {
 .status {
     width: 100%;
     max-width: 460px;
-    min-height: 96px;
+    min-height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
