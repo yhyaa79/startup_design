@@ -190,6 +190,11 @@
     width: 100%;
 }
 
+.main.full {
+    margin: 0 3%;
+    width: 94%;
+}
+
 .main-logout {
     width: 100%;
     min-height: 100vh;

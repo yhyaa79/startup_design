@@ -204,7 +204,7 @@
     </aside>
     {% endif %}
     {% endblock %}
-    <div class="main {% if request.resolver_match.url_name == 'landing' %}full-width{% endif %}">
+    <div class="main {% if request.resolver_match.url_name == 'landing' or request.resolver_match.url_name == 'login' or request.resolver_match.url_name == 'register' %}full-width{% endif %}" id="main">
         {% block content %}{% endblock %}
         <footer class="dashboard-footer">
             <div class="footer-container">
