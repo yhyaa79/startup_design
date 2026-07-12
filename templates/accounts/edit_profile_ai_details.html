@@ -1,8 +1,14 @@
 <!-- templates/accounts/edit_profile_ai_details.html -->
-{% extends 'base.html' %}
-{% block title %}پروفایل{% endblock %}
-{% block topbar_title %}ساخت پروفایل{% endblock %}
 
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}ساخت پروفایل{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
 
 {% block content %}
 

@@ -321,3 +321,75 @@ a {
 
 
 
+
+
+
+
+
+
+
+
+/* ─── Buttons ─── */
+.rm-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1.5px solid transparent;
+    transition: all var(--transition);
+    white-space: nowrap;
+    background: none;
+    width: fit-content;
+}
+
+.rm-btn svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+.rm-btn-primary {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+.rm-btn-primary:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: #fff;
+}
+
+
+.rm-btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border-color: transparent;
+}
+
+.rm-btn-ghost:hover {
+    background: var(--bg);
+    color: var(--text-main);
+}
+
+.rm-btn-danger {
+    background: var(--white);
+    color: var(--danger);
+    border-color: var(--border);
+}
+
+.rm-btn-danger:hover {
+    background: var(--danger-light);
+    border-color: var(--danger);
+}
+
+.rm-btn-xs {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+}

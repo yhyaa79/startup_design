@@ -2,13 +2,19 @@
 
 {% extends 'base.html' %}
 
-{% block title %}پروفایل{% endblock %}
-{% block topbar_title %}ویرایش پروفایل{% endblock %}
+{% load static %}
+
+{% block title %}ویرایش پروفایل{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
 
 {% block content %}
 
 
-<div class="div-hidden">
+
+<div class="div-btn-back-edit">
     {% block topbar_actions %}
     <button type="submit" form="profileForm" class="rm-btn rm-btn-primary">
         ذخیره ویرایش

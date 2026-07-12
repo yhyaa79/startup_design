@@ -1,131 +1,15 @@
+<!-- templates/core/login.html -->
+
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}ورود{% endblock %}
-{% block topbar_title %}ورود به حساب کاربری{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
 
 {% block content %}
-<style>
-    .auth-wrapper {
-        min-height: 80vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 30px 15px;
-        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-        direction: rtl;
-    }
-
-    .auth-card {
-        width: 100%;
-        max-width: 420px;
-        background: #ffffff;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        padding: 35px 30px;
-        transition: 0.3s ease;
-    }
-
-    .auth-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 14px 35px rgba(0, 0, 0, 0.12);
-    }
-
-    .auth-title {
-        text-align: center;
-        margin-bottom: 10px;
-        font-size: 28px;
-        font-weight: bold;
-        color: #1e293b;
-    }
-
-    .auth-subtitle {
-        text-align: center;
-        color: #64748b;
-        margin-bottom: 25px;
-        font-size: 14px;
-    }
-
-    .error-message {
-        background: #fee2e2;
-        color: #b91c1c;
-        padding: 12px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        font-size: 14px;
-        text-align: center;
-    }
-
-    .login-form p {
-        margin-bottom: 18px;
-    }
-
-    .login-form label {
-        display: block;
-        margin-bottom: 6px;
-        font-weight: 600;
-        color: #334155;
-    }
-
-    .login-form input {
-        width: 100%;
-        padding: 12px 14px;
-        border: 1px solid #cbd5e1;
-        border-radius: 12px;
-        font-size: 15px;
-        transition: all 0.2s ease;
-        outline: none;
-        box-sizing: border-box;
-    }
-
-    .login-form input:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-    }
-
-    .auth-btn {
-        width: 100%;
-        padding: 13px;
-        border: none;
-        border-radius: 12px;
-        background: #2563eb;
-        color: white;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.3s ease;
-    }
-
-    .auth-btn:hover {
-        background: #1d4ed8;
-    }
-
-    .auth-footer {
-        margin-top: 20px;
-        text-align: center;
-        font-size: 14px;
-        color: #475569;
-    }
-
-    .auth-footer a {
-        color: #2563eb;
-        text-decoration: none;
-        font-weight: 600;
-    }
-
-    .auth-footer a:hover {
-        text-decoration: underline;
-    }
-
-    @media (max-width: 480px) {
-        .auth-card {
-            padding: 25px 20px;
-        }
-
-        .auth-title {
-            font-size: 24px;
-        }
-    }
-</style>
 
 <div class="auth-wrapper">
     <div class="auth-card">
