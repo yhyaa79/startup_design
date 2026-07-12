@@ -1,0 +1,323 @@
+@font-face {
+    font-family: "Vazirmatn";
+    src: url("../fonts/Vazirmatn-Thin.ttf") format("truetype");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F;
+    /* Persian/Arabic */
+}
+
+@font-face {
+    font-family: "Vazirmatn";
+    src: url("../fonts/Vazirmatn-Light.ttf") format("truetype");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F;
+    /* Persian/Arabic */
+}
+
+@font-face {
+    font-family: "Vazirmatn";
+    src: url("../fonts/Vazirmatn-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F;
+    /* Persian/Arabic */
+}
+
+@font-face {
+    font-family: "Vazirmatn";
+    src: url("../fonts/Vazirmatn-Medium.ttf") format("truetype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F;
+    /* Persian/Arabic */
+}
+
+@font-face {
+    font-family: "Vazirmatn";
+    src: url("../fonts/Vazirmatn-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F;
+    /* Persian/Arabic */
+}
+
+@font-face {
+    font-family: "Vazirmatn";
+    src: url("../fonts/Vazirmatn-ExtraBold.ttf") format("truetype");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F;
+    /* Persian/Arabic */
+}
+
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../fonts/Roboto-Thin.ttf") format("truetype");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-00FF;
+    /* Latin */
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../fonts/Roboto-Light.ttf") format("truetype");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-00FF;
+    /* Latin */
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../fonts/Roboto-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-00FF;
+    /* Latin */
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../fonts/Roboto-Medium.ttf") format("truetype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-00FF;
+    /* Latin */
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../fonts/Roboto-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-00FF;
+    /* Latin */
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../fonts/Roboto-ExtraBold.ttf") format("truetype");
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-00FF;
+    /* Latin */
+}
+
+
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+:root {
+    --primary: #5B8DEF;
+    --primary-light: #EBF1FD;
+    --accent: #7EC8C8;
+    --accent-light: #E8F7F7;
+    --bg: #F7F9FC;
+    --white: #FFFFFF;
+    --black: #111111;
+    --text: #2D3748;
+    --text-2: #3e4147;
+    --text-muted: #595e66;
+    --border: #E2E8F0;
+    --sidebar-bg: #FFFFFF;
+    --shadow-box: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px rgba(91, 141, 239, 0.07);
+    --shadow: 0 2px 8px rgba(91, 141, 239, 0.10);
+    --radius: 10px;
+    --radius-sm: 6px;
+}
+
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+}
+
+
+
+html,
+body,
+p,
+span,
+div,
+h1,
+td,
+h2,
+h3,
+h4,
+h5,
+h6,
+a,
+li,
+ul,
+ol,
+label,
+small,
+medium,
+strong,
+em,
+b,
+i,
+blockquote,
+q,
+cite,
+code,
+pre,
+button,
+input,
+textarea,
+select,
+option {
+    font-family: "Vazirmatn", "Roboto", sans-serif;
+}
+
+
+
+
+
+:root {
+    /* ===== فاصله‌گذاری — تک منبع حقیقت ===== */
+    --gap: 26px;
+
+    --gap-lg: calc(var(--gap) + 2px);
+    --gap-lgg: calc(var(--gap) + 6px);
+    --gap-lggg: calc(var(--gap) + 12px);
+
+    --gap-sm: calc(var(--gap) - 2px);
+    --gap-smm: calc(var(--gap) - 6px);
+    --gap-smmm: calc(var(--gap) - 12px);
+
+    /* ===== رنگ پایه ===== */
+    --bg-page: #eef0f5;
+    --card: #ffffff;
+    --card-soft: #f5f6fa;
+    --line: #dbdada80;
+
+    --ink-900: #171b2e;
+    /* متن اصلی */
+    --ink-600: #5c6170;
+    /* متن ثانویه */
+    --ink-400: #9498a6;
+    /* متن کم‌رنگ */
+
+    --primary: #2f5cf5;
+    --primary-ink: #1f3fc9;
+    --primary-soft: #dee6ff;
+    --primary-softer: #eef1ff;
+
+    --purple: #ac63ea;
+    --purple-deep: #5B21B6;
+
+    --gold: #b8873a;
+    --gold-soft: #f6ecda;
+
+    --green: #1ea672;
+    --green-soft: #dbf3ea;
+    --red: #e0553f;
+    --red-soft: #fbe2de;
+    --amber: #c98a1e;
+    --amber-soft: #faedd6;
+
+    --radius-lg: 26px;
+    --radius-md: 16px;
+    --radius-sm: 11px;
+
+    --shadow-sm: 0 4px 10px rgba(20, 26, 46, .02);
+    --shadow-md: 0 10px 30px rgba(20, 26, 46, .08);
+
+
+
+    --text: 7px;
+    --text-xs: calc(--text);
+    --text-sm: calc(var(--text) + 1px);
+    --text-base: calc(var(--text) + 2px);
+    --text-lg: calc(var(--text) + 3px);
+    --text-xl: calc(var(--text) + 4px);
+    --text-2xl: calc(var(--text) + 5px);
+    --text-3xl: calc(var(--text) + 7px);
+    --text-4xl: calc(var(--text) + 9px);
+    --text-5xl: calc(var(--text) + 11px);
+    --text-6xl: calc(var(--text) + 15px);
+    --text-7xl: calc(var(--text) + 20px);
+
+
+}
+
+
+
+
+
+
+
+:root {
+    --bg-1: #eef1ff;
+    --bg-2: #f3eefc;
+    --blue: #3E63DD;
+    --blue-soft: #7C93F5;
+    --red: #EF4444;
+    --red-deep: #B91C1C;
+    --ink: #20233F;
+    --muted: #767b98;
+    --card: #ffffff;
+    --radius-card: 22px;
+}
+
+
+
+    :root {
+        --ink-mid: #3a4a5a;
+        --ink-muted: #8a9bac;
+        --paper: #f7f9fb;
+        --accent-2: #00b89c;
+        --rule: #dde4ec;
+        --danger: #e84040;
+        --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+
+
+
+* {
+    box-sizing: border-box;
+}
+
+
+
+.page {
+    width: 100%;
+    padding: var(--gap-lgg);
+}
+
+a {
+    color: inherit;
+}
+
+
+

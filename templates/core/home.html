@@ -1,33 +1,17 @@
 <!-- templates/core/home.html -->
 
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}صفحه اصلی{% endblock %}
-{% block topbar_title %}داشبورد مدیریت{% endblock %}
+{% block title %}خانه{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
 
 {% block content %}
 
 {% load dashboard_extras %}
-
-<style>
-    /* آیکون‌های SVG آفلاین جایگزین ایموجی — بدون نیاز به فونت/CDN */
-    .icon {
-        width: 18px;
-        height: 18px;
-        stroke: currentColor;
-        fill: none;
-        stroke-width: 2;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        vertical-align: middle;
-        display: inline-block;
-    }
-
-    .icon-lg {
-        width: 26px;
-        height: 26px;
-    }
-</style>
 
 <div class="page">
 
