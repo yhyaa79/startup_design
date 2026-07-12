@@ -64,12 +64,12 @@
 
 .brand-text .title {
     font-weight: 800;
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     color: var(--ink-900);
 }
 
 .brand-text .sub {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--ink-400);
 }
 
@@ -83,7 +83,7 @@
     border-radius: 16px;
     padding: 6px 16px;
     color: var(--ink-400);
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     box-shadow: var(--shadow-sm);
 }
 
@@ -93,7 +93,7 @@
     background: transparent;
     flex: 1;
     font-family: inherit;
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     color: var(--ink-900);
     padding: 8px 0;
 }
@@ -109,7 +109,7 @@
     color: var(--ink-400);
     display: flex;
     align-items: center;
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     padding: 4px;
 }
 
@@ -117,7 +117,7 @@
     background: var(--card-soft);
     border-radius: 8px;
     padding: 3px 8px;
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--ink-600);
     white-space: nowrap;
 }
@@ -138,18 +138,18 @@
     justify-content: center;
     color: #fff;
     font-weight: 700;
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     flex-shrink: 0;
 }
 
 .user-meta .name {
     font-weight: 700;
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     color: var(--ink-900);
 }
 
 .user-meta .loc {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--ink-400);
 }
 
@@ -178,7 +178,7 @@
 .greeting p {
     margin: 0;
     color: var(--ink-600);
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     letter-spacing: -0.5px;
     line-height: 1.3;
 
@@ -192,7 +192,7 @@
     color: transparent;
     display: inline-block;
     font-weight: 600;
-    font-size: var(--text-3xl);
+    font-size: var(--text-2xl);
     letter-spacing: -4px;
 }
 
@@ -211,7 +211,7 @@
     align-items: center;
     justify-content: center;
     box-shadow: var(--shadow-sm);
-    font-size: var(--text-4xl);
+    font-size: var(--text-3xl);
 }
 
 .date-cluster {
@@ -233,13 +233,13 @@
 }
 
 .date-badge .num {
-    font-size: var(--text-3xl);
+    font-size: var(--text-2xl);
     font-weight: 700;
     color: var(--ink-900);
 }
 
 .date-text {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--ink-600);
     line-height: 1.3;
 }
@@ -247,7 +247,7 @@
 .date-text b {
     color: var(--ink-900);
     display: block;
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
 }
 
 .range-pill {
@@ -257,7 +257,7 @@
     background: #fff;
     border-radius: 14px;
     padding: 10px 14px;
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     color: var(--ink-900);
     box-shadow: var(--shadow-sm);
 }
@@ -287,7 +287,7 @@
 
 .card-title-row h4 {
     margin: 0;
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     color: var(--ink-900);
     font-weight: 700;
 }
@@ -301,12 +301,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     flex-shrink: 0;
 }
 
 .list-empty {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--ink-400);
     text-align: center;
     padding: 22px 4px;
@@ -336,17 +336,17 @@
     display: flex;
     align-items: center;
     gap: 9px;
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     font-weight: 800;
     color: var(--ink-900);
 }
 
 .section-head .s-icon {
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
 }
 
 .section-head .s-note {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--ink-400);
 }
 
@@ -392,25 +392,25 @@
 }
 
 .kpi-meta .kpi-value {
-    font-size: var(--text-3xl);
+    font-size: var(--text-2xl);
     font-weight: 700;
     color: var(--ink-900);
 }
 
 .kpi-meta .kpi-label {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--ink-400);
     margin-top: 2px;
 }
 
 .ring-text {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     font-weight: 700;
     fill: var(--ink-900);
 }
 
 .ring-text-rm {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     font-weight: 700;
     fill: var(--ink-900);
 }
@@ -448,7 +448,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--text-4xl);
+    font-size: var(--text-3xl);
     flex-shrink: 0;
 }
 
@@ -468,7 +468,7 @@
 }
 
 .alert-body .alert-tag {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     font-weight: 700;
     color: var(--red);
     text-transform: uppercase;
@@ -489,13 +489,13 @@
 
 .alert-body h4 {
     margin: 4px 0;
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     color: var(--ink-900);
 }
 
 .alert-body p {
     margin: 0;
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     color: var(--ink-600);
     line-height: 1.6;
 }
@@ -547,7 +547,7 @@
 }
 
 .rm-chip .rm-title {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     font-weight: 700;
     color: var(--ink-900);
     white-space: nowrap;
@@ -556,7 +556,7 @@
 }
 
 .rm-chip .rm-goal {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--ink-400);
     margin-top: 3px;
     white-space: nowrap;
@@ -567,7 +567,7 @@
 .rm-chip .rm-status {
     display: inline-block;
     margin-top: 6px;
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     font-weight: 700;
     padding: 3px 9px;
     border-radius: 20px;
@@ -582,7 +582,7 @@
     border: 1.5px dashed #d3d7e2;
     border-radius: var(--radius-md);
     color: var(--ink-400);
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     text-decoration: none;
 }
 
@@ -601,13 +601,13 @@
 }
 
 .rm-detail-title {
-    font-size: var(--text-3xl);
+    font-size: var(--text-2xl);
     font-weight: 800;
     color: var(--ink-900);
 }
 
 .rm-detail-goal {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--ink-400);
     margin-top: 4px;
 }
@@ -615,7 +615,7 @@
 .status-pill {
     border-radius: 20px;
     padding: 6px 14px;
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     font-weight: 700;
     white-space: nowrap;
 }
@@ -624,7 +624,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--ink-400);
     margin-bottom: 6px;
 }
@@ -655,12 +655,12 @@
 }
 
 .rm-dates .fee-label {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--ink-400);
 }
 
 .rm-dates .fee-amount {
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     font-weight: 700;
     color: var(--ink-900);
     margin-top: 2px;
@@ -677,7 +677,7 @@
     border: none;
     border-radius: 12px;
     padding: 11px 20px;
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
@@ -692,7 +692,7 @@
     border: none;
     border-radius: 12px;
     padding: 11px 20px;
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
@@ -727,7 +727,7 @@
 }
 
 .rm-vtl-title {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-weight: 800;
     color: var(--ink-900);
     margin-bottom: 20px;
@@ -835,7 +835,7 @@
 }
 
 .rm-vtl-stage-title {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-weight: 700;
     color: var(--ink-900);
     overflow: hidden;
@@ -845,7 +845,7 @@
 
 .rm-vtl-stage-pct {
     margin-inline-start: auto;
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     font-weight: 700;
     color: var(--ink-400);
     background: var(--card-soft);
@@ -863,7 +863,7 @@
     margin-inline-start: auto;
     background: var(--primary-softer);
     color: var(--primary);
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     font-weight: 700;
     padding: 3px 10px;
     border-radius: 20px;
@@ -925,7 +925,7 @@
 }
 
 .rm-vtl-atitle {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--ink-600);
     flex: 1;
     min-width: 0;
@@ -1064,19 +1064,19 @@
 }
 
 .tl-active-tag {
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     font-weight: 700;
     fill: var(--primary);
 }
 
 .tl-label {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     font-weight: 500;
     fill: var(--ink-600);
 }
 
 .tl-pct {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     fill: var(--ink-900);
     font-weight: 700;
 }
@@ -1131,14 +1131,14 @@
     position: absolute;
     transform: translate(-50%, -50%);
     text-align: center;
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--ink-600);
     white-space: nowrap;
 }
 
 .radar-label b {
     display: block;
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--ink-900);
 }
 
@@ -1153,7 +1153,7 @@
     display: flex;
     gap: var(--gap-smmm);
     margin-bottom: 14px;
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--ink-600);
 }
 
@@ -1266,13 +1266,13 @@
 }
 
 .bar-value {
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     font-weight: 700;
     color: var(--ink-900);
 }
 
 .chart-item-title {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     font-weight: 600;
     color: var(--ink-900);
     text-decoration: none;
@@ -1289,7 +1289,7 @@
 }
 
 .difficulty-badge {
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     font-weight: 700;
     padding: 2px 9px;
     border-radius: 20px;
@@ -1308,7 +1308,7 @@
 }
 
 .heatmap-nav-btns .btn-ghost {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     padding: 4px 10px;
     border-radius: 8px;
     border: 1px solid var(--border, #e5e7eb);
@@ -1348,7 +1348,7 @@
 }
 
 .heatmap-weekdays span {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--ink-400);
     height: 12px;
     line-height: 12px;
@@ -1373,7 +1373,7 @@
 }
 
 .month-title {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     font-weight: 600;
     color: var(--ink-700);
     margin-bottom: 4px;
@@ -1405,7 +1405,7 @@
     justify-content: flex-end;
     gap: 6px;
     margin-top: 10px;
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     color: var(--ink-400);
     direction: ltr;
     margin-right: 10px;
@@ -1422,7 +1422,7 @@
     color: #fff;
     padding: 6px 10px;
     border-radius: 6px;
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     line-height: 1.6;
     pointer-events: none;
     z-index: 1000;
@@ -1447,7 +1447,7 @@
 
 .hbar-name {
     flex-shrink: 0;
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--ink-600);
     white-space: nowrap;
     overflow: hidden;
@@ -1475,7 +1475,7 @@
 .hbar-count {
     width: 26px;
     flex-shrink: 0;
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     font-weight: 700;
     color: var(--ink-900);
     text-align: left;
@@ -1496,7 +1496,7 @@
 }
 
 .sales-amount {
-    font-size: var(--text-4xl);
+    font-size: var(--text-3xl);
     font-weight: 700;
     color: var(--ink-900);
     margin-top: 6px;
@@ -1507,14 +1507,14 @@
     border-radius: 14px;
     padding: 8px 12px;
     text-align: center;
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--ink-400);
 }
 
 .daily-pill b {
     display: block;
     color: var(--ink-900);
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
 }
 
 .project-row {
@@ -1526,7 +1526,7 @@
 }
 
 .project-row .p-name {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--ink-900);
     font-weight: 600;
     margin-bottom: 6px;
@@ -1537,7 +1537,7 @@
 .p-legend {
     display: flex;
     gap: 14px;
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     color: var(--ink-400);
     margin-top: 10px;
 }
@@ -1591,7 +1591,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     flex-shrink: 0;
     z-index: 1;
     font-weight: 700;
@@ -1601,7 +1601,7 @@
     background: var(--card-soft);
     border-radius: 12px;
     padding: 9px 14px;
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--ink-900);
     display: flex;
     flex-direction: column;
@@ -1648,7 +1648,7 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--ink-600);
 }
 
@@ -1674,7 +1674,7 @@
     background: var(--card-soft);
     border-radius: 10px;
     padding: 6px 10px;
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--ink-600);
 }
 
@@ -1686,19 +1686,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     color: var(--ink-600);
     flex-shrink: 0;
 }
 
 .ti-label {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--ink-400);
     margin: 14px 0 2px;
 }
 
 .ti-amount {
-    font-size: var(--text-4xl);
+    font-size: var(--text-3xl);
     font-weight: 700;
     color: var(--ink-900);
 }
@@ -1710,7 +1710,7 @@
 }
 
 .view-chart {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--primary);
     display: flex;
     align-items: center;
@@ -1737,13 +1737,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--text-4xl);
+    font-size: var(--text-3xl);
     color: var(--ink-400);
 }
 
 .empty-state p {
     margin: 0;
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     color: var(--ink-400);
     line-height: 1.6;
 }
@@ -1776,7 +1776,7 @@
 }
 
 .list-row .lr-title {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-weight: 600;
     color: var(--ink-900);
     white-space: nowrap;
@@ -1785,12 +1785,12 @@
 }
 
 .list-row .lr-sub {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--ink-400);
 }
 
 .list-row .lr-badge {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     font-weight: 600;
     color: var(--primary);
     background: var(--primary-softer);
@@ -1819,7 +1819,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--ink-600);
 }
 
@@ -1897,7 +1897,7 @@ svg {
 }
 
 .eyebrow {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-weight: 600;
     letter-spacing: .5px;
     color: var(--purple-deep);
@@ -1994,21 +1994,21 @@ h1 {
 
 .item .num {
     display: none;
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     font-weight: 700;
     color: var(--muted);
     letter-spacing: .5px;
 }
 
 .item .label {
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     font-weight: 700;
     color: var(--ink);
     line-height: 1.5;
 }
 
 .item .desc {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--muted);
     line-height: 1.6;
@@ -2148,7 +2148,7 @@ h1 {
 }
 
 .complete-msg {
-    font-size: var(--text-3xl);
+    font-size: var(--text-2xl);
     font-weight: 800;
     color: #fff;
     background: linear-gradient(90deg, var(--blue), var(--purple));
@@ -2159,13 +2159,13 @@ h1 {
 }
 
 .complete-sub {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-weight: 600;
     color: var(--muted);
 }
 
 .counter {
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
     font-weight: 700;
     color: var(--purple-deep);
     background: var(--card);
@@ -2264,21 +2264,21 @@ h1 {
 }
 
 .vbar-value {
-    font-size: var(--text-lg);
+    font-size: var(--text-base);
     font-weight: 600;
     margin-top: 6px;
     color: var(--text-primary, #333);
 }
 
 .vbar-label {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     color: var(--text-secondary, #777);
     margin-top: 2px;
     text-align: center;
 }
 
 .vbar-applications {
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     color: var(--purple);
     margin-top: 2px;
 }

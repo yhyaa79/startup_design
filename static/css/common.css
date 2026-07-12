@@ -1,3 +1,5 @@
+/* static/css/common.css */
+
 @font-face {
     font-family: "Vazirmatn";
     src: url("../fonts/Vazirmatn-Thin.ttf") format("truetype");
@@ -255,8 +257,8 @@ option {
 
 
 
-    --text: 7px;
-    --text-xs: calc(--text);
+    --text: 8px;
+    --text-xs: calc(var(--text) + px);
     --text-sm: calc(var(--text) + 1px);
     --text-base: calc(var(--text) + 2px);
     --text-lg: calc(var(--text) + 3px);

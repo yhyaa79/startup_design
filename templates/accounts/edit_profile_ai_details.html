@@ -10,240 +10,253 @@
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
+{% block sidebar %}{% endblock %}
+
 {% block content %}
 
+<div class="aip-page" dir="rtl">
+    <div class="aip-container">
 
-<div class="content">
-    <div class="profile-card">
+        <!-- ===================== مرحله ۱: انتخاب روش ===================== -->
+        <section id="aipChoose" class="aip-choose">
+            <div class="aip-choose-head">
+                <h1>پروفایلت رو چطور بسازیم؟</h1>
+                <p>می‌تونی متن یا رزومه‌ت رو به هوش مصنوعی بدی تا خودش پروفایل رو بسازه، یا اگه ترجیح می‌دی، فرم رو خودت قدم‌به‌قدم پر کنی.</p>
+            </div>
 
-        <h2>فرم ارسال اطلاعات</h2>
-        <p>با وارد کردن اطلاعات، پروفایل خود را کامل کنید.</p>
+            <div class="aip-options">
 
-        <form action="{% url 'accounts:edit_profile_ai' %}" method="post" enctype="multipart/form-data" id="aiForm">
-            {% csrf_token %}
-
-
-            <!-- هوش مصنوعی -->
-            <section class="form-section">
-                <h4>ساخت پروفایل با هوش مصنوعی</h4>
-                <label for="text">متن خود را وارد کنید:</label>
-                <textarea id="text" class="textarea-edit-profile" name="text" rows="6">{{ raw_text }}</textarea>
-            </section>
-            <hr>
-
-            <!-- آپلود فایل -->
-            <section class="form-section">
-                <h4>ارسال فایل رزومه</h4>
-                <div class="upload-file-profile">
-                    <label for="file">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="17 8 12 3 7 8" />
-                            <line x1="12" y1="3" x2="12" y2="15" />
+                <button type="button" class="aip-option aip-option--ai" id="aipChooseAi">
+                    <span class="aip-option-badge">پیشنهاد ما</span>
+                    <span class="aip-option-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#4F46E5">
+                        <path d="M12 2l1.9 4.9L19 8l-4.9 1.9L12 15l-1.9-4.9L5 8l4.9-1.9L12 2z"/>
+                        <path d="M19 14l0.9 2.4L22 17l-2.1 0.9L19 20l-0.9-2.1L16 17l2.1-0.6L19 14z" opacity="0.7"/>
+                        <path d="M5 15l0.7 1.8L7.5 17.5l-1.8 0.7L5 20l-0.7-1.8L2.5 17.5l1.8-0.7L5 15z" opacity="0.5"/>
                         </svg>
-                        <span class="upload-text">برای آپلود کلیک کنید</span>
-                        <span class="upload-hint">یا فایل را اینجا رها کنید</span>
-                        <input type="file" id="file" name="file">
+                    </span>
+                    <span class="aip-option-title">ساخت با هوش مصنوعی</span>
+                    <span class="aip-option-desc">متن معرفی خودت رو بنویس یا فایل رزومه‌ت رو آپلود کن؛ هوش مصنوعی
+                        اطلاعات رو استخراج می‌کنه و پروفایلت رو در چند ثانیه می‌سازه.</span>
+                    <span class="aip-option-cta">
+                        شروع کن
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12" />
+                            <polyline points="12 19 5 12 12 5" />
+                        </svg>
+                    </span>
+                </button>
+
+                <a href="{% url 'accounts:edit_profile' %}" class="aip-option aip-option--manual">
+                    <span class="aip-option-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9" />
+                            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                        </svg>
+                    </span>
+                    <span class="aip-option-title">پر کردن دستی</span>
+                    <span class="aip-option-desc">اگه دوست داری خودت هر بخش از پروفایل رو جداگانه و با کنترل کامل پر
+                        کنی، از این روش استفاده کن.</span>
+                    <span class="aip-option-cta">
+                        رفتن به فرم
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12" />
+                            <polyline points="12 19 5 12 12 5" />
+                        </svg>
+                    </span>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- ===================== مرحله ۲: فرم هوش مصنوعی ===================== -->
+        <section id="aipBuild" class="aip-build" hidden>
+            <button type="button" class="aip-back" id="aipBack">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 5 12 12 19" />
+                </svg>
+                بازگشت به انتخاب روش
+            </button>
+
+            <form action="{% url 'accounts:edit_profile_ai' %}" method="post" enctype="multipart/form-data"
+                id="aiForm">
+                {% csrf_token %}
+
+                <div class="aip-card">
+                    <h3>متن خودت رو بنویس</h3>
+                    <p class="aip-card-hint">درباره تحصیلات، تجربه‌ها و مهارت‌هات به هر شکلی که راحتی بنویس؛ لازم
+                        نیست فرمت خاصی داشته باشه.</p>
+                    <textarea id="text" class="aip-textarea" name="text" rows="6"
+                        placeholder="مثلاً: من فارغ‌التحصیل مهندسی کامپیوترم، دو سال تجربه‌ی برنامه‌نویسی فرانت‌اند دارم و به طراحی رابط کاربری علاقه‌مندم...">{{ raw_text }}</textarea>
+                </div>
+
+                <div class="aip-or-divider">یا</div>
+
+                <div class="aip-card">
+                    <h3>فایل رزومه رو آپلود کن</h3>
+                    <p class="aip-card-hint">فرمت‌های PDF و Word پشتیبانی می‌شن.</p>
+                    <label class="aip-dropzone" id="aipDropzone" for="file">
+                        <span class="aip-dropzone-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                        </span>
+                        <span class="aip-dropzone-text">برای آپلود کلیک کن</span>
+                        <span class="aip-dropzone-hint">یا فایل رو همین‌جا رها کن</span>
+                        <span class="aip-dropzone-filename" id="aipFileName"></span>
+                        <input type="file" id="file" name="file" accept=".pdf,.doc,.docx">
                     </label>
                 </div>
-            </section>
 
-            <hr>
-
-            <!-- ویرایش دستی -->
-            <section class="form-section">
-                <a href="{% url 'accounts:edit_profile' %}" class="btn btn-outline-secondary btn-lg">پر کردن فرم به صورت دستی</a>
-            </section>
-
-            <hr>
-
-            <button type="submit" class="btn-submit" id="submitBtn">
-                <span id="btnText">ارسال</span>
-            </button>
-
-        </form>
+                <button type="submit" class="aip-submit" id="submitBtn">
+                    <span id="btnText">تحلیل و ساخت پروفایل</span>
+                </button>
+            </form>
+        </section>
     </div>
 </div>
-
-
 
 <!-- مودال انیمیشن پردازش -->
-<div id="processingModal" class="processing-modal" style="display:none;">
-    <div class="processing-content">
-        <div class="processing-animation">
-            <div class="brain-icon">
-                <svg viewBox="0 0 100 100" width="80" height="80">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.3"/>
-                    <circle cx="50" cy="50" r="35" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.5"/>
-                    <circle cx="50" cy="50" r="25" fill="none" stroke="#4A90D9" stroke-width="2" opacity="0.7"/>
-                    <circle cx="50" cy="50" r="15" fill="#4A90D9">
-                        <animate attributeName="r" values="15;18;15" dur="1s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="1;0.7;1" dur="1s" repeatCount="indefinite"/>
-                    </circle>
-                    <!-- ذرات در حال حرکت -->
-                    <circle cx="20" cy="30" r="3" fill="#4A90D9">
-                        <animate attributeName="cy" values="30;20;30" dur="1.5s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/>
-                    </circle>
-                    <circle cx="80" cy="40" r="3" fill="#4A90D9">
-                        <animate attributeName="cy" values="40;30;40" dur="1.8s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="0;1;0" dur="1.8s" repeatCount="indefinite"/>
-                    </circle>
-                    <circle cx="30" cy="70" r="3" fill="#4A90D9">
-                        <animate attributeName="cy" values="70;60;70" dur="1.3s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="0;1;0" dur="1.3s" repeatCount="indefinite"/>
-                    </circle>
-                    <circle cx="70" cy="65" r="3" fill="#4A90D9">
-                        <animate attributeName="cy" values="65;75;65" dur="1.6s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite"/>
-                    </circle>
-                </svg>
-            </div>
-            <div class="processing-text">
-                <h3>در حال پردازش رزومه...</h3>
-                <p>هوش مصنوعی در حال استخراج اطلاعات است</p>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill"></div>
-            </div>
+<div id="processingModal" class="aip-modal" style="display:none;">
+    <div class="aip-modal-content">
+        <svg class="aip-modal-brain" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="var(--primary)" stroke-width="2" opacity="0.25" />
+            <circle cx="50" cy="50" r="35" fill="none" stroke="var(--primary)" stroke-width="2" opacity="0.4" />
+            <circle cx="50" cy="50" r="25" fill="none" stroke="var(--primary)" stroke-width="2" opacity="0.6" />
+            <circle cx="50" cy="50" r="15" fill="var(--primary)">
+                <animate attributeName="r" values="15;18;15" dur="1s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="1;0.7;1" dur="1s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="20" cy="30" r="3" fill="var(--purple)">
+                <animate attributeName="cy" values="30;20;30" dur="1.5s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="80" cy="40" r="3" fill="var(--purple)">
+                <animate attributeName="cy" values="40;30;40" dur="1.8s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0;1;0" dur="1.8s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="30" cy="70" r="3" fill="var(--purple)">
+                <animate attributeName="cy" values="70;60;70" dur="1.3s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0;1;0" dur="1.3s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="70" cy="65" r="3" fill="var(--purple)">
+                <animate attributeName="cy" values="65;75;65" dur="1.6s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite" />
+            </circle>
+        </svg>
+        <h3>در حال پردازش رزومه‌ی تو...</h3>
+        <p>هوش مصنوعی داره اطلاعات رو استخراج می‌کنه، چند لحظه صبر کن.</p>
+        <div class="aip-progress-track">
+            <div class="aip-progress-fill"></div>
         </div>
     </div>
 </div>
 
-
-<div id="errorModal" class="processing-modal" style="display:none;">
-    <div class="processing-content">
-        <div class="processing-text">
-            <h3>خطا در پردازش</h3>
-            <p>در حال حاضر سرویس هوش مصنوعی در دسترس نیست.</p>
-            <p>لطفاً چند دقیقه دیگر دوباره تلاش کنید.</p>
-
-            <button onclick="closeErrorModal()" class="btn-submit">
-                بستن
-            </button>
-        </div>
+<!-- مودال خطا -->
+<div id="errorModal" class="aip-modal aip-modal--error" style="display:none;">
+    <div class="aip-modal-content">
+        <span class="aip-error-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+        </span>
+        <h3>پردازش انجام نشد</h3>
+        <p>سرویس هوش مصنوعی در حال حاضر در دسترس نیست. لطفاً چند دقیقه‌ی دیگر دوباره امتحان کن.</p>
+        <button type="button" onclick="closeErrorModal()" class="aip-submit">
+            متوجه شدم
+        </button>
     </div>
 </div>
 
 <script>
-function closeErrorModal(){
-    document.getElementById('errorModal').style.display = 'none';
-}
+    (function () {
+        var choose = document.getElementById('aipChoose');
+        var build = document.getElementById('aipBuild');
+        var step1 = document.getElementById('stepIndicator1');
+        var step2 = document.getElementById('stepIndicator2');
 
-{% if ai_error %}
-document.getElementById('processingModal').style.display = 'none';
-document.getElementById('errorModal').style.display = 'flex';
-{% endif %}
-</script>
+        function goToBuild() {
+            choose.hidden = true;
+            build.hidden = false;
+            step1.classList.remove('is-active');
+            step1.classList.add('is-done');
+            step2.classList.add('is-active');
+        }
 
+        function goToChoose() {
+            build.hidden = true;
+            choose.hidden = false;
+            step2.classList.remove('is-active');
+            step1.classList.remove('is-done');
+            step1.classList.add('is-active');
+        }
 
+        document.getElementById('aipChooseAi').addEventListener('click', goToBuild);
+        document.getElementById('aipBack').addEventListener('click', goToChoose);
 
-<style>
-/* استایل مودال پردازش */
-.processing-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.3s ease;
-}
+        // اگر خطایی از سرور برگشته یا متنی از قبل موجوده، مستقیم برو مرحله فرم
+        {% if ai_error or raw_text %}
+        goToChoose();
+        {% else %}
+        step1.classList.add('is-active');
+        {% endif %}
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+        // پیش‌نمایش نام فایل انتخاب‌شده
+        var fileInput = document.getElementById('file');
+        var fileNameEl = document.getElementById('aipFileName');
+        var dropzone = document.getElementById('aipDropzone');
 
-.processing-content {
-    background: white;
-    border-radius: 20px;
-    padding: 40px 50px;
-    text-align: center;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: slideUp 0.4s ease;
-    max-width: 400px;
-    width: 90%;
-}
+        fileInput.addEventListener('change', function () {
+            if (fileInput.files && fileInput.files.length > 0) {
+                fileNameEl.textContent = fileInput.files[0].name;
+                fileNameEl.classList.add('is-visible');
+            } else {
+                fileNameEl.classList.remove('is-visible');
+            }
+        });
 
-@keyframes slideUp {
-    from { 
-        opacity: 0;
-        transform: translateY(30px) scale(0.95);
+        ['dragenter', 'dragover'].forEach(function (evt) {
+            dropzone.addEventListener(evt, function (e) {
+                e.preventDefault();
+                dropzone.classList.add('is-dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(function (evt) {
+            dropzone.addEventListener(evt, function (e) {
+                e.preventDefault();
+                dropzone.classList.remove('is-dragover');
+            });
+        });
+
+        // نمایش مودال پردازش هنگام ارسال فرم
+        document.getElementById('aiForm').addEventListener('submit', function () {
+            document.getElementById('processingModal').style.display = 'flex';
+            var btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+        });
+
+        {% if ai_error %}
+        document.getElementById('processingModal').style.display = 'none';
+        document.getElementById('errorModal').style.display = 'flex';
+        {% endif %}
+    })();
+
+    function closeErrorModal() {
+        document.getElementById('errorModal').style.display = 'none';
     }
-    to { 
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.processing-animation {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-}
-
-.brain-icon {
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
-.processing-text h3 {
-    color: #2c3e50;
-    font-size: 1.3rem;
-    margin: 0 0 8px 0;
-    font-weight: 600;
-}
-
-.processing-text p {
-    color: #7f8c8d;
-    font-size: 0.95rem;
-    margin: 0;
-}
-
-.progress-bar {
-    width: 100%;
-    height: 6px;
-    background: #ecf0f1;
-    border-radius: 3px;
-    overflow: hidden;
-    margin-top: 10px;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #4A90D9, #67B26F, #4A90D9);
-    background-size: 200% 100%;
-    border-radius: 3px;
-    animation: progressMove 1.5s ease-in-out infinite;
-}
-
-@keyframes progressMove {
-    0% { width: 0%; background-position: 0% 50%; }
-    50% { width: 70%; background-position: 100% 50%; }
-    100% { width: 100%; background-position: 0% 50%; }
-}
-</style>
-
-<script>
-document.getElementById('aiForm').addEventListener('submit', function(e) {
-    // نمایش مودال پردازش
-    document.getElementById('processingModal').style.display = 'flex';
-    
-    // غیرفعال کردن دکمه
-    document.getElementById('submitBtn').disabled = true;
-});
 </script>
 
 {% endblock %}
