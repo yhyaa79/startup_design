@@ -1,1086 +1,462 @@
-<!--  templates/roadmap/stage_activity_detail.html -->
+<!--  templates/roadmap/stage_activity_detail.html  -->
 
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}جزئیات فعالیت{% endblock %}
-{% block topbar_title %}فعالیت{% endblock %}
+{% block title %}رودمپ{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/roadmap.css' %}">
+{% endblock %}
 
 {% block content %}
 
-<style>
-    :root {
-        --primary: #3b82f6;
-        --primary-dark: #1d4ed8;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --danger: #ef4444;
-        --gray-50: #f9fafb;
-        --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb;
-        --gray-300: #d1d5db;
-        --gray-400: #9ca3af;
-        --gray-500: #6b7280;
-        --gray-600: #4b5563;
-        --gray-700: #374151;
-        --gray-900: #111827;
-    }
-
-    * {
-        direction: rtl;
-        text-align: right;
-        box-sizing: border-box;
-    }
-
-    body {
-        background-color: var(--gray-50);
-        font-family: 'Vazir', sans-serif;
-    }
-
-    .activity-detail-container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 1rem;
-    }
-
-    /* ════════════════════════════════════════════
-       HEADER
-       ════════════════════════════════════════════ */
-
-    .activity-header {
-        background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
-        color: white;
-        padding: 2rem;
-        border-radius: 14px;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .activity-header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 2rem;
-        flex-wrap: wrap;
-    }
-
-    .activity-header-breadcrumb {
-        font-size: 0.8rem;
-        opacity: 0.85;
-        margin-bottom: 0.75rem;
-    }
-
-    .activity-header-breadcrumb a {
-        color: white;
-        text-decoration: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-    }
-
-    .activity-header-title {
-        font-size: 1.8rem;
-        font-weight: 700;
-        margin: 0 0 0.5rem;
-    }
-
-    .activity-header-status {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-
-    .status-badge {
-        background: rgba(255, 255, 255, 0.18);
-        padding: 0.4rem 0.9rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        white-space: nowrap;
-    }
-
-    .status-badge.completed {
-        background: var(--success);
-    }
-
-    .status-badge.pending {
-        background: var(--warning);
-    }
-
-    /* توضیح راهنما بالای صفحه برای کاربر تازه‌کار */
-    .page-guide {
-        background: white;
-        border: 1px solid var(--gray-200);
-        border-right: 4px solid var(--primary);
-        border-radius: 10px;
-        padding: 1rem 1.25rem;
-        margin-bottom: 1.5rem;
-        color: var(--gray-700);
-        font-size: 0.9rem;
-        line-height: 1.8;
-        display: flex;
-        gap: 0.75rem;
-    }
-
-    /* ════════════════════════════════════════════
-       LAYOUT
-       ════════════════════════════════════════════ */
-
-    .activity-content {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 1.5rem;
-        align-items: start;
-    }
-
-    @media (max-width: 1024px) {
-        .activity-content {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .activity-main {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .activity-sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        top: 1rem;
-    }
-
-    /* ════════════════════════════════════════════
-       CARDS / SECTIONS
-       ════════════════════════════════════════════ */
-
-    .card {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-        border: 1px solid var(--gray-200);
-    }
-
-    .card-header {
-        margin-bottom: 0.4rem;
-    }
-
-    .card-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: var(--gray-900);
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .card-desc {
-        font-size: 0.82rem;
-        color: var(--gray-500);
-        margin: 0.25rem 0 1.25rem;
-        line-height: 1.7;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid var(--gray-100);
-    }
-
-    /* ════════════════════════════════════════════
-       DESCRIPTION
-       ════════════════════════════════════════════ */
-
-    .description-section {
-        line-height: 1.9;
-        color: var(--gray-700);
-    }
-
-    .description-section p {
-        margin: 0 0 1rem;
-    }
-
-    /* ════════════════════════════════════════════
-       PROGRESS
-       ════════════════════════════════════════════ */
-
-    .progress-container {
-        margin-bottom: 0.5rem;
-    }
-
-    .progress-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-    }
-
-    .progress-header span:last-child {
-        color: var(--primary);
-        font-weight: 700;
-    }
-
-    .progress-bar {
-        width: 100%;
-        height: 10px;
-        background: var(--gray-200);
-        border-radius: 5px;
-        overflow: hidden;
-    }
-
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--primary), #0ea5e9);
-        transition: width 0.3s ease;
-    }
-
-    .progress-input {
-        width: 100%;
-        margin-top: 1.1rem;
-        accent-color: var(--primary);
-    }
-
-    /* ════════════════════════════════════════════
-       FORM
-       ════════════════════════════════════════════ */
-
-    .form-group {
-        margin-bottom: 1.25rem;
-    }
-
-    .form-label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 0.4rem;
-        color: var(--gray-900);
-        font-size: 0.9rem;
-    }
-
-    .form-input,
-    .form-select,
-    .form-textarea {
-        width: 100%;
-        padding: 0.7rem 0.85rem;
-        border: 1px solid var(--gray-300);
-        border-radius: 8px;
-        font-family: inherit;
-        font-size: 0.95rem;
-        background: white;
-    }
-
-    .form-textarea {
-        resize: vertical;
-        min-height: 100px;
-    }
-
-    .form-input:focus,
-    .form-select:focus,
-    .form-textarea:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-    }
-
-    @media (max-width: 600px) {
-        .form-row {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    /* ════════════════════════════════════════════
-       SOURCE SWITCH (لیست آماده / دستی)
-       ════════════════════════════════════════════ */
-
-    .source-switch {
-        display: flex;
-        background: var(--gray-100);
-        border-radius: 10px;
-        padding: 0.3rem;
-        gap: 0.3rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .source-switch-btn {
-        flex: 1;
-        border: none;
-        background: transparent;
-        padding: 0.7rem 1rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        cursor: pointer;
-        color: var(--gray-600);
-        transition: all 0.2s;
-    }
-
-    .source-switch-btn.active {
-        background: white;
-        color: var(--primary);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .source-panel {
-        display: none;
-    }
-
-    .source-panel.active {
-        display: block;
-    }
-
-    .current-source-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        background: rgba(16, 185, 129, 0.08);
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        color: #065f46;
-        padding: 0.6rem 1rem;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 1.25rem;
-    }
-
-    /* ════════════════════════════════════════════
-       STATIC ITEMS
-       ════════════════════════════════════════════ */
-
-    .static-items-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1rem;
-        margin-top: 1rem;
-        background: var(--gray-100);
-        border-radius: 10px;
-        max-height: 500px;
-        overflow: auto;
-        padding: 15px 20px;
-    }
-
-    .static-item-card {
-        border: 2px solid var(--gray-200);
-        border-radius: 10px;
-        padding: 1rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        background: white;
-    }
-
-    .static-item-card:hover {
-        border-color: var(--primary);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-    }
-
-    .static-item-card.selected {
-        border-color: var(--success);
-        background: rgba(16, 185, 129, 0.05);
-    }
-
-    .static-item-title {
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: var(--gray-900);
-    }
-
-    .static-item-category {
-        display: inline-block;
-        background: var(--gray-100);
-        padding: 0.25rem 0.75rem;
-        border-radius: 12px;
-        font-size: 0.72rem;
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: 0.5rem;
-    }
-
-    .static-item-desc {
-        font-size: 0.85rem;
-        color: var(--gray-600);
-        line-height: 1.6;
-    }
-
-    .static-item-meta {
-        display: flex;
-        gap: 0.75rem;
-        margin-top: 0.75rem;
-        font-size: 0.75rem;
-        color: var(--gray-500);
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 2rem 1rem;
-        color: var(--gray-500);
-        font-size: 0.9rem;
-    }
-
-    /* ════════════════════════════════════════════
-       CHECKPOINTS
-       ════════════════════════════════════════════ */
-
-    .checkpoints-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .checkpoint-item {
-        display: flex;
-        gap: 1rem;
-        padding: 1rem;
-        background: var(--gray-50);
-        border-radius: 10px;
-        border-right: 4px solid var(--gray-300);
-        transition: all 0.3s;
-    }
-
-    .checkpoint-item.completed {
-        background: rgba(16, 185, 129, 0.05);
-        border-right-color: var(--success);
-    }
-
-    .checkpoint-checkbox {
-        width: 22px;
-        height: 22px;
-        cursor: pointer;
-        flex-shrink: 0;
-        margin-top: 0.2rem;
-        accent-color: var(--success);
-    }
-
-    .checkpoint-content {
-        flex: 1;
-    }
-
-    .checkpoint-title {
-        font-weight: 600;
-        color: var(--gray-900);
-        margin-bottom: 0.2rem;
-    }
-
-    .checkpoint-item.completed .checkpoint-title {
-        text-decoration: line-through;
-        color: var(--gray-500);
-    }
-
-    .checkpoint-desc {
-        font-size: 0.85rem;
-        color: var(--gray-600);
-    }
-
-    .checkpoint-date {
-        font-size: 0.72rem;
-        color: var(--gray-500);
-        margin-top: 0.25rem;
-    }
-
-    .icon-btn-delete {
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--danger);
-        border: none;
-        padding: 0.35rem 0.8rem;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.75rem;
-        font-weight: 600;
-        flex-shrink: 0;
-        height: fit-content;
-    }
-
-    .icon-btn-delete:hover {
-        background: var(--danger);
-        color: white;
-    }
-
-    /* ════════════════════════════════════════════
-       RESOURCES
-       ════════════════════════════════════════════ */
-
-    .resources-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .resource-item {
-        display: flex;
-        gap: 1rem;
-        padding: 1rem;
-        background: var(--gray-50);
-        border-radius: 10px;
-        border: 1px solid var(--gray-200);
-    }
-
-    .resource-icon {
-        font-size: 1.4rem;
-        flex-shrink: 0;
-    }
-
-    .resource-content {
-        flex: 1;
-    }
-
-    .resource-title {
-        font-weight: 600;
-        color: var(--gray-900);
-        margin-bottom: 0.25rem;
-    }
-
-    .resource-type {
-        display: inline-block;
-        background: var(--gray-200);
-        padding: 0.2rem 0.65rem;
-        border-radius: 4px;
-        font-size: 0.72rem;
-        color: var(--gray-700);
-        margin-bottom: 0.4rem;
-    }
-
-    .resource-url {
-        color: var(--primary);
-        text-decoration: none;
-        font-size: 0.82rem;
-        word-break: break-all;
-    }
-
-    .resource-url:hover {
-        text-decoration: underline;
-    }
-
-    /* ════════════════════════════════════════════
-       SIDEBAR INFO
-       ════════════════════════════════════════════ */
-
-    .info-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.65rem 0;
-        border-bottom: 1px solid var(--gray-100);
-        font-size: 0.88rem;
-    }
-
-    .info-item:last-child {
-        border-bottom: none;
-    }
-
-    .info-label {
-        font-weight: 600;
-        color: var(--gray-600);
-    }
-
-    .info-value {
-        color: var(--gray-900);
-        font-weight: 600;
-    }
-
-    /* ════════════════════════════════════════════
-       BUTTONS
-       ════════════════════════════════════════════ */
-
-    .btn-group {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }
-
-    .btn {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 8px;
-        font-size: 0.92rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .btn-block {
-        width: 100%;
-    }
-
-    .btn-primary {
-        background: var(--primary);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--primary-dark);
-    }
-
-    .btn-success {
-        background: var(--success);
-        color: white;
-    }
-
-    .btn-success:hover {
-        background: #059669;
-    }
-
-    .btn-secondary {
-        background: var(--gray-200);
-        color: var(--gray-900);
-    }
-
-    .btn-secondary:hover {
-        background: var(--gray-300);
-    }
-
-    .btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    /* ════════════════════════════════════════════
-       ALERTS
-       ════════════════════════════════════════════ */
-
-    .alert {
-        padding: 0.9rem 1rem;
-        border-radius: 10px;
-        margin-bottom: 1rem;
-        display: flex;
-        gap: 0.75rem;
-        align-items: flex-start;
-        font-size: 0.88rem;
-    }
-
-    .alert-info {
-        background: rgba(59, 130, 246, 0.1);
-        border: 1px solid var(--primary);
-        color: #1e40af;
-    }
-
-    .alert-success {
-        background: rgba(16, 185, 129, 0.1);
-        border: 1px solid var(--success);
-        color: #065f46;
-    }
-
-    .alert-warning {
-        background: rgba(245, 158, 11, 0.1);
-        border: 1px solid var(--warning);
-        color: #92400e;
-    }
-
-    .alert-danger {
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid var(--danger);
-        color: #7f1d1d;
-    }
-
-    .toast-alert {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 10000;
-        max-width: 360px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    }
-</style>
-
 <div class="activity-detail-container">
 
-    <!-- HEADER -->
-    <div class="activity-header">
-        <div class="activity-header-content">
+    <div class="sd-page">
+        <!-- HEADER -->
+        <div class="activity-header">
+            <div class="activity-header-content">
+                <div>
+                    <div class="activity-header-breadcrumb">
+                        <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}">{{ roadmap.title }}</a>
+                        <span> / </span>
+                        <a href="{% url 'roadmap:stage_detail' stage.id %}">{{ stage.title }}</a>
+                        <span> / </span>
+                        <span>{{ activity.title }}</span>
+                    </div>
+                    <h1 class="activity-header-title">{{ activity.title }}</h1>
+                    <span class="status-badge {% if stage_activity.is_completed %}completed{% else %}pending{% endif %}">
+                        {% if stage_activity.is_completed %}✅ تکمیل‌شده{% else %}⏳ در انتظار{% endif %}
+                    </span>
+                </div>
+                <div class="activity-header-status">
+                    <div class="status-badge">📁 {{ activity.get_category_display }}</div>
+                    {% if activity.organizer %}<div class="status-badge">👤 {{ activity.organizer }}</div>{% endif %}
+                    {% if activity.level %}<div class="status-badge">🌍 {{ activity_level_label }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- راهنمای صفحه -->
+        <div class="page-guide">
+            <span>💡</span>
             <div>
-                <div class="activity-header-breadcrumb">
-                    <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}">{{ roadmap.title }}</a>
-                    <span> / </span>
-                    <a href="{% url 'roadmap:stage_detail' stage.id %}">{{ stage.title }}</a>
-                    <span> / </span>
-                    <span>{{ activity.title }}</span>
-                </div>
-                <h1 class="activity-header-title">{{ activity.title }}</h1>
-                <span class="status-badge {% if stage_activity.is_completed %}completed{% else %}pending{% endif %}">
-                    {% if stage_activity.is_completed %}✅ تکمیل‌شده{% else %}⏳ در انتظار{% endif %}
-                </span>
-            </div>
-            <div class="activity-header-status">
-                <div class="status-badge">📁 {{ activity.get_category_display }}</div>
-                {% if activity.organizer %}<div class="status-badge">👤 {{ activity.organizer }}</div>{% endif %}
-                {% if activity.level %}<div class="status-badge">🌍 {{ activity_level_label }}</div>{% endif %}
+                این صفحه برای مدیریت یک فعالیتِ خاص از رودمپ شماست. پیشرفت کار را ثبت کنید، نقاط کنترل و منابع را
+                مدیریت کنید و در پایان فعالیت را «تکمیل‌شده» علامت بزنید. اگر فعالیت انتخابی مناسب نیست، از دکمهٔ
+                «تغییر فعالیت» برای انتخاب فعالیت دیگری استفاده کنید.
             </div>
         </div>
-    </div>
 
-    <!-- راهنمای صفحه -->
-    <div class="page-guide">
-        <span>💡</span>
-        <div>
-            این صفحه برای مدیریت یک فعالیتِ خاص از رودمپ شماست. اول باید فعالیت را مشخص کنید
-            (یا از لیست آماده انتخاب کنید، یا خودتان بسازید)، بعد پیشرفت‌تان را ثبت کنید و در پایان
-            آن را «تکمیل‌شده» علامت بزنید.
-        </div>
-    </div>
+        <div class="activity-content">
 
-    <div class="activity-content">
+            <!-- ═══════════ MAIN ═══════════ -->
+            <div class="activity-main">
 
-        <!-- ═══════════ MAIN ═══════════ -->
-        <div class="activity-main">
-
-            <!-- توضیحات فعالیت -->
-            {% if activity.description %}
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">📝 توضیحات فعالیت</h2>
+                <!-- فعالیت فعلی + دکمه تغییر -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">🎯 فعالیت انتخاب‌شده</h2>
+                    </div>
+                    <div class="current-activity-row">
+                        <div class="current-activity-badge">
+                            {% if stage_activity.activity_source == 'static' and stage_activity.static_item_data %}
+                            <span class="src-icon">🎯</span>
+                            <div>
+                                <div>{{ stage_activity.static_item_data.title }}</div>
+                                <div class="current-activity-sub">انتخاب‌شده از لیست آماده</div>
+                            </div>
+                            {% elif stage_activity.activity_source == 'custom' %}
+                            <span class="src-icon">✏️</span>
+                            <div>
+                                <div>{{ activity.title }}</div>
+                                <div class="current-activity-sub">تعریف‌شده به‌صورت دستی</div>
+                            </div>
+                            {% else %}
+                            <span class="src-icon">❔</span>
+                            <div>
+                                <div>هنوز فعالیتی مشخص نشده</div>
+                                <div class="current-activity-sub">برای شروع، یک فعالیت انتخاب کنید</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <button type="button" class="btn rm-btn-ghost btn-sm" onclick="openActivityModal()">
+                            تغییر فعالیت
+                        </button>
+                    </div>
                 </div>
-                <p class="card-desc">شرح کاملی از این فعالیت و اینکه شامل چه کاری می‌شود.</p>
-                <div class="description-section">{{ activity.description|linebreaks }}</div>
-            </div>
-            {% endif %}
 
-            <!-- بخش ۱: انتخاب فعالیت -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">🎯 مشخص کردن فعالیت</h2>
-                </div>
-                <p class="card-desc">
-                    برای این مرحله باید یک فعالیت مشخص کنید: یا از لیست آماده‌ی فعالیت‌های رایج
-                    (دوره، کنگره، پروژه و...) یکی را انتخاب کنید، یا اگر فعالیت موردنظرتان در لیست نیست،
-                    خودتان جزئیات آن را وارد کنید. فقط یکی از این دو روش قابل انتخاب است.
-                </p>
-
-                {% if stage_activity.activity_source == 'static' and stage_activity.static_item_data %}
-                <div class="current-source-badge">
-                    ✅ فعالیت فعلی از «لیست آماده» انتخاب شده: {{ stage_activity.static_item_data.title }}
-                </div>
-                {% elif stage_activity.activity_source == 'custom' %}
-                <div class="current-source-badge">
-                    ✏️ فعالیت فعلی به‌صورت دستی تعریف شده است.
+                <!-- توضیحات فعالیت -->
+                {% if activity.description %}
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">📝 توضیحات فعالیت</h2>
+                    </div>
+                    <p class="card-desc">شرح کاملی از این فعالیت و اینکه شامل چه کاری می‌شود.</p>
+                    <div class="description-section">{{ activity.description|linebreaks }}</div>
                 </div>
                 {% endif %}
 
-                <div class="source-switch">
-                    <button type="button" class="source-switch-btn active" id="btn-switch-static"
-                        onclick="switchSource('static')">
-                        🎯 انتخاب از لیست آماده
-                    </button>
-                    <button type="button" class="source-switch-btn" id="btn-switch-custom"
-                        onclick="switchSource('custom')">
-                        ✏️ ایجاد فعالیت دستی
-                    </button>
+                <!-- پیشرفت -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">📊 درصد پیشرفت</h2>
+                        <span id="progressValue" style="font-weight:700; color: var(--primary); font-size: var(--text-lg);">
+                            {{ stage_activity.progress_percentage|default:0 }}%
+                        </span>
+                    </div>
+                    <p class="card-desc">میزان پیشرفت خود را در انجام این فعالیت مشخص کنید.</p>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progressFill" style="width: {{ stage_activity.progress_percentage|default:0 }}%;"></div>
+                    </div>
+                    <input type="range" id="progressSlider" min="0" max="100" step="5"
+                        value="{{ stage_activity.progress_percentage|default:0 }}"
+                        style="width:100%; margin-top: var(--gap-sm); accent-color: var(--primary);">
                 </div>
 
-                <!-- پنل: لیست آماده -->
-                <div id="panel-static" class="source-panel active">
-                    <div class="form-group">
-                        <label class="form-label">فیلتر بر اساس دسته</label>
-                        <select id="categoryFilter" class="form-select" onchange="filterStaticItems()">
-                            <option value="">همه دسته‌ها</option>
-                            {% for key, label in category_labels.items %}
-                            <option value="{{ key }}">{{ label }}</option>
-                            {% endfor %}
-                        </select>
+                <!-- نقاط کنترل -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">✓ نقاط کنترل</h2>
+                    </div>
+                    <p class="card-desc">فعالیت را به گام‌های کوچک‌تر بشکنید تا پیشرفت خود را دقیق‌تر دنبال کنید؛ مثلاً
+                        «تکمیل فصل اول» یا «ارسال چکیده مقاله».</p>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">عنوان نقطه کنترل</label>
+                            <input type="text" class="form-input" id="checkpointTitle" placeholder="مثال: تکمیل فصل اول">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">توضیحات (اختیاری)</label>
+                            <input type="text" class="form-input" id="checkpointDesc" placeholder="توضیحات کوتاه">
+                        </div>
                     </div>
 
-                    <div class="static-items-grid" id="staticItemsGrid">
-                        {% for item in static_items %}
-                        <div class="static-item-card {% if stage_activity.static_item_id == item.id|stringformat:'s' %}selected{% endif %}"
-                            data-category="{{ item.category }}" onclick="selectStaticItem('{{ item.id }}', this)">
-                            <div class="static-item-title">{{ item.title }}</div>
-                            <span class="static-item-category">{{ item.category_label }}</span>
-                            <div class="static-item-desc">{{ item.description|truncatewords:15 }}</div>
-                            <div class="static-item-meta">
-                                <span>⏱️ {{ item.estimated_duration_days }} روز</span>
-                                <span>⭐ {{ item.impact_score }}/10</span>
+                    <button class="btn rm-btn-primary" onclick="addCheckpoint()">➕ اضافه کردن نقطه کنترل</button>
+
+                    <div class="checkpoints-list" id="checkpointsList" style="margin-top: var(--gap-sm);">
+                        {% for checkpoint in stage_activity.checkpoints %}
+                        <div class="checkpoint-item {% if checkpoint.is_completed %}completed{% endif %}"
+                            data-checkpoint-id="{{ checkpoint.id }}">
+                            <input type="checkbox" class="checkpoint-checkbox"
+                                {% if checkpoint.is_completed %}checked{% endif %}
+                                onchange="toggleCheckpoint({{ stage_activity.id }}, {{ checkpoint.id }})">
+                            <div class="checkpoint-content">
+                                <div class="checkpoint-title">{{ checkpoint.title }}</div>
+                                {% if checkpoint.description %}<div class="checkpoint-desc">{{ checkpoint.description }}</div>{% endif %}
+                                {% if checkpoint.date %}<div class="checkpoint-date">✅ تکمیل: {{ checkpoint.date }}</div>{% endif %}
                             </div>
+                            <button class="icon-btn-delete"
+                                onclick="deleteCheckpoint({{ stage_activity.id }}, {{ checkpoint.id }})">حذف</button>
                         </div>
                         {% empty %}
-                        <div class="empty-state">فعلاً آیتمی در لیست آماده موجود نیست.</div>
+                        <div class="empty-state">هنوز نقطه کنترلی اضافه نکرده‌اید.</div>
                         {% endfor %}
                     </div>
                 </div>
 
-                <!-- پنل: فعالیت دستی -->
-                <div id="panel-custom" class="source-panel">
-                    <form id="customActivityForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">عنوان فعالیت</label>
-                                <input type="text" class="form-input" name="title" value="{{ activity.title }}"
-                                    required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">دسته</label>
-                                <select class="form-select" name="category" required>
-                                    {% for key, label in category_labels.items %}
-                                    <option value="{{ key }}" {% if activity.category == key %}selected{% endif %}>
-                                        {{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">توضیحات</label>
-                            <textarea class="form-textarea" name="description">{{ activity.description }}</textarea>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">مدت زمان (روز)</label>
-                                <input type="number" class="form-input" name="duration_days"
-                                    value="{{ activity.duration_days }}" min="1" max="365" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">امتیاز تاثیر (۱ تا ۱۰)</label>
-                                <input type="number" class="form-input" name="impact_score"
-                                    value="{{ activity.impact_score }}" min="1" max="10" required>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">سطح دشواری</label>
-                                <select class="form-select" name="difficulty_rating">
-                                    {% for key, label in difficulty_labels.items %}
-                                    <option value="{{ key }}"
-                                        {% if activity.difficulty_rating == key %}selected{% endif %}>{{ label }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">سطح</label>
-                                <select class="form-select" name="level">
-                                    <option value="">انتخاب کنید</option>
-                                    {% for key, label in level_labels.items %}
-                                    <option value="{{ key }}" {% if activity.level == key %}selected{% endif %}>
-                                        {{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">برگزارکننده (اختیاری)</label>
-                            <input type="text" class="form-input" name="organizer" value="{{ activity.organizer }}">
-                        </div>
-
-                        <button type="button" class="btn btn-primary btn-block" onclick="createCustomActivity()">
-                            💾 ذخیره فعالیت دستی
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- بخش ۳: نقاط کنترل -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">✓ نقاط کنترل</h2>
-                </div>
-                <p class="card-desc">فعالیت را به گام‌های کوچک‌تر بشکنید تا پیشرفت خود را دقیق‌تر دنبال کنید؛ مثلاً
-                    «تکمیل فصل اول» یا «ارسال چکیده مقاله».</p>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">عنوان نقطه کنترل</label>
-                        <input type="text" class="form-input" id="checkpointTitle" placeholder="مثال: تکمیل فصل اول">
+                <!-- منابع -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">📚 منابع</h2>
                     </div>
+                    <p class="card-desc">لینک، کتاب یا فایل‌های مفیدی که برای انجام این فعالیت استفاده می‌کنید را اینجا نگه دارید.</p>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">عنوان منبع</label>
+                            <input type="text" class="form-input" id="resourceTitle" placeholder="مثال: مقاله مرجع">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">نوع</label>
+                            <select class="form-select" id="resourceType">
+                                <option value="link">لینک</option>
+                                <option value="file">فایل</option>
+                                <option value="book">کتاب</option>
+                                <option value="course">دوره</option>
+                                <option value="other">سایر</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">آدرس (URL) — اختیاری</label>
+                        <input type="url" class="form-input" id="resourceUrl" placeholder="https://example.com">
+                    </div>
+
                     <div class="form-group">
                         <label class="form-label">توضیحات (اختیاری)</label>
-                        <input type="text" class="form-input" id="checkpointDesc" placeholder="توضیحات کوتاه">
+                        <textarea class="form-textarea" id="resourceDesc" placeholder="توضیحات کوتاه"></textarea>
                     </div>
-                </div>
 
-                <button class="btn btn-primary" onclick="addCheckpoint()">➕ اضافه کردن نقطه کنترل</button>
+                    <button class="btn rm-btn-primary" onclick="addResource()">➕ اضافه کردن منبع</button>
 
-                <div class="checkpoints-list" id="checkpointsList" style="margin-top: 1.25rem;">
-                    {% for checkpoint in stage_activity.checkpoints %}
-                    <div class="checkpoint-item {% if checkpoint.is_completed %}completed{% endif %}"
-                        data-checkpoint-id="{{ checkpoint.id }}">
-                        <input type="checkbox" class="checkpoint-checkbox"
-                            {% if checkpoint.is_completed %}checked{% endif %}
-                            onchange="toggleCheckpoint({{ stage_activity.id }}, {{ checkpoint.id }})">
-                        <div class="checkpoint-content">
-                            <div class="checkpoint-title">{{ checkpoint.title }}</div>
-                            {% if checkpoint.description %}<div class="checkpoint-desc">{{ checkpoint.description }}
-                            </div>{% endif %}
-                            {% if checkpoint.date %}<div class="checkpoint-date">✅ تکمیل: {{ checkpoint.date }}</div>
-                            {% endif %}
+                    <div class="resources-list" id="resourcesList" style="margin-top: var(--gap-sm);">
+                        {% for resource in stage_activity.resources %}
+                        <div class="resource-item" data-resource-id="{{ resource.id }}">
+                            <div class="resource-icon">
+                                {% if resource.type == 'link' %}🔗{% elif resource.type == 'file' %}📄{% elif resource.type == 'book' %}📖{% elif resource.type == 'course' %}🎓{% else %}📌{% endif %}
+                            </div>
+                            <div class="resource-content">
+                                <div class="resource-title">{{ resource.title }}</div>
+                                <span class="resource-type">{{ resource.type }}</span>
+                                {% if resource.url %}<div><a href="{{ resource.url }}" target="_blank" class="resource-url">{{ resource.url }}</a></div>{% endif %}
+                                {% if resource.description %}<p style="margin-top: 6px; color: var(--ink-600); font-size: var(--text-sm);">{{ resource.description }}</p>{% endif %}
+                            </div>
+                            <button class="icon-btn-delete"
+                                onclick="deleteResource({{ stage_activity.id }}, {{ resource.id }})">حذف</button>
                         </div>
-                        <button class="icon-btn-delete"
-                            onclick="deleteCheckpoint({{ stage_activity.id }}, {{ checkpoint.id }})">حذف</button>
+                        {% empty %}
+                        <div class="empty-state">هنوز منبعی اضافه نکرده‌اید.</div>
+                        {% endfor %}
                     </div>
-                    {% empty %}
-                    <div class="empty-state">هنوز نقطه کنترلی اضافه نکرده‌اید.</div>
-                    {% endfor %}
                 </div>
+
+                <!-- یادداشت‌ها -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">📌 یادداشت‌ها و نتیجه</h2>
+                    </div>
+                    <p class="card-desc">یادداشت شخصی برای حین انجام کار، و در پایان خلاصه‌ای از نتیجه/دستاورد این فعالیت.</p>
+
+                    <div class="form-group">
+                        <label class="form-label">یادداشت‌های شخصی</label>
+                        <textarea class="form-textarea" id="notesTextarea" style="min-height: 140px;">{{ stage_activity.notes }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">خلاصه نتایج</label>
+                        <textarea class="form-textarea" id="resultSummary" style="min-height: 100px;">{{ stage_activity.result_summary }}</textarea>
+                    </div>
+
+                    <button class="btn rm-btn-primary" onclick="saveNotes()">💾 ذخیره یادداشت‌ها</button>
+                </div>
+
             </div>
 
-            <!-- بخش ۴: منابع -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">📚 منابع</h2>
-                </div>
-                <p class="card-desc">لینک، کتاب یا فایل‌های مفیدی که برای انجام این فعالیت استفاده می‌کنید را اینجا نگه
-                    دارید.</p>
+            <!-- ═══════════ SIDEBAR ═══════════ -->
+            <div class="activity-sidebar">
 
-                <div class="form-row">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">ℹ️ اطلاعات</h3>
+                    </div>
+                    <div class="info-item"><span class="info-label">رودمپ</span><span class="info-value">{{ roadmap.title }}</span></div>
+                    <div class="info-item"><span class="info-label">مرحله</span><span class="info-value">{{ stage.title }}</span></div>
+                    <div class="info-item"><span class="info-label">دسته</span><span class="info-value">{{ activity.get_category_display }}</span></div>
+                    <div class="info-item"><span class="info-label">مدت زمان</span><span class="info-value">{{ activity.duration_days }} روز</span></div>
+                    <div class="info-item"><span class="info-label">امتیاز تاثیر</span><span class="info-value">{{ activity.impact_score }}/10</span></div>
+                    <div class="info-item"><span class="info-label">سطح دشواری</span><span class="info-value">{{ activity_difficulty_label }}</span></div>
+                    {% if activity.organizer %}<div class="info-item"><span class="info-label">برگزارکننده</span><span class="info-value">{{ activity.organizer }}</span></div>{% endif %}
+                    {% if activity.level %}<div class="info-item"><span class="info-label">سطح</span><span class="info-value">{{ activity_level_label }}</span></div>{% endif %}
+                    <div class="info-item"><span class="info-label">تاریخ شروع</span><span class="info-value">{{ stage_activity.actual_start_date|default:stage.start_date|date:"d/m/Y" }}</span></div>
+                    <div class="info-item"><span class="info-label">تاریخ پایان</span><span class="info-value">{{ stage_activity.actual_end_date|default:stage.end_date|date:"d/m/Y" }}</span></div>
+                    <div class="info-item"><span class="info-label">روزهای باقی‌مانده</span><span class="info-value">{{ stage_activity.get_remaining_days }} روز</span></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📅 تاریخ‌های واقعی</h3>
+                    </div>
+                    <p class="card-desc">اگر تاریخ شروع/پایان واقعیِ انجام فعالیت با برنامه اولیه فرق دارد، اینجا ثبت کنید.</p>
                     <div class="form-group">
-                        <label class="form-label">عنوان منبع</label>
-                        <input type="text" class="form-input" id="resourceTitle" placeholder="مثال: مقاله مرجع">
+                        <label class="form-label">تاریخ شروع واقعی</label>
+                        <input type="date" class="form-input" id="actualStartDate" value="{{ stage_activity.actual_start_date|date:'Y-m-d' }}">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">نوع</label>
-                        <select class="form-select" id="resourceType">
-                            <option value="link">لینک</option>
-                            <option value="file">فایل</option>
-                            <option value="book">کتاب</option>
-                            <option value="course">دوره</option>
-                            <option value="other">سایر</option>
-                        </select>
+                        <label class="form-label">تاریخ پایان واقعی</label>
+                        <input type="date" class="form-input" id="actualEndDate" value="{{ stage_activity.actual_end_date|date:'Y-m-d' }}">
                     </div>
+                    <button class="btn btn-secondary btn-block" onclick="updateDates()">بروزرسانی تاریخ‌ها</button>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">آدرس (URL) — اختیاری</label>
-                    <input type="url" class="form-input" id="resourceUrl" placeholder="https://example.com">
+                <div class="card">
+                    {% if not stage_activity.is_completed %}
+                    <button class="btn btn-success btn-block" onclick="completeActivity()">✅ علامت‌گذاری به‌عنوان تکمیل‌شده</button>
+                    {% else %}
+                    <button class="btn btn-secondary btn-block" disabled>✅ تکمیل‌شده</button>
+                    {% endif %}
+                    <a href="{% url 'roadmap:stage_detail' stage.id %}" class="btn rm-btn-ghost btn-block" style="margin-top: var(--gap-sm);">
+                        ← بازگشت به مرحله
+                    </a>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">توضیحات (اختیاری)</label>
-                    <textarea class="form-textarea" id="resourceDesc" placeholder="توضیحات کوتاه"></textarea>
-                </div>
-
-                <button class="btn btn-primary" onclick="addResource()">➕ اضافه کردن منبع</button>
-
-                <div class="resources-list" id="resourcesList" style="margin-top: 1.25rem;">
-                    {% for resource in stage_activity.resources %}
-                    <div class="resource-item" data-resource-id="{{ resource.id }}">
-                        <div class="resource-icon">
-                            {% if resource.type == 'link' %}🔗{% elif resource.type == 'file' %}📄{% elif resource.type == 'book' %}📖{% elif resource.type == 'course' %}🎓{% else %}📌{% endif %}
-                        </div>
-                        <div class="resource-content">
-                            <div class="resource-title">{{ resource.title }}</div>
-                            <span class="resource-type">{{ resource.type }}</span>
-                            {% if resource.url %}<div><a href="{{ resource.url }}" target="_blank"
-                                    class="resource-url">{{ resource.url }}</a></div>{% endif %}
-                            {% if resource.description %}<p
-                                style="margin-top: 0.4rem; color: var(--gray-600); font-size: 0.85rem;">
-                                {{ resource.description }}</p>{% endif %}
-                        </div>
-                        <button class="icon-btn-delete"
-                            onclick="deleteResource({{ stage_activity.id }}, {{ resource.id }})">حذف</button>
-                    </div>
-                    {% empty %}
-                    <div class="empty-state">هنوز منبعی اضافه نکرده‌اید.</div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- بخش ۵: یادداشت‌ها -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">📌 یادداشت‌ها و نتیجه</h2>
-                </div>
-                <p class="card-desc">یادداشت شخصی برای حین انجام کار، و در پایان خلاصه‌ای از نتیجه/دستاورد این فعالیت.
-                </p>
-
-                <div class="form-group">
-                    <label class="form-label">یادداشت‌های شخصی</label>
-                    <textarea class="form-textarea" id="notesTextarea"
-                        style="min-height: 140px;">{{ stage_activity.notes }}</textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">خلاصه نتایج</label>
-                    <textarea class="form-textarea" id="resultSummary"
-                        style="min-height: 100px;">{{ stage_activity.result_summary }}</textarea>
-                </div>
-
-                <button class="btn btn-primary" onclick="saveNotes()">💾 ذخیره یادداشت‌ها</button>
             </div>
 
         </div>
-
-        <!-- ═══════════ SIDEBAR ═══════════ -->
-        <div class="activity-sidebar">
-
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">ℹ️ اطلاعات</h3>
-                </div>
-                <div class="info-item"><span class="info-label">رودمپ</span><span
-                        class="info-value">{{ roadmap.title }}</span></div>
-                <div class="info-item"><span class="info-label">مرحله</span><span
-                        class="info-value">{{ stage.title }}</span></div>
-                <div class="info-item"><span class="info-label">دسته</span><span
-                        class="info-value">{{ activity.get_category_display }}</span></div>
-                <div class="info-item"><span class="info-label">مدت زمان</span><span
-                        class="info-value">{{ activity.duration_days }} روز</span></div>
-                <div class="info-item"><span class="info-label">امتیاز تاثیر</span><span
-                        class="info-value">{{ activity.impact_score }}/10</span></div>
-                <div class="info-item"><span class="info-label">سطح دشواری</span><span
-                        class="info-value">{{ activity_difficulty_label }}</span></div>
-                {% if activity.organizer %}<div class="info-item"><span class="info-label">برگزارکننده</span><span
-                        class="info-value">{{ activity.organizer }}</span></div>{% endif %}
-                {% if activity.level %}<div class="info-item"><span class="info-label">سطح</span><span
-                        class="info-value">{{ activity_level_label }}</span></div>{% endif %}
-                <div class="info-item"><span class="info-label">تاریخ شروع</span><span
-                        class="info-value">{{ stage_activity.actual_start_date|default:stage.start_date|date:"d/m/Y" }}</span>
-                </div>
-                <div class="info-item"><span class="info-label">تاریخ پایان</span><span
-                        class="info-value">{{ stage_activity.actual_end_date|default:stage.end_date|date:"d/m/Y" }}</span>
-                </div>
-                <div class="info-item"><span class="info-label">روزهای باقی‌مانده</span><span
-                        class="info-value">{{ stage_activity.get_remaining_days }} روز</span></div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">📅 تاریخ‌های واقعی</h3>
-                </div>
-                <p class="card-desc">اگر تاریخ شروع/پایان واقعیِ انجام فعالیت با برنامه اولیه فرق دارد، اینجا ثبت کنید.
-                </p>
-                <div class="form-group">
-                    <label class="form-label">تاریخ شروع واقعی</label>
-                    <input type="date" class="form-input" id="actualStartDate"
-                        value="{{ stage_activity.actual_start_date|date:'Y-m-d' }}">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">تاریخ پایان واقعی</label>
-                    <input type="date" class="form-input" id="actualEndDate"
-                        value="{{ stage_activity.actual_end_date|date:'Y-m-d' }}">
-                </div>
-                <button class="btn btn-secondary btn-block" onclick="updateDates()">بروزرسانی تاریخ‌ها</button>
-            </div>
-
-            <div class="card">
-                {% if not stage_activity.is_completed %}
-                <button class="btn btn-success btn-block" onclick="completeActivity()">✅ علامت‌گذاری به‌عنوان
-                    تکمیل‌شده</button>
-                {% else %}
-                <button class="btn btn-secondary btn-block" disabled>✅ تکمیل‌شده</button>
-                {% endif %}
-                <a href="{% url 'roadmap:stage_detail' stage.id %}" class="btn btn-secondary btn-block"
-                    style="text-decoration: none; text-align: center; display: block; margin-top: 0.75rem;">
-                    ← بازگشت به مرحله
-                </a>
-            </div>
-
-        </div>
-
     </div>
+</div>
 
+<!-- ════════════════════════════════════════════
+     MODAL: تغییر فعالیت
+     پیش‌فرض مخفی است و فقط با کلیک روی «تغییر فعالیت» نمایش داده می‌شود
+     ════════════════════════════════════════════ -->
+
+<div class="modal-overlay" id="activityModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="modal-title">تغییر فعالیت</h3>
+            <button type="button" class="modal-close" onclick="closeActivityModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <p class="card-desc">
+                یا از لیست آماده‌ی فعالیت‌های رایج (دوره، کنگره، پروژه و...) یکی را انتخاب کنید، یا اگر فعالیت
+                موردنظرتان در لیست نیست، خودتان جزئیات آن را وارد کنید.
+            </p>
+
+            {% if stage_activity.activity_source == 'static' and stage_activity.static_item_data %}
+            <div class="current-source-badge">
+                فعالیت فعلی از «لیست آماده» انتخاب شده: {{ stage_activity.static_item_data.title }}
+            </div>
+            {% elif stage_activity.activity_source == 'custom' %}
+            <div class="current-source-badge">
+                فعالیت فعلی به‌صورت دستی تعریف شده است.
+            </div>
+            {% endif %}
+
+            <div class="source-switch">
+                <button type="button" class="source-switch-btn active" id="btn-switch-static" onclick="switchSource('static')">
+                    انتخاب از لیست آماده
+                </button>
+                <button type="button" class="source-switch-btn" id="btn-switch-custom" onclick="switchSource('custom')">
+                    ایجاد فعالیت دستی
+                </button>
+            </div>
+
+            <!-- پنل: لیست آماده -->
+            <div id="panel-static" class="source-panel active">
+                <div class="form-group">
+                    <label class="form-label">فیلتر بر اساس دسته</label>
+                    <select id="categoryFilter" class="form-select" onchange="filterStaticItems()">
+                        <option value="">همه دسته‌ها</option>
+                        {% for key, label in category_labels.items %}
+                        <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="static-items-grid" id="staticItemsGrid">
+                    {% for item in static_items %}
+                    <div class="static-item-card {% if stage_activity.static_item_id == item.id|stringformat:'s' %}selected{% endif %}"
+                        data-category="{{ item.category }}" onclick="selectStaticItem('{{ item.id }}', this)">
+                        <div class="static-item-title">{{ item.title }}</div>
+                        <span class="static-item-category">{{ item.category_label }}</span>
+                        <div class="static-item-desc">{{ item.description|truncatewords:15 }}</div>
+                        <div class="static-item-meta">
+                            <span>{{ item.estimated_duration_days }} روز</span>
+                            <span>{{ item.impact_score }}/10</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">فعلاً آیتمی در لیست آماده موجود نیست.</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- پنل: فعالیت دستی -->
+            <div id="panel-custom" class="source-panel">
+                <form id="customActivityForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">عنوان فعالیت</label>
+                            <input type="text" class="form-input" name="title" value="{{ activity.title }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">دسته</label>
+                            <select class="form-select" name="category" required>
+                                {% for key, label in category_labels.items %}
+                                <option value="{{ key }}" {% if activity.category == key %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">توضیحات</label>
+                        <textarea class="form-textarea" name="description">{{ activity.description }}</textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">مدت زمان (روز)</label>
+                            <input type="number" class="form-input" name="duration_days" value="{{ activity.duration_days }}" min="1" max="365" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">امتیاز تاثیر (۱ تا ۱۰)</label>
+                            <input type="number" class="form-input" name="impact_score" value="{{ activity.impact_score }}" min="1" max="10" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">سطح دشواری</label>
+                            <select class="form-select" name="difficulty_rating">
+                                {% for key, label in difficulty_labels.items %}
+                                <option value="{{ key }}" {% if activity.difficulty_rating == key %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">سطح</label>
+                            <select class="form-select" name="level">
+                                <option value="">انتخاب کنید</option>
+                                {% for key, label in level_labels.items %}
+                                <option value="{{ key }}" {% if activity.level == key %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">برگزارکننده (اختیاری)</label>
+                        <input type="text" class="form-input" name="organizer" value="{{ activity.organizer }}">
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn rm-btn-ghost" onclick="closeActivityModal()">انصراف</button>
+            <button type="button" class="btn rm-btn-primary" id="modalSaveCustomBtn" style="display:none;" onclick="createCustomActivity()">
+                💾 ذخیره فعالیت دستی
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- ════════════════════════════════════════════
      SCRIPTS
      ════════════════════════════════════════════ -->
 
-{{ stage_activity.checkpoints|json_script:"__unused_checkpoints" }}
-
-
 <script>
 const ACTIVITY_ID = {{ stage_activity.id }};
 const ROADMAP_ID = {{ roadmap.id }};
 
+// ═══════════════════════════════════════════
+// MODAL (تغییر فعالیت)
+// ═══════════════════════════════════════════
 
+function openActivityModal() {
+    document.getElementById('activityModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeActivityModal() {
+    document.getElementById('activityModal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+// بستن مودال با کلیک روی پس‌زمینه
+document.getElementById('activityModal').addEventListener('click', function (e) {
+    if (e.target === this) closeActivityModal();
+});
+
+// بستن مودال با کلید Escape
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeActivityModal();
+});
 
 // ═══════════════════════════════════════════
 // SOURCE SWITCH (لیست آماده / دستی)
@@ -1091,6 +467,7 @@ function switchSource(source) {
     document.getElementById('panel-custom').classList.toggle('active', source === 'custom');
     document.getElementById('btn-switch-static').classList.toggle('active', source === 'static');
     document.getElementById('btn-switch-custom').classList.toggle('active', source === 'custom');
+    document.getElementById('modalSaveCustomBtn').style.display = (source === 'custom') ? 'inline-flex' : 'none';
 }
 
 // ═══════════════════════════════════════════
@@ -1258,7 +635,7 @@ function addResource() {
                         <div class="resource-title">${data.resource.title}</div>
                         <span class="resource-type">${data.resource.type}</span>
                         ${data.resource.url ? `<div><a href="${data.resource.url}" target="_blank" class="resource-url">${data.resource.url}</a></div>` : ''}
-                        ${data.resource.description ? `<p style="margin-top: 0.4rem; color: var(--gray-600); font-size: 0.85rem;">${data.resource.description}</p>` : ''}
+                        ${data.resource.description ? `<p style="margin-top: 6px; color: var(--ink-600); font-size: var(--text-sm);">${data.resource.description}</p>` : ''}
                     </div>
                     <button class="icon-btn-delete" onclick="deleteResource(${ACTIVITY_ID}, ${data.resource.id})">حذف</button>
                 </div>`;
@@ -1372,7 +749,7 @@ function getCookie(name) {
 function showAlert(type, message) {
     const icons = { success: '✅', danger: '❌', warning: '⚠️', info: 'ℹ️' };
     const html = `
-        <div class="alert alert-${type} toast-alert">
+        <div class="alert-${type} toast-alert">
             <span>${icons[type] || 'ℹ️'}</span>
             <div>${message}</div>
         </div>`;
@@ -1382,7 +759,6 @@ function showAlert(type, message) {
         if (el) el.remove();
     }, 3500);
 }
-
 </script>
 
 {% endblock %}

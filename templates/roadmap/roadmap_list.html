@@ -1,397 +1,111 @@
-<!-- templates/oadmap/roadmap_list.html -->
-
-
+<!-- templates/roadmap/roadmap_list.html -->
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}نقشه‌های راه{% endblock %}
-{% block topbar_title %}نقشه‌های راه من{% endblock %}
+{% block title %}رودمپ‌ها{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/roadmap.css' %}">
+{% endblock %}
 
 {% block content %}
-
 <div class="rm-page">
-    <div class="rm-page-header">
-        <div class="rm-header-left">
-            <h1 class="rm-page-title">نقشه‌های راه</h1>
-            <p class="rm-page-desc">برنامه‌های توسعه حرفه‌ای شما</p>
-        </div>
-        <div class="rm-header-actions">
-            <a href="{% url 'roadmap:roadmap_create' %}" class="rm-btn rm-btn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                ایجاد رودمپ جدید
-            </a>
-        </div>
+
+  <div class="rm-topbar">
+    <div>
+      <h1 class="rm-page-title">نقشه‌های راه <span class="rm-title-grad">حرفه‌ای</span></h1>
+      <p class="rm-page-sub">برنامه‌های توسعه حرفه‌ای شما</p>
     </div>
+    <a href="{% url 'roadmap:roadmap_create' %}" class="rm-btn rm-btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      ایجاد رودمپ جدید
+    </a>
+  </div>
 
-    <div class="rm-stats-row">
-        <div class="rm-stat-card">
-            <span class="rm-stat-label">کل رودمپ‌ها</span>
-            <span class="rm-stat-value">{{ roadmaps|length }}</span>
-        </div>
-        <div class="rm-stat-card">
-            <span class="rm-stat-label">فعال</span>
-            <span class="rm-stat-value">{{ active_count }}</span>
-        </div>
-        <div class="rm-stat-card">
-            <span class="rm-stat-label">تکمیل‌شده</span>
-            <span class="rm-stat-value">{{ completed_count }}</span>
-        </div>
+  <div class="rm-stats-row-3">
+    <div class="rm-stat-card">
+      <span class="rm-stat-icon rm-stat-icon-total">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M9 12l2 2 4-4"/></svg>
+      </span>
+      <div>
+        <span class="rm-stat-value">{{ roadmaps|length }}</span>
+        <span class="rm-stat-label">کل رودمپ‌ها</span>
+      </div>
     </div>
-
-    <div class="rm-body">
-        {% if roadmaps %}
-        <div class="rm-grid">
-            {% for roadmap in roadmaps %}
-            <div class="rm-card rm-card-roadmap">
-                <div class="rm-card-header-compact">
-                    <div class="rm-card-title-wrap">
-                        <h3 class="rm-card-title">{{ roadmap.title }}</h3>
-                        <span class="tag tag-status tag-{{ roadmap.status }}">
-                            {% if roadmap.status == 'active' %}
-                            🔄 فعال
-                            {% elif roadmap.status == 'completed' %}
-                            ✓ تکمیل‌شده
-                            {% elif roadmap.status == 'paused' %}
-                            ⏸ متوقف
-                            {% else %}
-                            📝 پیش‌نویس
-                            {% endif %}
-                        </span>
-                    </div>
-                    <p class="rm-card-desc">{{ roadmap.description|truncatewords:20 }}</p>
-                </div>
-
-                <div class="rm-card-body-compact">
-                    <div class="rm-progress-section">
-                        <div class="rm-progress-header">
-                            <span class="rm-progress-label">پیشرفت</span>
-                            <span class="rm-progress-pct">{{ roadmap.get_progress }}%</span>
-                        </div>
-                        <div class="rm-progress-bar-track">
-                            <div class="rm-progress-bar-fill" style="width: {{ roadmap.get_progress }}%;"></div>
-                        </div>
-                    </div>
-
-                    <div class="rm-card-meta">
-                        <div class="rm-meta-item">
-                            <span class="rm-meta-label">مدت زمان</span>
-                            <span class="rm-meta-value">{{ roadmap.duration_days }} روز</span>
-                        </div>
-                        <div class="rm-meta-item">
-                            <span class="rm-meta-label">مراحل</span>
-                            <span class="rm-meta-value">{{ roadmap.stages.count }}</span>
-                        </div>
-                        <div class="rm-meta-item">
-                            <span class="rm-meta-label">امتیاز</span>
-                            <span class="rm-meta-value">{{ roadmap.total_score|floatformat:1 }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rm-card-footer">
-                    <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="rm-btn rm-btn-sm rm-btn-primary">
-                        مشاهده جزئیات
-                    </a>
-                    <a href="{% url 'roadmap:roadmap_edit' roadmap.id %}" class="rm-btn rm-btn-sm rm-btn-outline">
-                        ویرایش
-                    </a>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="rm-empty">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M9 11l3 3L22 4"></path>
-                <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <p>هنوز رودمپی ایجاد نکرده‌اید.</p>
-            <a href="{% url 'roadmap:roadmap_create' %}" class="rm-btn rm-btn-primary">
-                ایجاد اولین رودمپ
-            </a>
-        </div>
-        {% endif %}
+    <div class="rm-stat-card">
+      <span class="rm-stat-icon rm-stat-icon-active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      </span>
+      <div>
+        <span class="rm-stat-value">{{ active_count }}</span>
+        <span class="rm-stat-label">فعال</span>
+      </div>
     </div>
+    <div class="rm-stat-card">
+      <span class="rm-stat-icon rm-stat-icon-done">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </span>
+      <div>
+        <span class="rm-stat-value">{{ completed_count }}</span>
+        <span class="rm-stat-label">تکمیل‌شده</span>
+      </div>
+    </div>
+  </div>
+
+  {% if roadmaps %}
+  <div class="rm-grid">
+    {% for roadmap in roadmaps %}
+    <div class="rm-card">
+      <div class="rm-card-head">
+        <h3 class="rm-card-title">{{ roadmap.title }}</h3>
+        <span class="rm-status-pill rm-status-{{ roadmap.status }}">
+          {% if roadmap.status == 'active' %}فعال
+          {% elif roadmap.status == 'completed' %}تکمیل‌شده
+          {% elif roadmap.status == 'paused' %}متوقف
+          {% else %}پیش‌نویس{% endif %}
+        </span>
+      </div>
+
+      <p class="rm-card-desc">{{ roadmap.description|truncatewords:35 }}</p>
+
+
+
+      <div class="rm-meta-row">
+        <div class="rm-meta-item">
+          <span class="rm-meta-label">مدت</span>
+          <span class="rm-meta-val">{{ roadmap.duration_days }} روز</span>
+        </div>
+        <div class="rm-meta-item">
+          <span class="rm-meta-label">پیشرفت</span>
+          <span class="rm-meta-val">{{ roadmap.get_progress  }}%</span>
+        </div>
+        <div class="rm-meta-item">
+          <span class="rm-meta-label">مراحل</span>
+          <span class="rm-meta-val">{{ roadmap.stages.count }}</span>
+        </div>
+        <div class="rm-meta-item">
+          <span class="rm-meta-label">امتیاز</span>
+          <span class="rm-meta-val">{{ roadmap.total_score|floatformat:1 }}</span>
+        </div>
+      </div>
+
+      <div class="rm-card-footer">
+        <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="rm-btn rm-btn-primary rm-n-sm">مشاهده جزئیات</a>
+        <a href="{% url 'roadmap:roadmap_edit' roadmap.id %}" class="rm-btn rm-btn-ghost rm-btn-sm">ویرایش</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="rm-empty">
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+      <path d="M9 11l3 3L22 4"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <p>هنوز رودمپی ایجاد نکرده‌اید.</p>
+    <a href="{% url 'roadmap:roadmap_create' %}" class="rm-btn rm-btn-primary">ایجاد اولین رودمپ</a>
+  </div>
+  {% endif %}
+
 </div>
-
-<style>
-    .rm-page {
-        padding: 2rem;
-        max-width: 1400px;
-    }
-
-    .rm-page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 2rem;
-        gap: 2rem;
-    }
-
-    .rm-header-left h1 {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-        color: #1a1a1a;
-    }
-
-    .rm-page-desc {
-        color: #666;
-        font-size: 0.95rem;
-    }
-
-    .rm-header-actions {
-        display: flex;
-        gap: 1rem;
-    }
-
-    .rm-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.5rem;
-        font-size: 0.95rem;
-        text-decoration: none;
-        cursor: pointer;
-        border: none;
-        transition: all 0.2s;
-    }
-
-    .rm-btn-primary {
-        background: #4f46e5;
-        color: white;
-    }
-
-    .rm-btn-primary:hover {
-        background: #4338ca;
-        transform: translateY(-2px);
-    }
-
-    .rm-btn-outline {
-        border: 1px solid #e5e7eb;
-        color: #1a1a1a;
-        background: white;
-    }
-
-    .rm-btn-outline:hover {
-        background: #f9fafb;
-    }
-
-    .rm-stats-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .rm-stat-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 0.75rem;
-        border: 1px solid #e5e7eb;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .rm-stat-label {
-        font-size: 0.85rem;
-        color: #666;
-        font-weight: 500;
-    }
-
-    .rm-stat-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #1a1a1a;
-    }
-
-    .rm-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .rm-card {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 0.75rem;
-        overflow: hidden;
-        transition: all 0.3s;
-    }
-
-    .rm-card:hover {
-        border-color: #4f46e5;
-        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
-    }
-
-    .rm-card-header-compact {
-        padding: 1.5rem;
-        border-bottom: 1px solid #f3f4f6;
-    }
-
-    .rm-card-title-wrap {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 1rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .rm-card-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #1a1a1a;
-        margin: 0;
-    }
-
-    .tag {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 0.25rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        white-space: nowrap;
-    }
-
-    .tag-status {
-        background: #f0f9ff;
-        color: #0369a1;
-    }
-
-    .tag-status.active {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .tag-status.completed {
-        background: #e0e7ff;
-        color: #3730a3;
-    }
-
-    .rm-card-desc {
-        color: #666;
-        font-size: 0.9rem;
-        margin: 0;
-    }
-
-    .rm-card-body-compact {
-        padding: 1.5rem;
-        border-bottom: 1px solid #f3f4f6;
-    }
-
-    .rm-progress-section {
-        margin-bottom: 1.5rem;
-    }
-
-    .rm-progress-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
-    }
-
-    .rm-progress-label {
-        color: #666;
-        font-weight: 500;
-    }
-
-    .rm-progress-pct {
-        color: #1a1a1a;
-        font-weight: 600;
-    }
-
-    .rm-progress-bar-track {
-        height: 6px;
-        background: #e5e7eb;
-        border-radius: 3px;
-        overflow: hidden;
-    }
-
-    .rm-progress-bar-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #4f46e5, #7c3aed);
-        transition: width 0.3s;
-    }
-
-    .rm-card-meta {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-    }
-
-    .rm-meta-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-
-    .rm-meta-label {
-        font-size: 0.75rem;
-        color: #999;
-        text-transform: uppercase;
-        font-weight: 600;
-    }
-
-    .rm-meta-value {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #1a1a1a;
-    }
-
-    .rm-card-footer {
-        padding: 1.5rem;
-        display: flex;
-        gap: 0.75rem;
-    }
-
-    .rm-btn-sm {
-        flex: 1;
-        justify-content: center;
-        padding: 0.5rem 1rem;
-        font-size: 0.85rem;
-    }
-
-    .rm-empty {
-        text-align: center;
-        padding: 3rem 2rem;
-        background: #f9fafb;
-        border-radius: 0.75rem;
-        border: 2px dashed #e5e7eb;
-    }
-
-    .rm-empty svg {
-        width: 64px;
-        height: 64px;
-        margin: 0 auto 1rem;
-        color: #d1d5db;
-    }
-
-    .rm-empty p {
-        color: #666;
-        margin-bottom: 1.5rem;
-    }
-
-    @media (max-width: 768px) {
-        .rm-page {
-            padding: 1rem;
-        }
-
-        .rm-page-header {
-            flex-direction: column;
-        }
-
-        .rm-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .rm-stats-row {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-
 {% endblock %}

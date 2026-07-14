@@ -4,8 +4,11 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ stage.title }}{% endblock %}
-{% block topbar_title %}{{ stage.title }}{% endblock %}
+{% block title %}{{ stage.title }} — رودمپ{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/roadmap.css' %}">
+{% endblock %}
 
 {% block content %}
 
@@ -14,616 +17,224 @@
     <div class="acm-box">
         <div class="acm-header">
             <h2>تأیید تکمیل فعالیت</h2>
+            <button class="acm-close" onclick="closeActivityModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
         </div>
-
         <p class="acm-warning-text">
             پس از تأیید، وضعیت این فعالیت به <strong>تکمیل‌شده</strong> تغییر می‌کند.
         </p>
-
         <div class="acm-section">
             <label class="acm-section-label">محل ذخیره‌سازی در پروفایل</label>
             <div class="acm-save-list" id="acm-save-list"></div>
         </div>
-
         <div class="acm-footer">
-            <button type="button" class="acm-btn acm-btn-cancel" onclick="closeActivityModal()">
-                انصراف
-            </button>
-            <button type="button" class="acm-btn acm-btn-confirm" onclick="submitActivityForm()">
-                تأیید
-            </button>
+            <button type="button" class="sd-btn sd-btn-ghost" onclick="closeActivityModal()">انصراف</button>
+            <button type="button" class="sd-btn sd-btn-primary" onclick="submitActivityForm()">تأیید و ذخیره</button>
         </div>
     </div>
 </div>
 
-<div class="rm-page">
-    <div class="rm-page-header">
-        <div class="rm-header-left">
-            <span class="rm-eyebrow">{{ roadmap.title }}</span>
-            <h1 class="rm-page-title">{{ stage.title }}</h1>
+<div class="sd-page">
+
+    <!-- هدر صفحه -->
+    <div class="sd-topbar">
+        <div class="sd-topbar-right">
+            <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="sd-back-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </a>
+            <div>
+                <div class="sd-eyebrow">{{ roadmap.title }}</div>
+                <h1 class="sd-page-title">{{ stage.title }}</h1>
+            </div>
         </div>
-        <div class="rm-header-actions">
-            <a href="{% url 'roadmap:stage_edit' stage.id %}" class="rm-btn rm-btn-primary">
+        <div class="sd-topbar-left">
+            {% if stage.get_progress == 100 %}
+            <span class="sd-status-pill sd-status-done">✓ تکمیل‌شده</span>
+            {% elif stage.id == active_stage.id %}
+            <span class="sd-status-pill sd-status-active">در حال انجام</span>
+            {% else %}
+            <span class="sd-status-pill sd-status-pending">در انتظار</span>
+            {% endif %}
+            <a href="{% url 'roadmap:stage_edit' stage.id %}" class="sd-btn sd-btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
                 ویرایش
             </a>
-            <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="rm-btn rm-btn-outline">
-                بازگشت
-            </a>
         </div>
     </div>
 
-    <div class="sd-stats-grid">
-        <div class="rm-stat-card">
-            <span class="rm-stat-label">وضعیت</span>
-            <span class="rm-stat-value">
-                {% if stage.get_progress == 100 %}
-                ✓ تکمیل‌شده
-                {% elif stage.id == active_stage.id %}
-                🔄 در حال انجام
-                {% else %}
-                ⏳ در انتظار
-                {% endif %}
+    <!-- کارت‌های آماری -->
+    <div class="sd-stats-row">
+        <div class="sd-stat-card">
+            <span class="sd-stat-label">مرحله</span>
+            <span class="sd-stat-value">{{ stage.order }}</span>
+        </div>
+        <div class="sd-stat-card">
+            <span class="sd-stat-label">پیشرفت</span>
+            <span class="sd-stat-value sd-stat-progress">
+                <span class="sd-progress-bar-wrap">
+                    <span class="sd-progress-bar-fill" style="width: {{ progress }}%"></span>
+                </span>
+                {{ progress }}%
             </span>
         </div>
-        <div class="rm-stat-card">
-            <span class="rm-stat-label">مرحله</span>
-            <span class="rm-stat-value">{{ stage.order }}</span>
+        <div class="sd-stat-card">
+            <span class="sd-stat-label">مدت زمان</span>
+            <span class="sd-stat-value">{{ duration }} <small>روز</small></span>
         </div>
-        <div class="rm-stat-card">
-            <span class="rm-stat-label">پیشرفت</span>
-            <span class="rm-stat-value">{{ progress }}%</span>
-        </div>
-        <div class="rm-stat-card">
-            <span class="rm-stat-label">مدت زمان</span>
-            <span class="rm-stat-value">{{ duration }} روز</span>
+        <div class="sd-stat-card">
+            <span class="sd-stat-label">فعالیت‌ها</span>
+            <span class="sd-stat-value">{{ activities|length }}</span>
         </div>
     </div>
 
-    <div class="sd-main">
-        {% if stage.description %}
-        <div class="rm-card">
-            <div class="rm-card-header">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                توضیحات
+    <!-- محتوای اصلی -->
+    <div class="sd-body">
+
+                <!-- ستون فعالیت‌ها -->
+        <div class="sd-info-col">
+
+            {% if stage.description %}
+            <div class="sd-card">
+                <div class="sd-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    توضیحات
+                </div>
+                <p class="sd-card-text">{{ stage.description }}</p>
             </div>
-            <div class="rm-card-body">
-                <p>{{ stage.description }}</p>
+            {% endif %}
+
+
+            <div class="sd-card sd-card-full">
+                <div class="sd-card-title-row">
+                    <div class="sd-card-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        فعالیت‌ها
+                    </div>
+                    <span class="sd-badge">{{ activities|length }}</span>
+                </div>
+
+                {% if activities %}
+                <div class="sd-activity-list">
+                    {% for item in activities %}
+                    <div class="sd-activity-item {% if item.is_completed %}sd-activity-done{% endif %}">
+                        <div class="sd-activity-body">
+                            <div class="sd-activity-top">
+                                <span class="sd-activity-title">{{ item.activity.title }}</span>
+                                <div class="sd-activity-meta">
+                                    <span class="sd-tag">{{ item.activity.get_category_display }}</span>
+                                    <span class="sd-tag sd-tag-neutral">{{ item.activity.duration_days }} روز</span>
+                                    {% if item.is_completed %}
+                                    <span class="sd-tag sd-tag-done">✓ تکمیل</span>
+                                    {% else %}
+                                    <span class="sd-tag sd-tag-pending">در انتظار</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if item.activity.description %}
+                            <p class="sd-activity-desc">{{ item.activity.description }}</p>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'roadmap:stage_activity_detail' item.id %}" class="sd-btn sd-btn-sm sd-btn-ghost">
+                            جزئیات
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="sd-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                        <rect x="9" y="3" width="6" height="4" rx="2"/>
+                    </svg>
+                    <span>فعالیتی برای این مرحله ثبت نشده است.</span>
+                </div>
+                {% endif %}
             </div>
         </div>
-        {% endif %}
 
-        {% if stage.objectives %}
-        <div class="rm-card">
-            <div class="rm-card-header">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 11l3 3L22 4"></path>
-                </svg>
-                اهداف
-            </div>
-            <div class="rm-card-body">
-                <p>{{ stage.objectives }}</p>
-            </div>
-        </div>
-        {% endif %}
 
-        {% if stage.milestone %}
-        <div class="rm-card">
-            <div class="rm-card-header">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                معیار تکمیل
-            </div>
-            <div class="rm-card-body">
-                <p>{{ stage.milestone }}</p>
-            </div>
-        </div>
-        {% endif %}
+        <!-- ستون اطلاعات -->
+        <div class="sd-info-col">
 
-        {% if stage.success_criteria %}
-        <div class="rm-card">
-            <div class="rm-card-header">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 11l3 3L22 4"></path>
-                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                معیارهای موفقیت
+            {% if stage.objectives %}
+            <div class="sd-card">
+                <div class="sd-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"/>
+                    </svg>
+                    اهداف
+                </div>
+                <p class="sd-card-text">{{ stage.objectives }}</p>
             </div>
-            <div class="rm-card-body">
+            {% endif %}
+
+            {% if stage.milestone %}
+            <div class="sd-card">
+                <div class="sd-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    معیار تکمیل
+                </div>
+                <p class="sd-card-text">{{ stage.milestone }}</p>
+            </div>
+            {% endif %}
+
+            {% if stage.success_criteria %}
+            <div class="sd-card">
+                <div class="sd-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"/>
+                        <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    معیارهای موفقیت
+                </div>
                 <ul class="sd-criteria-list">
                     {% for criterion in stage.success_criteria %}
                     <li>{{ criterion }}</li>
                     {% endfor %}
                 </ul>
             </div>
-        </div>
-        {% endif %}
+            {% endif %}
 
-        {% if stage.risks %}
-        <div class="rm-card">
-            <div class="rm-card-header">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                    <line x1="12" y1="9" x2="12" y2="13"></line>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-                ریسک‌های احتمالی
-            </div>
-            <div class="rm-card-body">
+            {% if stage.risks %}
+            <div class="sd-card sd-card-risk">
+                <div class="sd-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    ریسک‌های احتمالی
+                </div>
                 <ul class="sd-risks-list">
                     {% for risk in stage.risks %}
                     <li>{{ risk }}</li>
                     {% endfor %}
                 </ul>
             </div>
-        </div>
-        {% endif %}
+            {% endif %}
 
-        <!-- جدول فعالیت‌ها -->
-        <div class="rm-card">
-            <div class="rm-card-header">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                </svg>
-                فعالیت‌ها
-                <span class="title-badge">{{ activities|length }}</span>
-            </div>
-            <div class="rm-card-body rm-card-body-flush">
-                {% if activities %}
-                <table class="rm-activity-table">
-                    <thead>
-                        <tr>
-                            <th>عنوان</th>
-                            <th>دسته</th>
-                            <th>مدت</th>
-                            <th>وضعیت</th>
-                            <th>اقدام</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in activities %}
-                        <tr class="{% if item.is_completed %}rm-row-done{% endif %}">
-                            <td>
-                                <strong>{{ item.activity.title }}</strong>
-                                {% if item.activity.description %}
-                                <div class="rm-td-note">{{ item.activity.description }}</div>
-                                {% endif %}
-                            </td>
-                            <td><span class="tag">{{ item.activity.get_category_display }}</span></td>
-                            <td>{{ item.activity.duration_days }} روز</td>
-                            <td>
-                                {% if item.is_completed %}
-                                <span class="tag tag-done">✓ تکمیل‌شده</span>
-                                {% else %}
-                                <span class="tag tag-pending">⏳ در انتظار</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a href="{% url 'roadmap:stage_activity_detail' item.id %}" class="rm-btn rm-btn-sm rm-btn-primary">
-                                    جزئیات
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <div class="rm-empty-table">
-                    فعالیتی برای این مرحله ثبت نشده است.
-                </div>
-                {% endif %}
-            </div>
         </div>
+
     </div>
 </div>
-
-<style>
-    .rm-page {
-        padding: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .rm-page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 2rem;
-        gap: 2rem;
-    }
-
-    .rm-eyebrow {
-        display: block;
-        font-size: 0.85rem;
-        color: #999;
-        margin-bottom: 0.5rem;
-        text-transform: uppercase;
-        font-weight: 600;
-    }
-
-    .rm-page-title {
-        font-size: 2rem;
-        margin: 0;
-        color: #1a1a1a;
-    }
-
-    .rm-header-actions {
-        display: flex;
-        gap: 1rem;
-    }
-
-    .rm-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.5rem;
-        font-size: 0.95rem;
-        text-decoration: none;
-        cursor: pointer;
-        border: none;
-        transition: all 0.2s;
-    }
-
-    .rm-btn-primary {
-        background: #4f46e5;
-        color: white;
-    }
-
-    .rm-btn-primary:hover {
-        background: #4338ca;
-    }
-
-    .rm-btn-outline {
-        border: 1px solid #e5e7eb;
-        color: #1a1a1a;
-        background: white;
-    }
-
-    .rm-btn-outline:hover {
-        background: #f9fafb;
-    }
-
-    .rm-btn-sm {
-        padding: 0.5rem 1rem;
-        font-size: 0.85rem;
-    }
-
-    .sd-stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .rm-stat-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 0.75rem;
-        border: 1px solid #e5e7eb;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .rm-stat-label {
-        font-size: 0.85rem;
-        color: #666;
-        font-weight: 500;
-    }
-
-    .rm-stat-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1a1a1a;
-    }
-
-    .sd-main {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .rm-card {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 0.75rem;
-        overflow: hidden;
-    }
-
-    .rm-card-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 1.5rem;
-        border-bottom: 1px solid #f3f4f6;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #1a1a1a;
-    }
-
-    .rm-card-header svg {
-        width: 20px;
-        height: 20px;
-        color: #4f46e5;
-    }
-
-    .title-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        background: #f0f4ff;
-        color: #4f46e5;
-        border-radius: 0.25rem;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-left: auto;
-    }
-
-    .rm-card-body {
-        padding: 1.5rem;
-    }
-
-    .rm-card-body-flush {
-        padding: 0;
-    }
-
-    .rm-card-body p {
-        margin: 0;
-        line-height: 1.6;
-        color: #333;
-    }
-
-    .sd-criteria-list,
-    .sd-risks-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .sd-criteria-list li,
-    .sd-risks-list li {
-        padding: 0.75rem;
-        padding-right: 1rem;
-        border-right: 3px solid #10b981;
-        margin-bottom: 0.5rem;
-        color: #333;
-    }
-
-    .sd-risks-list li {
-        border-right-color: #ef4444;
-    }
-
-    .rm-activity-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .rm-activity-table thead {
-        background: #f9fafb;
-        border-bottom: 2px solid #e5e7eb;
-    }
-
-    .rm-activity-table th {
-        padding: 1rem;
-        text-align: right;
-        font-weight: 600;
-        color: #666;
-        font-size: 0.9rem;
-    }
-
-    .rm-activity-table td {
-        padding: 1rem;
-        border-bottom: 1px solid #f3f4f6;
-        color: #333;
-    }
-
-    .rm-activity-table tr:last-child td {
-        border-bottom: none;
-    }
-
-    .rm-activity-table tr.rm-row-done {
-        opacity: 0.6;
-        background: #f0fdf4;
-    }
-
-    .rm-td-note {
-        font-size: 0.85rem;
-        color: #999;
-        margin-top: 0.25rem;
-    }
-
-    .tag {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 0.25rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        background: #f3f4f6;
-        color: #1a1a1a;
-    }
-
-    .tag-done {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .tag-pending {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .rm-btn-disabled {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        background: #e5e7eb;
-        color: #999;
-        font-size: 0.85rem;
-        cursor: not-allowed;
-    }
-
-    .rm-empty-table {
-        text-align: center;
-        padding: 2rem;
-        color: #999;
-    }
-
-
-    .acm-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .acm-overlay.active {
-        display: flex;
-    }
-
-    .acm-box {
-        background: white;
-        border-radius: 0.75rem;
-        width: 90%;
-        max-width: 500px;
-        box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .acm-header {
-        padding: 1.5rem;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    .acm-header h2 {
-        margin: 0;
-        font-size: 1.25rem;
-        color: #1a1a1a;
-    }
-
-    .acm-warning-text {
-        padding: 1.5rem;
-        background: #fef2f2;
-        color: #991b1b;
-        border-bottom: 1px solid #e5e7eb;
-        margin: 0;
-    }
-
-    .acm-section {
-        padding: 1.5rem;
-    }
-
-    .acm-section-label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        color: #1a1a1a;
-    }
-
-    .acm-save-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .acm-save-item {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.75rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .acm-save-item:hover {
-        border-color: #4f46e5;
-        background: #f0f4ff;
-    }
-
-    .acm-save-item.selected {
-        border-color: #4f46e5;
-        background: #f0f4ff;
-    }
-
-    .acm-footer {
-        display: flex;
-        gap: 1rem;
-        padding: 1.5rem;
-        border-top: 1px solid #e5e7eb;
-    }
-
-    .acm-btn {
-        flex: 1;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.5rem;
-        border: none;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .acm-btn-confirm {
-        background: #4f46e5;
-        color: white;
-    }
-
-    .acm-btn-confirm:hover {
-        background: #4338ca;
-    }
-
-    .acm-btn-cancel {
-        background: #e5e7eb;
-        color: #1a1a1a;
-    }
-
-    .acm-btn-cancel:hover {
-        background: #d1d5db;
-    }
-
-    @media (max-width: 768px) {
-        .rm-page {
-            padding: 1rem;
-        }
-
-        .rm-page-header {
-            flex-direction: column;
-        }
-
-        .rm-header-actions {
-            width: 100%;
-        }
-
-        .rm-btn {
-            flex: 1;
-            justify-content: center;
-        }
-
-        .sd-stats-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .rm-activity-table {
-            font-size: 0.9rem;
-        }
-
-        .rm-activity-table th,
-        .rm-activity-table td {
-            padding: 0.75rem;
-        }
-    }
-</style>
 
 <script>
     let _currentFormId = null;
@@ -638,24 +249,16 @@
 
     function openActivityModal(itemId) {
         _currentFormId = itemId;
-
         const list = document.getElementById('acm-save-list');
         list.innerHTML = '';
-
         Object.entries(SAVE_OPTIONS).forEach(([key, label]) => {
             const item = document.createElement('div');
-            item.className = 'acm-save-item';
+            item.className = 'acm-save-item' + (key === '__skip__' ? ' selected' : '');
             item.dataset.value = key;
-
-            item.innerHTML = `
-                <input type="radio" name="save_option" value="${key}" ${key === '__skip__' ? 'checked' : ''}>
-                <label>${label}</label>
-            `;
-
+            item.innerHTML = `<span class="acm-radio"></span><span>${label}</span>`;
             item.addEventListener('click', () => selectOption(key));
             list.appendChild(item);
         });
-
         document.getElementById('activity-confirm-modal').classList.add('active');
     }
 
@@ -663,9 +266,9 @@
         document.querySelectorAll('.acm-save-item').forEach(el => {
             el.classList.toggle('selected', el.dataset.value === value);
         });
-
         if (_currentFormId !== null) {
-            document.getElementById('save-target-' + _currentFormId).value = value;
+            const el = document.getElementById('save-target-' + _currentFormId);
+            if (el) el.value = value;
         }
     }
 
@@ -680,13 +283,11 @@
         if (form) form.submit();
     }
 
-    document.getElementById('activity-confirm-modal').addEventListener('click', function (e) {
+    document.getElementById('activity-confirm-modal').addEventListener('click', function(e) {
         if (e.target === this) closeActivityModal();
     });
 
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeActivityModal();
-    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeActivityModal(); });
 </script>
-
 {% endblock %}
+
