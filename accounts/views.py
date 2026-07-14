@@ -178,13 +178,26 @@ def edit_profile_ai(request):
             return redirect('accounts:edit_profile')
 
         except ValueError as e:
-            messages.error(request, f'خطا در پردازش AI: {str(e)}')
+            logger.exception("خطای AI (ValueError)")
+            return render(request, 'accounts/edit_profile_ai_details.html', {
+                'raw_text': profile.raw_text,
+                'ai_error': True,
+            })
         except ConnectionError as e:
-            messages.error(request, f'خطا در اتصال: {str(e)}')
+            logger.exception("خطای اتصال به AI")
+            return render(request, 'accounts/edit_profile_ai_details.html', {
+                'raw_text': profile.raw_text,
+                'ai_error': True,
+            })
         except Exception as e:
-            messages.error(request, f'خطای غیرمنتظره: {str(e)}')
+            logger.exception("خطای غیرمنتظره در پردازش AI")
+            return render(request, 'accounts/edit_profile_ai_details.html', {
+                'raw_text': profile.raw_text,
+                'ai_error': True,
+            })
 
     return render(request, 'accounts/edit_profile_ai_details.html', {'raw_text': profile.raw_text})
+
 
 
 

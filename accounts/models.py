@@ -72,7 +72,7 @@ class Profile(models.Model):
 
     # --- زبان ---
     native_lang = models.CharField('زبان مادری', max_length=50, default='فارسی')
-    english_level = models.CharField('سطح زبان انگلیسی', max_length=5, choices=ENGLISH_LEVEL_CHOICES, blank=True)
+    english_level = models.CharField('سطح زبان انگلیسی', max_length=5, choices=ENGLISH_LEVEL_CHOICES, blank=True, default='')
     lang_cert = models.TextField('مدرک زبان انگلیسی', blank=True)
     other_langs = models.TextField('سایر زبان‌ها', blank=True)
 

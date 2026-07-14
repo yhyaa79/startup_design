@@ -230,7 +230,7 @@ def _call_gpt_api(messages: list, max_tokens: int = 4000) -> str:
     }
 
     payload = {
-        "model": "gpt-4o-mini",
+        "model": GAPGPT_API_URL,
         "messages": messages,
         "max_tokens": max_tokens,
         "temperature": 0.7,

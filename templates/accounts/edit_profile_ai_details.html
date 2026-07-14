@@ -173,7 +173,7 @@
             </svg>
         </span>
         <h3>پردازش انجام نشد</h3>
-        <p>سرویس هوش مصنوعی در حال حاضر در دسترس نیست. لطفاً چند دقیقه‌ی دیگر دوباره امتحان کن.</p>
+        <p>سرویس هوش مصنوعی در حال حاضر در دسترس نیست. لطفاً چند دقیقه‌ی دیگر دوباره امتحان گنید یا از پرکردن دستی استفاده کنید.</p>
         <button type="button" onclick="closeErrorModal()" class="aip-submit">
             متوجه شدم
         </button>
@@ -184,23 +184,15 @@
     (function () {
         var choose = document.getElementById('aipChoose');
         var build = document.getElementById('aipBuild');
-        var step1 = document.getElementById('stepIndicator1');
-        var step2 = document.getElementById('stepIndicator2');
 
         function goToBuild() {
             choose.hidden = true;
             build.hidden = false;
-            step1.classList.remove('is-active');
-            step1.classList.add('is-done');
-            step2.classList.add('is-active');
         }
 
         function goToChoose() {
             build.hidden = true;
             choose.hidden = false;
-            step2.classList.remove('is-active');
-            step1.classList.remove('is-done');
-            step1.classList.add('is-active');
         }
 
         document.getElementById('aipChooseAi').addEventListener('click', goToBuild);
@@ -209,8 +201,6 @@
         // اگر خطایی از سرور برگشته یا متنی از قبل موجوده، مستقیم برو مرحله فرم
         {% if ai_error or raw_text %}
         goToChoose();
-        {% else %}
-        step1.classList.add('is-active');
         {% endif %}
 
         // پیش‌نمایش نام فایل انتخاب‌شده
@@ -256,7 +246,10 @@
 
     function closeErrorModal() {
         document.getElementById('errorModal').style.display = 'none';
+        var btn = document.getElementById('submitBtn');
+        if (btn) btn.disabled = false;
     }
 </script>
+
 
 {% endblock %}

@@ -19,18 +19,18 @@ urlpatterns = [
     path('stage/<int:stage_id>/', views.stage_detail, name='stage_detail'),
     path('stage/<int:stage_id>/edit/', views.stage_edit, name='stage_edit'),
     
-    # ✅ فعالیت‌ها (جدید)
+    # فعالیت‌ها
     path('activity/<int:activity_id>/', views.stage_activity_detail, name='stage_activity_detail'),
     path('activity/<int:activity_id>/update/', views.stage_activity_update, name='stage_activity_update'),
     path('activity/<int:activity_id>/toggle/', views.stage_activity_toggle, name='stage_activity_toggle'),
     path('activity/<int:activity_id>/select-static/', views.stage_activity_select_static_item, name='stage_activity_select_static'),
     path('activity/<int:activity_id>/create-custom/', views.stage_activity_create_custom, name='stage_activity_create_custom'),
     
-    # ✅ Checkpoints (جدید)
+    # Checkpoints
     path('activity/<int:activity_id>/checkpoint/add/', views.stage_activity_add_checkpoint, name='stage_activity_add_checkpoint'),
     path('activity/<int:activity_id>/checkpoint/<int:checkpoint_id>/toggle/', views.stage_activity_toggle_checkpoint, name='stage_activity_toggle_checkpoint'),
     
-    # ✅ Resources (جدید)
+    # Resources 
     path('activity/<int:activity_id>/resource/add/', views.stage_activity_add_resource, name='stage_activity_add_resource'),
     path('activity/<int:activity_id>/resource/<int:resource_id>/delete/', views.stage_activity_delete_resource, name='stage_activity_delete_resource'),
 ]
