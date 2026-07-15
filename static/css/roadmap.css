@@ -1826,13 +1826,11 @@
 }
 
 .activity-header-breadcrumb {
-    font-size: var(--text-lg);
+    font-size: var(--text-xl);
     color: var(--ink-400);
-    margin-bottom: 6px;
 }
 
 .activity-header-breadcrumb a {
-    color: var(--primary);
     text-decoration: none;
 }
 
@@ -2071,6 +2069,17 @@
     font-size: var(--text-lg);
     color: var(--ink-600);
     margin-top: 2px;
+}
+
+.checkpoint-extra-details {
+    display: grid;
+    margin: 4px 6px;
+}
+
+.checkpoint-extra-details-item {
+    font-size: var(--text-xl);
+    font-weight: 500;
+    color: var(--ink-700);
 }
 
 .checkpoint-date {
@@ -2398,33 +2407,9 @@
     gap: 10px;
 }
 
-.sd-back-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--sd-white);
-    box-shadow: var(--sd-shadow);
-    color: var(--sd-ink-600);
-    text-decoration: none;
-    transition: box-shadow .15s, color .15s;
-    flex-shrink: 0;
-}
-
-.sd-back-btn svg {
-    width: 18px;
-    height: 18px;
-}
-
-.sd-back-btn:hover {
-    box-shadow: var(--sd-shadow-md);
-    color: var(--sd-primary);
-}
 
 .sd-eyebrow {
-    font-size: var(--text-lg);
+    font-size: var(--text-xl);
     color: var(--sd-ink-400);
     margin-bottom: 2px;
 }
@@ -2435,6 +2420,7 @@
     color: var(--sd-ink-900);
     margin: 0;
     line-height: 1.3;
+    margin-bottom: 5px;
 }
 
 .sd-status-pill {

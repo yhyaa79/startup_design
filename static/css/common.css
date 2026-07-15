@@ -462,8 +462,7 @@ a {
 }
 
 .tag-blue.solid {
-    background: var(--primary);
-    color: #fff;
+    color: rgb(from var(--primary) r g b / 0.6);
 }
 
 .tag-purple.solid {
@@ -490,9 +489,9 @@ a {
 /* ─── Buttons (extends .btn) ─── */
 
 .btn {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     border-radius: var(--radius);
     cursor: pointer;
     text-decoration: none;
@@ -501,12 +500,14 @@ a {
     white-space: nowrap;
 }
 
-/* 
 .btn svg {
-    width: 15px;
-    height: 15px;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
+    margin-left: -5px;
 }
+
+/* 
 
 .btn-primary {
     background: var(--primary);
@@ -664,4 +665,34 @@ a {
 .btn-ghost:hover {
     background: var(--bg);
     color: var(--text-main);
+}
+
+
+
+
+
+
+.sd-back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--sd-white);
+    box-shadow: var(--sd-shadow);
+    color: var(--sd-ink-600);
+    text-decoration: none;
+    transition: box-shadow .15s, color .15s;
+    flex-shrink: 0;
+}
+
+.sd-back-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.sd-back-btn:hover {
+    box-shadow: var(--sd-shadow-md);
+    color: var(--sd-primary);
 }

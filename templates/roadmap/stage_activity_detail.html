@@ -15,8 +15,10 @@
 
     <div class="sd-page">
         <!-- HEADER -->
-        <div class="activity-header">
-            <div class="activity-header-content">
+
+
+        <div class="sd-topbar">
+            <div class="sd-topbar-right">
                 <div>
                     <div class="activity-header-breadcrumb">
                         <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}">{{ roadmap.title }}</a>
@@ -24,19 +26,44 @@
                         <a href="{% url 'roadmap:stage_detail' stage.id %}">{{ stage.title }}</a>
                         <span> / </span>
                     </div>
-                    <h1 class="activity-header-title">{{ activity.title }}</h1>
-                    <div class="description-section">{{ activity.description|linebreaks }}</div>
-                    <span class="tag tag-lg tag-blue">
-                        {% if stage_activity.is_completed %}تکمیل‌شده{% else %}در انتظار{% endif %}
-                    </span>
-                </div>
-                <div class="activity-header-status">
-                    <div class="tag tag-lg tag-purple">{{ activity.get_category_display }}</div>
-                    {% if activity.organizer %}<div class="tag tag-lg tag-gold">{{ activity.organizer }}</div>{% endif %}
-                    {% if activity.level %}<div class="tag tag-lg tag-teal">{{ activity_level_label }}</div>{% endif %}
+                    <h1 class="sd-page-title">{{ activity.title }}</h1>
+                    <div>
+                        <div class="tag tag-md tag-purple">{{ activity.get_category_display }}</div>
+                        {% if activity.organizer %}
+                        <div class="tag tag-md tag-gold">{{ activity.organizer }}</div>
+                        {% endif %}
+                        {% if activity.level %}
+                        <div class="tag tag-md tag-teal">{{ activity_level_label }}</div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
+            <div class="sd-topbar-left">
+                <span class="tag tag-lg tag-blue">
+                    {% if stage_activity.is_completed %}تکمیل‌شده{% else %}در انتظار{% endif %}
+                </span>
+                <a href="{% url 'roadmap:stage_detail' stage.id %}" class="sd-back-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                </a>
+            </div>
         </div>
+
+
+        {% if stage.description %}
+        <div class="sd-card">
+            <div class="sd-card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                توضیحات
+            </div>
+            <p class="sd-card-text">{{ activity.description }}</p>
+        </div>
+        {% endif %}
 
         <!-- راهنمای صفحه -->
         <div class="page-guide">
@@ -57,34 +84,42 @@
                     <div class="card-header">
                         <h2 class="card-title">✓ نقاط کنترل</h2>
                     </div>
-                    <p class="card-desc">فعالیت را به گام‌های کوچک‌تر بشکنید؛ می‌توانید نقطه کنترل را دستی بسازید یا از دوره‌ها/پروژه‌های موجود انتخاب کنید.</p>
+                    <p class="card-desc">فعالیت را به گام‌های کوچک‌تر بشکنید؛ می‌توانید نقطه کنترل را دستی بسازید یا از
+                        دوره‌ها/پروژه‌های موجود انتخاب کنید.</p>
 
-                    <button class="btn btn-primary btn-md" onclick="openCheckpointModal()">اضافه کردن نقطه کنترل</button>
+                    <button class="btn btn-primary btn-md" onclick="openCheckpointModal()">اضافه کردن نقطه
+                        کنترل</button>
 
                     <div class="checkpoints-list" id="checkpointsList" style="margin-top: var(--gap-sm);">
                         {% for checkpoint in stage_activity.checkpoints %}
-                        <div class="checkpoint-item {% if checkpoint.is_completed %}completed{% endif %}" data-checkpoint-id="{{ checkpoint.id }}">
+                        <div class="checkpoint-item {% if checkpoint.is_completed %}completed{% endif %}"
+                            data-checkpoint-id="{{ checkpoint.id }}">
                             <input type="checkbox" class="checkpoint-checkbox"
                                 {% if checkpoint.is_completed %}checked{% endif %}
                                 onchange="toggleCheckpoint({{ stage_activity.id }}, {{ checkpoint.id }})">
                             <div class="checkpoint-content">
                                 <div class="checkpoint-title">
                                     {{ checkpoint.title }}
-                                    {% if checkpoint.source_type == 'course' %}<span class="tag tag-md tag-amber">دوره</span>
-                                    {% elif checkpoint.source_type == 'project' %}<span class="tag tag-md tag-amber">پروژه</span>
-                                    {% elif checkpoint.source_type == 'event' %}<span class="tag tag-md tag-amber">رویداد</span>{% endif %}
+                                    {% if checkpoint.source_type == 'course' %}<span
+                                        class="tag tag-md tag-amber">دوره</span>
+                                    {% elif checkpoint.source_type == 'project' %}<span
+                                        class="tag tag-md tag-amber">پروژه</span>
+                                    {% elif checkpoint.source_type == 'event' %}<span
+                                        class="tag tag-md tag-amber">رویداد</span>{% endif %}
                                 </div>
-                                {% if checkpoint.description %}<div class="checkpoint-desc">{{ checkpoint.description }}</div>{% endif %}
+                                {% if checkpoint.description %}<div class="checkpoint-desc">{{ checkpoint.description }}
+                                </div>{% endif %}
 
                                 {% if checkpoint.extra_details %}
                                 <div class="checkpoint-extra-details">
                                     {% for key, value in checkpoint.extra_details.items %}
-                                        {% if value %}<span class="tag">{{ value }}</span>{% endif %}
+                                    {% if value %}<span class="checkpoint-extra-details-item">{{ value }}</span>{% endif %}
                                     {% endfor %}
                                 </div>
                                 {% endif %}
 
-                                {% if checkpoint.date %}<div class="checkpoint-date">تکمیل: {{ checkpoint.date }}</div>{% endif %}
+                                {% if checkpoint.date %}<div class="checkpoint-date">تکمیل: {{ checkpoint.date }}</div>
+                                {% endif %}
                                 {% if checkpoint.source_url %}
                                 <a href="{{ checkpoint.source_url }}" target="_blank" class="resource-url">بازدید ←</a>
                                 {% endif %}
@@ -94,12 +129,14 @@
                                     <textarea class="form-textarea checkpoint-note-textarea"
                                         placeholder="یادداشت برای این مورد..."
                                         data-checkpoint-id="{{ checkpoint.id }}">{{ checkpoint.notes }}</textarea>
-                                    <button class="btn btn-outline btn-sm" onclick="saveCheckpointNote({{ stage_activity.id }}, {{ checkpoint.id }})">
+                                    <button class="btn btn-outline btn-sm"
+                                        onclick="saveCheckpointNote({{ stage_activity.id }}, {{ checkpoint.id }})">
                                         ذخیره یادداشت
                                     </button>
                                 </div>
                             </div>
-                            <button class="btn btn-red btn-sm btn-fit" onclick="deleteCheckpoint({{ stage_activity.id }}, {{ checkpoint.id }})">حذف</button>
+                            <button class="btn btn-red btn-sm btn-fit"
+                                onclick="deleteCheckpoint({{ stage_activity.id }}, {{ checkpoint.id }})">حذف</button>
                         </div>
                         {% empty %}
                         <div class="empty-state">هنوز نقطه کنترلی اضافه نکرده‌اید.</div>
@@ -117,15 +154,18 @@
 
                         <div class="modal-body">
                             <div class="source-switch">
-                                <button type="button" class="source-switch-btn active" id="btn-cp-manual" onclick="switchCheckpointTab('manual')">ایجاد دستی</button>
-                                <button type="button" class="source-switch-btn" id="btn-cp-search" onclick="switchCheckpointTab('search')">انتخاب از دوره‌ها / پروژه‌ها</button>
+                                <button type="button" class="source-switch-btn active" id="btn-cp-manual"
+                                    onclick="switchCheckpointTab('manual')">ایجاد دستی</button>
+                                <button type="button" class="source-switch-btn" id="btn-cp-search"
+                                    onclick="switchCheckpointTab('search')">انتخاب از دوره‌ها / پروژه‌ها</button>
                             </div>
 
                             <!-- پنل دستی -->
                             <div id="cp-panel-manual" class="source-panel active">
                                 <div class="form-group">
                                     <label class="form-label">عنوان</label>
-                                    <input type="text" class="form-input" id="cpTitle" placeholder="مثال: تکمیل فصل اول">
+                                    <input type="text" class="form-input" id="cpTitle"
+                                        placeholder="مثال: تکمیل فصل اول">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">توضیحات</label>
@@ -149,21 +189,26 @@
                                     <label class="form-label">یادداشت (اختیاری)</label>
                                     <textarea class="form-textarea" id="cpNotes"></textarea>
                                 </div>
-                                <button class="btn btn-primary btn-md" onclick="submitManualCheckpoint()">افزودن</button>
+                                <button class="btn btn-primary btn-md"
+                                    onclick="submitManualCheckpoint()">افزودن</button>
                             </div>
 
                             <!-- پنل جستجو -->
                             <div id="cp-panel-search" class="source-panel">
                                 <div class="source-switch">
-                                    <button type="button" class="source-switch-btn active" id="btn-type-course" onclick="switchItemType('course')">دوره‌های آموزشی</button>
-                                    <button type="button" class="source-switch-btn" id="btn-type-project" onclick="switchItemType('project')">پروژه‌ها</button>
-                                    <button type="button" class="source-switch-btn" id="btn-type-event" onclick="switchItemType('event')">رویدادها</button>
+                                    <button type="button" class="source-switch-btn active" id="btn-type-course"
+                                        onclick="switchItemType('course')">دوره‌های آموزشی</button>
+                                    <button type="button" class="source-switch-btn" id="btn-type-project"
+                                        onclick="switchItemType('project')">پروژه‌ها</button>
+                                    <button type="button" class="source-switch-btn" id="btn-type-event"
+                                        onclick="switchItemType('event')">رویدادها</button>
                                 </div>
 
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label class="form-label">جستجو</label>
-                                        <input type="text" class="form-input" id="cpSearchQuery" placeholder="نام دوره یا پروژه..." oninput="debouncedSearch()">
+                                        <input type="text" class="form-input" id="cpSearchQuery"
+                                            placeholder="نام دوره یا پروژه..." oninput="debouncedSearch()">
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label">فیلتر دسته‌بندی</label>
@@ -186,7 +231,8 @@
                     <div class="card-header">
                         <h2 class="card-title">منابع</h2>
                     </div>
-                    <p class="card-desc">لینک، کتاب یا فایل‌های مفیدی که برای انجام این فعالیت استفاده می‌کنید را اینجا نگه دارید.</p>
+                    <p class="card-desc">لینک، کتاب یا فایل‌های مفیدی که برای انجام این فعالیت استفاده می‌کنید را اینجا
+                        نگه دارید.</p>
 
                     <div class="form-row">
                         <div class="form-group">
@@ -226,8 +272,11 @@
                             <div class="resource-content">
                                 <div class="resource-title">{{ resource.title }}</div>
                                 <span class="resource-type">{{ resource.type }}</span>
-                                {% if resource.url %}<div><a href="{{ resource.url }}" target="_blank" class="resource-url">{{ resource.url }}</a></div>{% endif %}
-                                {% if resource.description %}<p style="margin-top: 6px; color: var(--ink-600); font-size: var(--text-sm);">{{ resource.description }}</p>{% endif %}
+                                {% if resource.url %}<div><a href="{{ resource.url }}" target="_blank"
+                                        class="resource-url">{{ resource.url }}</a></div>{% endif %}
+                                {% if resource.description %}<p
+                                    style="margin-top: 6px; color: var(--ink-600); font-size: var(--text-sm);">
+                                    {{ resource.description }}</p>{% endif %}
                             </div>
                             <button class="btn btn-red btn-sm btn-fit"
                                 onclick="deleteResource({{ stage_activity.id }}, {{ resource.id }})">حذف</button>
@@ -243,16 +292,19 @@
                     <div class="card-header">
                         <h2 class="card-title">یادداشت‌ها و نتیجه</h2>
                     </div>
-                    <p class="card-desc">یادداشت شخصی برای حین انجام کار، و در پایان خلاصه‌ای از نتیجه/دستاورد این فعالیت.</p>
+                    <p class="card-desc">یادداشت شخصی برای حین انجام کار، و در پایان خلاصه‌ای از نتیجه/دستاورد این
+                        فعالیت.</p>
 
                     <div class="form-group">
                         <label class="form-label">یادداشت‌های شخصی</label>
-                        <textarea class="form-textarea" id="notesTextarea" style="min-height: 140px;">{{ stage_activity.notes }}</textarea>
+                        <textarea class="form-textarea" id="notesTextarea"
+                            style="min-height: 140px;">{{ stage_activity.notes }}</textarea>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">خلاصه نتایج</label>
-                        <textarea class="form-textarea" id="resultSummary" style="min-height: 100px;">{{ stage_activity.result_summary }}</textarea>
+                        <textarea class="form-textarea" id="resultSummary"
+                            style="min-height: 100px;">{{ stage_activity.result_summary }}</textarea>
                     </div>
 
                     <button class="btn btn-primary btn-md" onclick="saveNotes()">ذخیره یادداشت‌ها</button>
@@ -267,33 +319,50 @@
                     <div class="card-header">
                         <h3 class="card-title">اطلاعات</h3>
                     </div>
-                    <div class="info-item"><span class="info-label">رودمپ</span><span class="info-value">{{ roadmap.title }}</span></div>
-                    <div class="info-item"><span class="info-label">مرحله</span><span class="info-value">{{ stage.title }}</span></div>
-                    <div class="info-item"><span class="info-label">دسته</span><span class="info-value">{{ activity.get_category_display }}</span></div>
-                    <div class="info-item"><span class="info-label">مدت زمان</span><span class="info-value">{{ activity.duration_days }} روز</span></div>
-                    <div class="info-item"><span class="info-label">امتیاز تاثیر</span><span class="info-value">{{ activity.impact_score }}/10</span></div>
-                    <div class="info-item"><span class="info-label">سطح دشواری</span><span class="info-value">{{ activity_difficulty_label }}</span></div>
-                    {% if activity.organizer %}<div class="info-item"><span class="info-label">برگزارکننده</span><span class="info-value">{{ activity.organizer }}</span></div>{% endif %}
-                    {% if activity.level %}<div class="info-item"><span class="info-label">سطح</span><span class="info-value">{{ activity_level_label }}</span></div>{% endif %}
-                    <div class="info-item"><span class="info-label">تاریخ شروع</span><span class="info-value">{{ stage_activity.actual_start_date|default:stage.start_date|date:"d/m/Y" }}</span></div>
-                    <div class="info-item"><span class="info-label">تاریخ پایان</span><span class="info-value">{{ stage_activity.actual_end_date|default:stage.end_date|date:"d/m/Y" }}</span></div>
-                    <div class="info-item"><span class="info-label">روزهای باقی‌مانده</span><span class="info-value">{{ stage_activity.get_remaining_days }} روز</span></div>
+                    <div class="info-item"><span class="info-label">رودمپ</span><span
+                            class="info-value">{{ roadmap.title }}</span></div>
+                    <div class="info-item"><span class="info-label">مرحله</span><span
+                            class="info-value">{{ stage.title }}</span></div>
+                    <div class="info-item"><span class="info-label">دسته</span><span
+                            class="info-value">{{ activity.get_category_display }}</span></div>
+                    <div class="info-item"><span class="info-label">مدت زمان</span><span
+                            class="info-value">{{ activity.duration_days }} روز</span></div>
+                    <div class="info-item"><span class="info-label">امتیاز تاثیر</span><span
+                            class="info-value">{{ activity.impact_score }}/10</span></div>
+                    <div class="info-item"><span class="info-label">سطح دشواری</span><span
+                            class="info-value">{{ activity_difficulty_label }}</span></div>
+                    {% if activity.organizer %}<div class="info-item"><span class="info-label">برگزارکننده</span><span
+                            class="info-value">{{ activity.organizer }}</span></div>{% endif %}
+                    {% if activity.level %}<div class="info-item"><span class="info-label">سطح</span><span
+                            class="info-value">{{ activity_level_label }}</span></div>{% endif %}
+                    <div class="info-item"><span class="info-label">تاریخ شروع</span><span
+                            class="info-value">{{ stage_activity.actual_start_date|default:stage.start_date|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="info-item"><span class="info-label">تاریخ پایان</span><span
+                            class="info-value">{{ stage_activity.actual_end_date|default:stage.end_date|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="info-item"><span class="info-label">روزهای باقی‌مانده</span><span
+                            class="info-value">{{ stage_activity.get_remaining_days }} روز</span></div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">تاریخ‌های واقعی</h3>
                     </div>
-                    <p class="card-desc">اگر تاریخ شروع/پایان واقعیِ انجام فعالیت با برنامه اولیه فرق دارد، اینجا ثبت کنید.</p>
+                    <p class="card-desc">اگر تاریخ شروع/پایان واقعیِ انجام فعالیت با برنامه اولیه فرق دارد، اینجا ثبت
+                        کنید.</p>
                     <div class="form-group">
                         <label class="form-label">تاریخ شروع واقعی</label>
-                        <input type="date" class="form-input" id="actualStartDate" value="{{ stage_activity.actual_start_date|date:'Y-m-d' }}">
+                        <input type="date" class="form-input" id="actualStartDate"
+                            value="{{ stage_activity.actual_start_date|date:'Y-m-d' }}">
                     </div>
                     <div class="form-group">
                         <label class="form-label">تاریخ پایان واقعی</label>
-                        <input type="date" class="form-input" id="actualEndDate" value="{{ stage_activity.actual_end_date|date:'Y-m-d' }}">
+                        <input type="date" class="form-input" id="actualEndDate"
+                            value="{{ stage_activity.actual_end_date|date:'Y-m-d' }}">
                     </div>
-                    <button class="btn btn-secondary btn-full btn-lg" onclick="updateDates()">بروزرسانی تاریخ‌ها</button>
+                    <button class="btn btn-secondary btn-full btn-lg" onclick="updateDates()">بروزرسانی
+                        تاریخ‌ها</button>
                 </div>
 
                 <div class="card">
@@ -303,11 +372,13 @@
                     <button class="btn btn-primary btn-full btn-lg" disabled>تکمیل‌شده</button>
                     {% endif %}
 
-                    <button type="button" style="margin-top: 5px;" class="btn btn-outline btn-full btn-lg" onclick="openActivityModal()">
-                    تغییر فعالیت
+                    <button type="button" style="margin-top: 5px;" class="btn btn-outline btn-full btn-lg"
+                        onclick="openActivityModal()">
+                        تغییر فعالیت
                     </button>
 
-                    <a href="{% url 'roadmap:stage_detail' stage.id %}" class="btn btn-outline-gray btn-full btn-lg" style="margin-top: var(--gap-sm);">
+                    <a href="{% url 'roadmap:stage_detail' stage.id %}" class="btn btn-outline-gray btn-full btn-lg"
+                        style="margin-top: var(--gap-sm);">
                         بازگشت به مرحله ها ←
                     </a>
                 </div>
@@ -347,7 +418,8 @@
             {% endif %}
 
             <div class="source-switch">
-                <button type="button" class="source-switch-btn active" id="btn-switch-static" onclick="switchSource('static')">
+                <button type="button" class="source-switch-btn active" id="btn-switch-static"
+                    onclick="switchSource('static')">
                     انتخاب از لیست آماده
                 </button>
                 <button type="button" class="source-switch-btn" id="btn-switch-custom" onclick="switchSource('custom')">
@@ -397,7 +469,8 @@
                             <label class="form-label">دسته</label>
                             <select class="form-select" name="category" required>
                                 {% for key, label in category_labels.items %}
-                                <option value="{{ key }}" {% if activity.category == key %}selected{% endif %}>{{ label }}</option>
+                                <option value="{{ key }}" {% if activity.category == key %}selected{% endif %}>
+                                    {{ label }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -411,11 +484,13 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">مدت زمان (روز)</label>
-                            <input type="number" class="form-input" name="duration_days" value="{{ activity.duration_days }}" min="1" max="365" required>
+                            <input type="number" class="form-input" name="duration_days"
+                                value="{{ activity.duration_days }}" min="1" max="365" required>
                         </div>
                         <div class="form-group">
                             <label class="form-label">امتیاز تاثیر (۱ تا ۱۰)</label>
-                            <input type="number" class="form-input" name="impact_score" value="{{ activity.impact_score }}" min="1" max="10" required>
+                            <input type="number" class="form-input" name="impact_score"
+                                value="{{ activity.impact_score }}" min="1" max="10" required>
                         </div>
                     </div>
 
@@ -424,7 +499,8 @@
                             <label class="form-label">سطح دشواری</label>
                             <select class="form-select" name="difficulty_rating">
                                 {% for key, label in difficulty_labels.items %}
-                                <option value="{{ key }}" {% if activity.difficulty_rating == key %}selected{% endif %}>{{ label }}</option>
+                                <option value="{{ key }}" {% if activity.difficulty_rating == key %}selected{% endif %}>
+                                    {{ label }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -433,7 +509,8 @@
                             <select class="form-select" name="level">
                                 <option value="">انتخاب کنید</option>
                                 {% for key, label in level_labels.items %}
-                                <option value="{{ key }}" {% if activity.level == key %}selected{% endif %}>{{ label }}</option>
+                                <option value="{{ key }}" {% if activity.level == key %}selected{% endif %}>{{ label }}
+                                </option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -449,7 +526,8 @@
 
         <div class="modal-footer">
             <button type="button" class="btn btn-outline-gray btn-md" onclick="closeActivityModal()">انصراف</button>
-            <button type="button" class="btn btn-primary btn-md" id="modalSaveCustomBtn" style="display:none;" onclick="createCustomActivity()">
+            <button type="button" class="btn btn-primary btn-md" id="modalSaveCustomBtn" style="display:none;"
+                onclick="createCustomActivity()">
                 ذخیره فعالیت دستی
             </button>
         </div>
@@ -461,146 +539,173 @@
      ════════════════════════════════════════════ -->
 
 <script>
-const ACTIVITY_ID = {{ stage_activity.id }};
-const ROADMAP_ID = {{ roadmap.id }};
-let currentItemType = 'course';
-let searchDebounceTimer = null;
-
-// ═══════════════════════════════════════════
-// MODAL (تغییر فعالیت)
-// ═══════════════════════════════════════════
-
-function openActivityModal() {
-    document.getElementById('activityModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeActivityModal() {
-    document.getElementById('activityModal').classList.remove('open');
-    document.body.style.overflow = '';
-}
-
-document.getElementById('activityModal').addEventListener('click', function (e) {
-    if (e.target === this) closeActivityModal();
-});
-
-document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeActivityModal();
-});
-
-// توجه: بخش PROGRESS (progressSlider) کاملاً حذف شد چون
-// المنت مربوطه در HTML کامنت شده و باعث توقف اجرای اسکریپت می‌شد.
-
-// ═══════════════════════════════════════════
-// SOURCE SWITCH (لیست آماده / دستی)
-// ═══════════════════════════════════════════
-
-function switchSource(source) {
-    document.getElementById('panel-static').classList.toggle('active', source === 'static');
-    document.getElementById('panel-custom').classList.toggle('active', source === 'custom');
-    document.getElementById('btn-switch-static').classList.toggle('active', source === 'static');
-    document.getElementById('btn-switch-custom').classList.toggle('active', source === 'custom');
-    document.getElementById('modalSaveCustomBtn').style.display = (source === 'custom') ? 'inline-flex' : 'none';
-}
-
-// ═══════════════════════════════════════════
-// PROGRESS
-// ═══════════════════════════════════════════
-
-document.getElementById('progressSlider').addEventListener('input', function (e) {
-    const value = e.target.value;
-    document.getElementById('progressValue').textContent = value + '%';
-    document.getElementById('progressFill').style.width = value + '%';
-
-    fetch(`/roadmap/activity/${ACTIVITY_ID}/update/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify({ progress_percentage: value })
-    });
-});
-
-// ═══════════════════════════════════════════
-// STATIC ITEMS
-// ═══════════════════════════════════════════
-
-function filterStaticItems() {
-    const category = document.getElementById('categoryFilter').value;
-    document.querySelectorAll('.static-item-card').forEach(item => {
-        item.style.display = (!category || item.dataset.category === category) ? '' : 'none';
-    });
-}
-
-function selectStaticItem(itemId, element) {
-    document.querySelectorAll('.static-item-card').forEach(card => card.classList.remove('selected'));
-    element.classList.add('selected');
-
-    fetch(`/roadmap/activity/${ACTIVITY_ID}/select-static/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify({ static_item_id: itemId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showAlert('success', data.message);
-            setTimeout(() => location.reload(), 800);
-        } else {
-            showAlert('danger', data.error || 'خطا در انتخاب آیتم');
+    const ACTIVITY_ID = {
+        {
+            stage_activity.id
         }
-    })
-    .catch(() => showAlert('danger', 'خطا در انتخاب آیتم'));
-}
-
-// ═══════════════════════════════════════════
-// CUSTOM ACTIVITY
-// ═══════════════════════════════════════════
-
-function createCustomActivity() {
-    const form = document.getElementById('customActivityForm');
-    const data = Object.fromEntries(new FormData(form));
-
-    fetch(`/roadmap/activity/${ACTIVITY_ID}/create-custom/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showAlert('success', data.message);
-            setTimeout(() => location.reload(), 800);
-        } else {
-            showAlert('danger', data.error);
+    };
+    const ROADMAP_ID = {
+        {
+            roadmap.id
         }
-    });
-}
+    };
+    let currentItemType = 'course';
+    let searchDebounceTimer = null;
 
-// ═══════════════════════════════════════════
-// CHECKPOINTS
-// ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════
+    // MODAL (تغییر فعالیت)
+    // ═══════════════════════════════════════════
 
-function addCheckpoint() {
-    const title = document.getElementById('checkpointTitle').value;
-    const description = document.getElementById('checkpointDesc').value;
-
-    if (!title) {
-        showAlert('warning', 'لطفاً عنوان نقطه کنترل را وارد کنید');
-        return;
+    function openActivityModal() {
+        document.getElementById('activityModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
     }
 
-    fetch(`/roadmap/activity/${ACTIVITY_ID}/checkpoint/add/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify({ title, description })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const list = document.getElementById('checkpointsList');
-            const emptyState = list.querySelector('.empty-state');
-            if (emptyState) emptyState.remove();
+    function closeActivityModal() {
+        document.getElementById('activityModal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
 
-            const html = `
+    document.getElementById('activityModal').addEventListener('click', function (e) {
+        if (e.target === this) closeActivityModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeActivityModal();
+    });
+
+    // توجه: بخش PROGRESS (progressSlider) کاملاً حذف شد چون
+    // المنت مربوطه در HTML کامنت شده و باعث توقف اجرای اسکریپت می‌شد.
+
+    // ═══════════════════════════════════════════
+    // SOURCE SWITCH (لیست آماده / دستی)
+    // ═══════════════════════════════════════════
+
+    function switchSource(source) {
+        document.getElementById('panel-static').classList.toggle('active', source === 'static');
+        document.getElementById('panel-custom').classList.toggle('active', source === 'custom');
+        document.getElementById('btn-switch-static').classList.toggle('active', source === 'static');
+        document.getElementById('btn-switch-custom').classList.toggle('active', source === 'custom');
+        document.getElementById('modalSaveCustomBtn').style.display = (source === 'custom') ? 'inline-flex' : 'none';
+    }
+
+    // ═══════════════════════════════════════════
+    // PROGRESS
+    // ═══════════════════════════════════════════
+
+    document.getElementById('progressSlider').addEventListener('input', function (e) {
+        const value = e.target.value;
+        document.getElementById('progressValue').textContent = value + '%';
+        document.getElementById('progressFill').style.width = value + '%';
+
+        fetch(`/roadmap/activity/${ACTIVITY_ID}/update/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                progress_percentage: value
+            })
+        });
+    });
+
+    // ═══════════════════════════════════════════
+    // STATIC ITEMS
+    // ═══════════════════════════════════════════
+
+    function filterStaticItems() {
+        const category = document.getElementById('categoryFilter').value;
+        document.querySelectorAll('.static-item-card').forEach(item => {
+            item.style.display = (!category || item.dataset.category === category) ? '' : 'none';
+        });
+    }
+
+    function selectStaticItem(itemId, element) {
+        document.querySelectorAll('.static-item-card').forEach(card => card.classList.remove('selected'));
+        element.classList.add('selected');
+
+        fetch(`/roadmap/activity/${ACTIVITY_ID}/select-static/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    static_item_id: itemId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    setTimeout(() => location.reload(), 800);
+                } else {
+                    showAlert('danger', data.error || 'خطا در انتخاب آیتم');
+                }
+            })
+            .catch(() => showAlert('danger', 'خطا در انتخاب آیتم'));
+    }
+
+    // ═══════════════════════════════════════════
+    // CUSTOM ACTIVITY
+    // ═══════════════════════════════════════════
+
+    function createCustomActivity() {
+        const form = document.getElementById('customActivityForm');
+        const data = Object.fromEntries(new FormData(form));
+
+        fetch(`/roadmap/activity/${ACTIVITY_ID}/create-custom/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', data.message);
+                    setTimeout(() => location.reload(), 800);
+                } else {
+                    showAlert('danger', data.error);
+                }
+            });
+    }
+
+    // ═══════════════════════════════════════════
+    // CHECKPOINTS
+    // ═══════════════════════════════════════════
+
+    function addCheckpoint() {
+        const title = document.getElementById('checkpointTitle').value;
+        const description = document.getElementById('checkpointDesc').value;
+
+        if (!title) {
+            showAlert('warning', 'لطفاً عنوان نقطه کنترل را وارد کنید');
+            return;
+        }
+
+        fetch(`/roadmap/activity/${ACTIVITY_ID}/checkpoint/add/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    title,
+                    description
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const list = document.getElementById('checkpointsList');
+                    const emptyState = list.querySelector('.empty-state');
+                    if (emptyState) emptyState.remove();
+
+                    const html = `
                 <div class="checkpoint-item" data-checkpoint-id="${data.checkpoint.id}">
                     <input type="checkbox" class="checkpoint-checkbox" onchange="toggleCheckpoint(${ACTIVITY_ID}, ${data.checkpoint.id})">
                     <div class="checkpoint-content">
@@ -609,73 +714,93 @@ function addCheckpoint() {
                     </div>
                     <button class="btn btn-red btn-sm btn-fit" onclick="deleteCheckpoint(${ACTIVITY_ID}, ${data.checkpoint.id})">حذف</button>
                 </div>`;
-            list.insertAdjacentHTML('beforeend', html);
+                    list.insertAdjacentHTML('beforeend', html);
 
-            document.getElementById('checkpointTitle').value = '';
-            document.getElementById('checkpointDesc').value = '';
-            showAlert('success', 'نقطه کنترل اضافه شد');
-        }
-    });
-}
-
-function toggleCheckpoint(activityId, checkpointId) {
-    fetch(`/roadmap/activity/${activityId}/checkpoint/${checkpointId}/toggle/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': getCookie('csrftoken') }
-    })
-    .then(response => response.json())
-    .then(data => { if (data.success) location.reload(); });
-}
-
-function deleteCheckpoint(activityId, checkpointId) {
-    if (!confirm('آیا مطمئن هستید؟')) return;
-
-    fetch(`/roadmap/activity/${activityId}/checkpoint/${checkpointId}/delete/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': getCookie('csrftoken') }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.querySelector(`[data-checkpoint-id="${checkpointId}"]`).remove();
-            showAlert('success', 'نقطه کنترل حذف شد');
-        } else {
-            showAlert('danger', data.error || 'خطا در حذف');
-        }
-    })
-    .catch(() => showAlert('danger', 'خطا در ارتباط با سرور'));
-}
-
-
-// ═══════════════════════════════════════════
-// RESOURCES
-// ═══════════════════════════════════════════
-
-function addResource() {
-    const title = document.getElementById('resourceTitle').value;
-    const type = document.getElementById('resourceType').value;
-    const url = document.getElementById('resourceUrl').value;
-    const description = document.getElementById('resourceDesc').value;
-
-    if (!title) {
-        showAlert('warning', 'لطفاً عنوان منبع را وارد کنید');
-        return;
+                    document.getElementById('checkpointTitle').value = '';
+                    document.getElementById('checkpointDesc').value = '';
+                    showAlert('success', 'نقطه کنترل اضافه شد');
+                }
+            });
     }
 
-    fetch(`/roadmap/activity/${ACTIVITY_ID}/resource/add/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify({ title, type, url, description })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const list = document.getElementById('resourcesList');
-            const emptyState = list.querySelector('.empty-state');
-            if (emptyState) emptyState.remove();
+    function toggleCheckpoint(activityId, checkpointId) {
+        fetch(`/roadmap/activity/${activityId}/checkpoint/${checkpointId}/toggle/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) location.reload();
+            });
+    }
 
-            const icons = { link: '🔗', file: '📄', book: '📖', course: '🎓', other: '📌' };
-            const html = `
+    function deleteCheckpoint(activityId, checkpointId) {
+        if (!confirm('آیا مطمئن هستید؟')) return;
+
+        fetch(`/roadmap/activity/${activityId}/checkpoint/${checkpointId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelector(`[data-checkpoint-id="${checkpointId}"]`).remove();
+                    showAlert('success', 'نقطه کنترل حذف شد');
+                } else {
+                    showAlert('danger', data.error || 'خطا در حذف');
+                }
+            })
+            .catch(() => showAlert('danger', 'خطا در ارتباط با سرور'));
+    }
+
+
+    // ═══════════════════════════════════════════
+    // RESOURCES
+    // ═══════════════════════════════════════════
+
+    function addResource() {
+        const title = document.getElementById('resourceTitle').value;
+        const type = document.getElementById('resourceType').value;
+        const url = document.getElementById('resourceUrl').value;
+        const description = document.getElementById('resourceDesc').value;
+
+        if (!title) {
+            showAlert('warning', 'لطفاً عنوان منبع را وارد کنید');
+            return;
+        }
+
+        fetch(`/roadmap/activity/${ACTIVITY_ID}/resource/add/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    title,
+                    type,
+                    url,
+                    description
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const list = document.getElementById('resourcesList');
+                    const emptyState = list.querySelector('.empty-state');
+                    if (emptyState) emptyState.remove();
+
+                    const icons = {
+                        link: '🔗',
+                        file: '📄',
+                        book: '📖',
+                        course: '🎓',
+                        other: '📌'
+                    };
+                    const html = `
                 <div class="resource-item" data-resource-id="${data.resource.id}">
                     <div class="resource-icon">${icons[data.resource.type]}</div>
                     <div class="resource-content">
@@ -686,126 +811,145 @@ function addResource() {
                     </div>
                     <button class="btn btn-red btn-sm btn-fit" onclick="deleteResource(${ACTIVITY_ID}, ${data.resource.id})">حذف</button>
                 </div>`;
-            list.insertAdjacentHTML('beforeend', html);
+                    list.insertAdjacentHTML('beforeend', html);
 
-            document.getElementById('resourceTitle').value = '';
-            document.getElementById('resourceUrl').value = '';
-            document.getElementById('resourceDesc').value = '';
-            document.getElementById('resourceType').value = 'link';
-            showAlert('success', 'منبع اضافه شد');
-        }
-    });
-}
-
-function deleteResource(activityId, resourceId) {
-    if (confirm('آیا مطمئن هستید؟')) {
-        fetch(`/roadmap/activity/${activityId}/resource/${resourceId}/delete/`, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': getCookie('csrftoken') }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.querySelector(`[data-resource-id="${resourceId}"]`).remove();
-                showAlert('success', 'منبع حذف شد');
-            }
-        });
+                    document.getElementById('resourceTitle').value = '';
+                    document.getElementById('resourceUrl').value = '';
+                    document.getElementById('resourceDesc').value = '';
+                    document.getElementById('resourceType').value = 'link';
+                    showAlert('success', 'منبع اضافه شد');
+                }
+            });
     }
-}
 
-// ═══════════════════════════════════════════
-// NOTES
-// ═══════════════════════════════════════════
-
-function saveNotes() {
-    const notes = document.getElementById('notesTextarea').value;
-    const result_summary = document.getElementById('resultSummary').value;
-
-    fetch(`/roadmap/activity/${ACTIVITY_ID}/update/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify({ notes, result_summary })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) showAlert('success', data.message);
-        else showAlert('danger', data.error);
-    });
-}
-
-// ═══════════════════════════════════════════
-// DATES
-// ═══════════════════════════════════════════
-
-function updateDates() {
-    const actual_start_date = document.getElementById('actualStartDate').value;
-    const actual_end_date = document.getElementById('actualEndDate').value;
-
-    fetch(`/roadmap/activity/${ACTIVITY_ID}/update/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify({ actual_start_date, actual_end_date })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) showAlert('success', data.message);
-        else showAlert('danger', data.error);
-    });
-}
-
-// ═══════════════════════════════════════════
-// COMPLETE ACTIVITY
-// ═══════════════════════════════════════════
-
-function completeActivity() {
-    if (confirm('آیا مطمئن هستید که این فعالیت تکمیل شده است؟')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `{% url 'roadmap:stage_activity_toggle' stage_activity.id %}`;
-
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = 'csrfmiddlewaretoken';
-        csrfInput.value = getCookie('csrftoken');
-
-        form.appendChild(csrfInput);
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
-// ═══════════════════════════════════════════
-// UTILITIES
-// ═══════════════════════════════════════════
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
+    function deleteResource(activityId, resourceId) {
+        if (confirm('آیا مطمئن هستید؟')) {
+            fetch(`/roadmap/activity/${activityId}/resource/${resourceId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector(`[data-resource-id="${resourceId}"]`).remove();
+                        showAlert('success', 'منبع حذف شد');
+                    }
+                });
         }
     }
-    return cookieValue;
-}
 
-function showAlert(type, message) {
-    const icons = { success: '✅', danger: '❌', warning: '⚠️', info: 'ℹ️' };
-    const html = `
+    // ═══════════════════════════════════════════
+    // NOTES
+    // ═══════════════════════════════════════════
+
+    function saveNotes() {
+        const notes = document.getElementById('notesTextarea').value;
+        const result_summary = document.getElementById('resultSummary').value;
+
+        fetch(`/roadmap/activity/${ACTIVITY_ID}/update/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    notes,
+                    result_summary
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) showAlert('success', data.message);
+                else showAlert('danger', data.error);
+            });
+    }
+
+    // ═══════════════════════════════════════════
+    // DATES
+    // ═══════════════════════════════════════════
+
+    function updateDates() {
+        const actual_start_date = document.getElementById('actualStartDate').value;
+        const actual_end_date = document.getElementById('actualEndDate').value;
+
+        fetch(`/roadmap/activity/${ACTIVITY_ID}/update/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    actual_start_date,
+                    actual_end_date
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) showAlert('success', data.message);
+                else showAlert('danger', data.error);
+            });
+    }
+
+    // ═══════════════════════════════════════════
+    // COMPLETE ACTIVITY
+    // ═══════════════════════════════════════════
+
+    function completeActivity() {
+        if (confirm('آیا مطمئن هستید که این فعالیت تکمیل شده است؟')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `{% url 'roadmap:stage_activity_toggle' stage_activity.id %}`;
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = getCookie('csrftoken');
+
+            form.appendChild(csrfInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    // UTILITIES
+    // ═══════════════════════════════════════════
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function showAlert(type, message) {
+        const icons = {
+            success: '✅',
+            danger: '❌',
+            warning: '⚠️',
+            info: 'ℹ️'
+        };
+        const html = `
         <div class="alert-${type} toast-alert">
             <span>${icons[type] || 'ℹ️'}</span>
             <div>${message}</div>
         </div>`;
-    document.body.insertAdjacentHTML('beforeend', html);
-    setTimeout(() => {
-        const el = document.querySelector('.toast-alert');
-        if (el) el.remove();
-    }, 3500);
-}
+        document.body.insertAdjacentHTML('beforeend', html);
+        setTimeout(() => {
+            const el = document.querySelector('.toast-alert');
+            if (el) el.remove();
+        }, 3500);
+    }
 
 
 
@@ -815,63 +959,67 @@ function showAlert(type, message) {
 
 
 
-function openCheckpointModal() {
-    document.getElementById('checkpointModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    switchCheckpointTab('manual');
-}
+    function openCheckpointModal() {
+        document.getElementById('checkpointModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+        switchCheckpointTab('manual');
+    }
 
-function closeCheckpointModal() {
-    document.getElementById('checkpointModal').classList.remove('open');
-    document.body.style.overflow = '';
-}
+    function closeCheckpointModal() {
+        document.getElementById('checkpointModal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
 
-function switchCheckpointTab(tab) {
-    document.getElementById('cp-panel-manual').classList.toggle('active', tab === 'manual');
-    document.getElementById('cp-panel-search').classList.toggle('active', tab === 'search');
-    document.getElementById('btn-cp-manual').classList.toggle('active', tab === 'manual');
-    document.getElementById('btn-cp-search').classList.toggle('active', tab === 'search');
-    if (tab === 'search') searchItems();
-}
+    function switchCheckpointTab(tab) {
+        document.getElementById('cp-panel-manual').classList.toggle('active', tab === 'manual');
+        document.getElementById('cp-panel-search').classList.toggle('active', tab === 'search');
+        document.getElementById('btn-cp-manual').classList.toggle('active', tab === 'manual');
+        document.getElementById('btn-cp-search').classList.toggle('active', tab === 'search');
+        if (tab === 'search') searchItems();
+    }
 
-function switchItemType(type) {
-    currentItemType = type;
-    document.getElementById('btn-type-course').classList.toggle('active', type === 'course');
-    document.getElementById('btn-type-project').classList.toggle('active', type === 'project');
-    document.getElementById('btn-type-event').classList.toggle('active', type === 'event');
-    document.getElementById('cpSearchQuery').value = '';
-    searchItems();
-}
+    function switchItemType(type) {
+        currentItemType = type;
+        document.getElementById('btn-type-course').classList.toggle('active', type === 'course');
+        document.getElementById('btn-type-project').classList.toggle('active', type === 'project');
+        document.getElementById('btn-type-event').classList.toggle('active', type === 'event');
+        document.getElementById('cpSearchQuery').value = '';
+        searchItems();
+    }
 
-function debouncedSearch() {
-    clearTimeout(searchDebounceTimer);
-    searchDebounceTimer = setTimeout(searchItems, 350);
-}
+    function debouncedSearch() {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(searchItems, 350);
+    }
 
-function searchItems() {
-    const q = document.getElementById('cpSearchQuery').value;
-    const category = document.getElementById('cpSearchCategory').value;
-    const params = new URLSearchParams({ type: currentItemType, q, category });
+    function searchItems() {
+        const q = document.getElementById('cpSearchQuery').value;
+        const category = document.getElementById('cpSearchCategory').value;
+        const params = new URLSearchParams({
+            type: currentItemType,
+            q,
+            category
+        });
 
-    fetch(`/roadmap/activity/search-items/?${params.toString()}`)
-        .then(r => {
-            if (!r.ok) throw new Error('Request failed: ' + r.status);
-            return r.json();
-        })
-        .then(data => {
-            const catSelect = document.getElementById('cpSearchCategory');
-            const currentVal = catSelect.value;
-            catSelect.innerHTML = '<option value="">همه</option>' +
-                (data.categories || []).map(c => `<option value="${c.slug}">${c.name}</option>`).join('');
-            catSelect.value = currentVal;
+        fetch(`/roadmap/activity/search-items/?${params.toString()}`)
+            .then(r => {
+                if (!r.ok) throw new Error('Request failed: ' + r.status);
+                return r.json();
+            })
+            .then(data => {
+                const catSelect = document.getElementById('cpSearchCategory');
+                const currentVal = catSelect.value;
+                catSelect.innerHTML = '<option value="">همه</option>' +
+                    (data.categories || []).map(c => `<option value="${c.slug}">${c.name}</option>`).join('');
+                catSelect.value = currentVal;
 
-            const container = document.getElementById('cpSearchResults');
-            if (!data.results || data.results.length === 0) {
-                container.innerHTML = '<div class="empty-state">نتیجه‌ای یافت نشد.</div>';
-                return;
-            }
+                const container = document.getElementById('cpSearchResults');
+                if (!data.results || data.results.length === 0) {
+                    container.innerHTML = '<div class="empty-state">نتیجه‌ای یافت نشد.</div>';
+                    return;
+                }
 
-            container.innerHTML = data.results.map(item => `
+                container.innerHTML = data.results.map(item => `
                 <div class="static-item-card">
                     <div class="static-item-title">${item.title}</div>
                     <span class="tag tag-sm tag-blue">${item.category}</span>
@@ -886,72 +1034,86 @@ function searchItems() {
                     </div>
                 </div>
             `).join('');
-        })
-        .catch(err => {
-            console.error('searchItems error:', err);
-            document.getElementById('cpSearchResults').innerHTML =
-                '<div class="empty-state">خطا در دریافت اطلاعات.</div>';
-        });
-}
-
-function submitManualCheckpoint() {
-    const title = document.getElementById('cpTitle').value.trim();
-    if (!title) {
-        showAlert('warning', 'لطفاً عنوان را وارد کنید');
-        return;
+            })
+            .catch(err => {
+                console.error('searchItems error:', err);
+                document.getElementById('cpSearchResults').innerHTML =
+                    '<div class="empty-state">خطا در دریافت اطلاعات.</div>';
+            });
     }
 
-    postCheckpoint({
-        source_type: 'manual',
-        title,
-        description: document.getElementById('cpDesc').value,
-        priority: document.getElementById('cpPriority').value,
-        due_date: document.getElementById('cpDueDate').value || null,
-        notes: document.getElementById('cpNotes').value,
-    });
-}
-
-function addItemCheckpoint(id, type, title, description, url) {
-    postCheckpoint({ source_type: type, source_id: id, title, description, source_url: url });
-}
-
-function postCheckpoint(payload) {
-    fetch(`/roadmap/activity/${ACTIVITY_ID}/checkpoint/add/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify(payload)
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            showAlert('success', 'نقطه کنترل اضافه شد');
-            closeCheckpointModal();
-            setTimeout(() => location.reload(), 600);
-        } else {
-            showAlert('danger', data.error || 'خطا در افزودن');
+    function submitManualCheckpoint() {
+        const title = document.getElementById('cpTitle').value.trim();
+        if (!title) {
+            showAlert('warning', 'لطفاً عنوان را وارد کنید');
+            return;
         }
-    });
-}
+
+        postCheckpoint({
+            source_type: 'manual',
+            title,
+            description: document.getElementById('cpDesc').value,
+            priority: document.getElementById('cpPriority').value,
+            due_date: document.getElementById('cpDueDate').value || null,
+            notes: document.getElementById('cpNotes').value,
+        });
+    }
+
+    function addItemCheckpoint(id, type, title, description, url) {
+        postCheckpoint({
+            source_type: type,
+            source_id: id,
+            title,
+            description,
+            source_url: url
+        });
+    }
+
+    function postCheckpoint(payload) {
+        fetch(`/roadmap/activity/${ACTIVITY_ID}/checkpoint/add/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', 'نقطه کنترل اضافه شد');
+                    closeCheckpointModal();
+                    setTimeout(() => location.reload(), 600);
+                } else {
+                    showAlert('danger', data.error || 'خطا در افزودن');
+                }
+            });
+    }
 
 
 
-function saveCheckpointNote(stageActivityId, checkpointId) {
-    const textarea = document.querySelector(
-        `.checkpoint-note-textarea[data-checkpoint-id="${checkpointId}"]`
-    );
-    const notes = textarea.value;
+    function saveCheckpointNote(stageActivityId, checkpointId) {
+        const textarea = document.querySelector(
+            `.checkpoint-note-textarea[data-checkpoint-id="${checkpointId}"]`
+        );
+        const notes = textarea.value;
 
-    fetch(`/roadmap/activity/${stageActivityId}/checkpoint/${checkpointId}/note/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify({ notes })
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) showAlert('success', 'یادداشت ذخیره شد');
-        else showAlert('danger', data.error || 'خطا در ذخیره یادداشت');
-    });
-}
+        fetch(`/roadmap/activity/${stageActivityId}/checkpoint/${checkpointId}/note/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    notes
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) showAlert('success', 'یادداشت ذخیره شد');
+                else showAlert('danger', data.error || 'خطا در ذخیره یادداشت');
+            });
+    }
 </script>
 
 {% endblock %}

@@ -42,13 +42,11 @@
     <!-- هدر صفحه -->
     <div class="sd-topbar">
         <div class="sd-topbar-right">
-            <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="sd-back-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="9 18 15 12 9 6"/>
-                </svg>
-            </a>
             <div>
-                <div class="sd-eyebrow">{{ roadmap.title }}</div>
+                <div class="activity-header-breadcrumb">
+                    <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}">{{ roadmap.title }}</a>
+                    <span> / </span>
+                </div>
                 <h1 class="sd-page-title">{{ stage.title }}</h1>
             </div>
         </div>
@@ -60,12 +58,10 @@
             {% else %}
             <span class="sd-status-pill sd-status-pending">در انتظار</span>
             {% endif %}
-            <a href="{% url 'roadmap:stage_edit' stage.id %}" class="sd-btn sd-btn-primary">
+            <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="sd-back-btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                <polyline points="15 18 9 12 15 6"/>
                 </svg>
-                ویرایش
             </a>
         </div>
     </div>
