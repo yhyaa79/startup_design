@@ -242,7 +242,7 @@ html {
 
     /* === Radius === */
     --radius: 10px;
-    --radius-sm: 6px;
+    --radius-sm: px;
     --radius-card: 22px;
     --radius-lg: 26px;
     --radius-md: 16px;

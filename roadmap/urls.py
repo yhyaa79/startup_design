@@ -33,4 +33,7 @@ urlpatterns = [
     # Resources 
     path('activity/<int:activity_id>/resource/add/', views.stage_activity_add_resource, name='stage_activity_add_resource'),
     path('activity/<int:activity_id>/resource/<int:resource_id>/delete/', views.stage_activity_delete_resource, name='stage_activity_delete_resource'),
+
+    path('activity/<int:activity_id>/checkpoint/add/', views.stage_activity_add_checkpoint, name='stage_activity_add_checkpoint'),
+    path('activity/search-items/', views.stage_activity_search_items, name='stage_activity_search_items'),
 ]

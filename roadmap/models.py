@@ -373,11 +373,30 @@ class StageActivity(models.Model):
     )
     
     # ✅ فیلد برای checkpoints
+    # ساختار هر آیتم:
+    # {
+    #     "id": 1,
+    #     "source_type": "manual" | "course" | "project",
+    #     "title": "...",
+    #     "description": "...",
+    #     "priority": "low" | "medium" | "high",
+    #     "due_date": "2025-01-01" | null,
+    #     "notes": "...",
+    #     "source_id": null | <course.id> | <project.id>,
+    #     "source_url": null | "/course/..." | "/project/...",
+    #     "is_completed": false,
+    #     "date": null
+    # }
     checkpoints = models.JSONField(
         default=list,
         blank=True,
         verbose_name='نقاط کنترل',
-        help_text='[{"title": "...", "is_completed": false, "date": "..."}]'
+        help_text=(
+            '[{"id": 1, "source_type": "manual|course|project", "title": "...", '
+            '"description": "...", "priority": "low|medium|high", "due_date": null, '
+            '"notes": "...", "source_id": null, "source_url": null, '
+            '"is_completed": false, "date": null}]'
+        )
     )
     
     # ✅ فیلد برای منابع

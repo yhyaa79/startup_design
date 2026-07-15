@@ -16,6 +16,9 @@ from .services.profile_data import collect_profile_data
 from .services.scoring import calculate_roadmap_score
 from .static_items import get_all_items_flat, get_item_by_id, CATEGORY_LABELS, LEVEL_LABELS, DIFFICULTY_LABELS
 
+from course.models import Course, Category
+from project.models import ResearchProject
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -509,41 +512,143 @@ def stage_activity_toggle(request, activity_id):
 #  ✅ اضافه کردن checkpoint (جدید)
 # ═══════════════════════════════════════════════════════════════════
 
+
 @login_required
 @require_http_methods(["POST"])
 def stage_activity_add_checkpoint(request, activity_id):
-    """اضافه کردن نقطه کنترل"""
-    
+    """اضافه کردن نقطه کنترل (دستی، یا از یک دوره/پروژه)"""
+
     stage_activity = get_object_or_404(StageActivity, id=activity_id)
     roadmap = stage_activity.stage.roadmap
-    
+
     if roadmap.user != request.user:
         return JsonResponse({'error': 'دسترسی رد شد'}, status=403)
-    
+
     try:
         data = json.loads(request.body)
-        
+        source_type = data.get('source_type', 'manual')
+
+        checkpoints = stage_activity.checkpoints or []
+        new_id = (max(cp['id'] for cp in checkpoints) + 1) if checkpoints else 1
+
         checkpoint = {
-            'id': len(stage_activity.checkpoints) + 1,
-            'title': data.get('title', ''),
-            'description': data.get('description', ''),
+            'id': new_id,
+            'source_type': source_type,
             'is_completed': False,
             'date': None,
         }
-        
-        checkpoints = stage_activity.checkpoints or []
+
+        if source_type == 'manual':
+            title = data.get('title', '').strip()
+            if not title:
+                return JsonResponse({'error': 'عنوان الزامی است'}, status=400)
+
+            checkpoint.update({
+                'title': title,
+                'description': data.get('description', ''),
+                'priority': data.get('priority', 'medium'),
+                'due_date': data.get('due_date') or None,
+                'notes': data.get('notes', ''),
+                'source_id': None,
+                'source_url': None,
+            })
+
+        elif source_type == 'course':
+            course = get_object_or_404(Course, id=data.get('source_id'))
+            checkpoint.update({
+                'title': course.title,
+                'description': course.short_desc,
+                'priority': 'medium',
+                'due_date': None,
+                'notes': '',
+                'source_id': course.id,
+                'source_url': course.get_absolute_url(),
+            })
+
+        elif source_type == 'project':
+            project = get_object_or_404(ResearchProject, id=data.get('source_id'))
+            checkpoint.update({
+                'title': project.title,
+                'description': project.short_description,
+                'priority': 'medium',
+                'due_date': None,
+                'notes': '',
+                'source_id': project.id,
+                'source_url': project.get_absolute_url(),
+            })
+
+        else:
+            return JsonResponse({'error': 'نوع نامعتبر است'}, status=400)
+
         checkpoints.append(checkpoint)
         stage_activity.checkpoints = checkpoints
         stage_activity.save()
-        
-        return JsonResponse({
-            'success': True,
-            'checkpoint': checkpoint,
-        })
-    
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
 
+        return JsonResponse({'success': True, 'checkpoint': checkpoint})
+
+    except Exception as e:
+        return JsonResponse({'error': f'خطا: {str(e)}'}, status=400)
+
+
+# ═══════════════════════════════════════════════════════
+#  ✅ جستجوی دوره‌ها / پروژه‌ها برای افزودن به نقاط کنترل (جدید)
+# ═══════════════════════════════════════════════════════
+
+@login_required
+@require_http_methods(["GET"])
+def stage_activity_search_items(request):
+    """جستجو و فیلتر دوره‌ها یا پروژه‌ها جهت انتخاب برای checklist"""
+
+    item_type = request.GET.get('type', 'course')  # course | project
+    query = request.GET.get('q', '').strip()
+    category = request.GET.get('category', '').strip()
+
+    results = []
+
+    if item_type == 'course':
+        qs = Course.objects.filter(active=True).select_related('category')
+        if query:
+            qs = qs.filter(title__icontains=query)
+        if category:
+            qs = qs.filter(category__slug=category)
+
+        for c in qs[:30]:
+            results.append({
+                'id': c.id,
+                'title': c.title,
+                'description': c.short_desc,
+                'category': c.category.name,
+                'meta': c.duration or '',
+                'url': c.get_absolute_url(),
+            })
+
+        categories = list(Category.objects.values('slug', 'name')) if False else list(
+            __import__('course.models', fromlist=['Category']).Category.objects.values('slug', 'name')
+        )
+
+    elif item_type == 'project':
+        qs = ResearchProject.objects.filter(is_active=True, visibility='public')
+        if query:
+            qs = qs.filter(title__icontains=query)
+        if category:
+            qs = qs.filter(category=category)
+
+        for p in qs[:30]:
+            results.append({
+                'id': p.id,
+                'title': p.title,
+                'description': p.short_description,
+                'category': p.get_category_display(),
+                'meta': p.get_status_display(),
+                'url': p.get_absolute_url(),
+            })
+
+        categories = [{'slug': k, 'name': v} for k, v in ResearchProject.CATEGORY_CHOICES]
+
+    else:
+        return JsonResponse({'error': 'نوع نامعتبر است'}, status=400)
+
+    return JsonResponse({'results': results, 'categories': categories})
 
 # ═══════════════════════════════════════════════════════════════════
 #  ✅ تغییر وضعیت checkpoint (جدید)
