@@ -37,4 +37,7 @@ urlpatterns = [
     path('activity/<int:activity_id>/checkpoint/add/', views.stage_activity_add_checkpoint, name='stage_activity_add_checkpoint'),
     path('activity/search-items/', views.stage_activity_search_items, name='stage_activity_search_items'),
     path('activity/<int:activity_id>/checkpoint/<int:checkpoint_id>/note/', views.stage_activity_update_checkpoint_note, name='stage_activity_update_checkpoint_note'),
+
+    path('activity/<int:activity_id>/checkpoint/<int:checkpoint_id>/delete/', views.stage_activity_delete_checkpoint, name='stage_activity_delete_checkpoint'),
+
 ]

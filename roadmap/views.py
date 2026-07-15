@@ -849,6 +849,40 @@ def stage_activity_delete_resource(request, activity_id, resource_id):
         return JsonResponse({'error': str(e)}, status=400)
 
 
+
+# ═══════════════════════════════════════════════════════════════════
+#  حذف ایتم های چک لیست
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+@require_http_methods(["POST"])
+def stage_activity_delete_checkpoint(request, activity_id, checkpoint_id):
+    """حذف نقطه کنترل"""
+
+    stage_activity = get_object_or_404(StageActivity, id=activity_id)
+    roadmap = stage_activity.stage.roadmap
+
+    if roadmap.user != request.user:
+        return JsonResponse({'error': 'دسترسی رد شد'}, status=403)
+
+    try:
+        checkpoint_id = int(checkpoint_id)
+        checkpoints = stage_activity.checkpoints or []
+
+        new_checkpoints = [cp for cp in checkpoints if cp['id'] != checkpoint_id]
+
+        if len(new_checkpoints) == len(checkpoints):
+            return JsonResponse({'error': 'نقطه کنترل یافت نشد'}, status=404)
+
+        stage_activity.checkpoints = new_checkpoints
+        stage_activity.save()
+
+        return JsonResponse({'success': True})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
 # ═══════════════════════════════════════════════════════════════════
 #  ویرایش رودمپ
 # ═══════════════════════════════════════════════════════════════════
