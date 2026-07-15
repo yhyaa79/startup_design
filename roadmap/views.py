@@ -18,6 +18,7 @@ from .static_items import get_all_items_flat, get_item_by_id, CATEGORY_LABELS, L
 
 from course.models import Course, Category
 from project.models import ResearchProject
+from event_hub.models import Event
 
 import logging
 
@@ -516,7 +517,7 @@ def stage_activity_toggle(request, activity_id):
 @login_required
 @require_http_methods(["POST"])
 def stage_activity_add_checkpoint(request, activity_id):
-    """اضافه کردن نقطه کنترل (دستی، یا از یک دوره/پروژه)"""
+    """اضافه کردن نقطه کنترل (دستی، یا از یک دوره/پروژه/رویداد)"""
 
     stage_activity = get_object_or_404(StageActivity, id=activity_id)
     roadmap = stage_activity.stage.roadmap
@@ -536,6 +537,7 @@ def stage_activity_add_checkpoint(request, activity_id):
             'source_type': source_type,
             'is_completed': False,
             'date': None,
+            'extra_details': {},
         }
 
         if source_type == 'manual':
@@ -563,6 +565,11 @@ def stage_activity_add_checkpoint(request, activity_id):
                 'notes': '',
                 'source_id': course.id,
                 'source_url': course.get_absolute_url(),
+                'extra_details': {
+                    'category': course.category.name,
+                    'duration': course.duration,
+                    'instructor': course.instructor,
+                },
             })
 
         elif source_type == 'project':
@@ -575,6 +582,29 @@ def stage_activity_add_checkpoint(request, activity_id):
                 'notes': '',
                 'source_id': project.id,
                 'source_url': project.get_absolute_url(),
+                'extra_details': {
+                    'category': project.get_category_display(),
+                    'status': project.get_status_display(),
+                    'institution': project.institution,
+                },
+            })
+
+        elif source_type == 'event':
+            event = get_object_or_404(Event, id=data.get('source_id'))
+            checkpoint.update({
+                'title': event.title,
+                'description': event.short_description,
+                'priority': 'medium',
+                'due_date': None,
+                'notes': '',
+                'source_id': event.id,
+                'source_url': f'/event/{event.slug}/',
+                'extra_details': {
+                    'section': event.section,
+                    'activity_type': event.activity_type,
+                    'difficulty': event.difficulty,
+                    'required_time': event.required_time,
+                },
             })
 
         else:
@@ -588,7 +618,7 @@ def stage_activity_add_checkpoint(request, activity_id):
 
     except Exception as e:
         return JsonResponse({'error': f'خطا: {str(e)}'}, status=400)
-
+    
 
 # ═══════════════════════════════════════════════════════
 #  ✅ جستجوی دوره‌ها / پروژه‌ها برای افزودن به نقاط کنترل (جدید)
@@ -597,9 +627,9 @@ def stage_activity_add_checkpoint(request, activity_id):
 @login_required
 @require_http_methods(["GET"])
 def stage_activity_search_items(request):
-    """جستجو و فیلتر دوره‌ها یا پروژه‌ها جهت انتخاب برای checklist"""
+    """جستجو و فیلتر دوره‌ها، پروژه‌ها یا رویدادها جهت انتخاب برای checklist"""
 
-    item_type = request.GET.get('type', 'course')  # course | project
+    item_type = request.GET.get('type', 'course')  # course | project | event
     query = request.GET.get('q', '').strip()
     category = request.GET.get('category', '').strip()
 
@@ -622,9 +652,7 @@ def stage_activity_search_items(request):
                 'url': c.get_absolute_url(),
             })
 
-        categories = list(Category.objects.values('slug', 'name')) if False else list(
-            __import__('course.models', fromlist=['Category']).Category.objects.values('slug', 'name')
-        )
+        categories = list(Category.objects.values('slug', 'name'))
 
     elif item_type == 'project':
         qs = ResearchProject.objects.filter(is_active=True, visibility='public')
@@ -645,13 +673,79 @@ def stage_activity_search_items(request):
 
         categories = [{'slug': k, 'name': v} for k, v in ResearchProject.CATEGORY_CHOICES]
 
+    elif item_type == 'event':
+        qs = Event.objects.all()
+        if query:
+            qs = qs.filter(title__icontains=query)
+        if category:
+            qs = qs.filter(section=category)
+
+        for e in qs[:30]:
+            results.append({
+                'id': e.id,
+                'title': e.title,
+                'description': e.short_description,
+                'category': e.section or 'عمومی',
+                'meta': e.required_time or '',
+                'url': f'/event/{e.slug}/',
+            })
+
+        sections = (
+            Event.objects.exclude(section='')
+            .values_list('section', flat=True)
+            .distinct()
+        )
+        categories = [{'slug': s, 'name': s} for s in sections]
+
     else:
         return JsonResponse({'error': 'نوع نامعتبر است'}, status=400)
 
     return JsonResponse({'results': results, 'categories': categories})
 
+
+# ═══════════════════════════════════════════════════════
+#  ✅ بروزرسانی یادداشت یک نقطه کنترل خاص (جدید)
+# ═══════════════════════════════════════════════════════
+
+@login_required
+@require_http_methods(["POST"])
+def stage_activity_update_checkpoint_note(request, activity_id, checkpoint_id):
+    """بروزرسانی یادداشت مربوط به یک آیتم checklist مشخص"""
+
+    stage_activity = get_object_or_404(StageActivity, id=activity_id)
+    roadmap = stage_activity.stage.roadmap
+
+    if roadmap.user != request.user:
+        return JsonResponse({'error': 'دسترسی رد شد'}, status=403)
+
+    try:
+        data = json.loads(request.body)
+        note = data.get('notes', '')
+
+        checkpoint_id = int(checkpoint_id)
+        checkpoints = stage_activity.checkpoints or []
+        found = False
+
+        for checkpoint in checkpoints:
+            if checkpoint['id'] == checkpoint_id:
+                checkpoint['notes'] = note
+                found = True
+                break
+
+        if not found:
+            return JsonResponse({'error': 'نقطه کنترل یافت نشد'}, status=404)
+
+        stage_activity.checkpoints = checkpoints
+        stage_activity.save()
+
+        return JsonResponse({'success': True, 'message': 'یادداشت ذخیره شد'})
+
+    except Exception as e:
+        return JsonResponse({'error': f'خطا: {str(e)}'}, status=400)
+    
+
 # ═══════════════════════════════════════════════════════════════════
-#  ✅ تغییر وضعیت checkpoint (جدید)
+#  ✅ تغییر وضعیت checkpoint 
 # ═══════════════════════════════════════════════════════════════════
 
 @login_required

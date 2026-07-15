@@ -128,13 +128,33 @@
                                 <div class="checkpoint-title">
                                     {{ checkpoint.title }}
                                     {% if checkpoint.source_type == 'course' %}<span class="status-badge">دوره</span>
-                                    {% elif checkpoint.source_type == 'project' %}<span class="status-badge">پروژه</span>{% endif %}
+                                    {% elif checkpoint.source_type == 'project' %}<span class="status-badge">پروژه</span>
+                                    {% elif checkpoint.source_type == 'event' %}<span class="status-badge">رویداد</span>{% endif %}
                                 </div>
                                 {% if checkpoint.description %}<div class="checkpoint-desc">{{ checkpoint.description }}</div>{% endif %}
+
+                                {% if checkpoint.extra_details %}
+                                <div class="checkpoint-extra-details">
+                                    {% for key, value in checkpoint.extra_details.items %}
+                                        {% if value %}<span class="status-badge">{{ value }}</span>{% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
                                 {% if checkpoint.date %}<div class="checkpoint-date">تکمیل: {{ checkpoint.date }}</div>{% endif %}
                                 {% if checkpoint.source_url %}
                                 <a href="{{ checkpoint.source_url }}" target="_blank" class="resource-url">بازدید ←</a>
                                 {% endif %}
+
+                                <!-- ✅ یادداشت اختصاصی همین آیتم -->
+                                <div class="checkpoint-note-box">
+                                    <textarea class="form-textarea checkpoint-note-textarea"
+                                        placeholder="یادداشت برای این مورد..."
+                                        data-checkpoint-id="{{ checkpoint.id }}">{{ checkpoint.notes }}</textarea>
+                                    <button class="btn rm-btn-ghost btn-sm" onclick="saveCheckpointNote({{ stage_activity.id }}, {{ checkpoint.id }})">
+                                        ذخیره یادداشت
+                                    </button>
+                                </div>
                             </div>
                             <button class="icon-btn-delete" onclick="deleteCheckpoint({{ stage_activity.id }}, {{ checkpoint.id }})">حذف</button>
                         </div>
@@ -194,6 +214,7 @@
                                 <div class="source-switch">
                                     <button type="button" class="source-switch-btn active" id="btn-type-course" onclick="switchItemType('course')">دوره‌های آموزشی</button>
                                     <button type="button" class="source-switch-btn" id="btn-type-project" onclick="switchItemType('project')">پروژه‌ها</button>
+                                    <button type="button" class="source-switch-btn" id="btn-type-event" onclick="switchItemType('event')">رویدادها</button>
                                 </div>
 
                                 <div class="form-row">
@@ -950,6 +971,26 @@ function postCheckpoint(payload) {
         } else {
             showAlert('danger', data.error || 'خطا در افزودن');
         }
+    });
+}
+
+
+
+function saveCheckpointNote(stageActivityId, checkpointId) {
+    const textarea = document.querySelector(
+        `.checkpoint-note-textarea[data-checkpoint-id="${checkpointId}"]`
+    );
+    const notes = textarea.value;
+
+    fetch(`/roadmap/activity/${stageActivityId}/checkpoint/${checkpointId}/note/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ notes })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) showAlert('success', 'یادداشت ذخیره شد');
+        else showAlert('danger', data.error || 'خطا در ذخیره یادداشت');
     });
 }
 </script>
