@@ -13,7 +13,7 @@
   <!-- HEADER -->
   <div class="rm-page-header">
     <div class="rm-header-left">
-      <h1 class="rm-page-title">{{ roadmap.title }}</h1>
+      <h1 class="sd-page-title">{{ roadmap.title }}</h1>
       <p class="rm-page-desc">{{ roadmap.description|default:"بدون توضیح" }}</p>
     </div>
     <div class="rm-header-actions">
@@ -62,7 +62,7 @@
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
       </svg>
       مراحل رودمپ
-      <span class="title-badge">{{ stages|length }} مرحله</span>
+      <span class="tag tag-lg tag-blue margin-right">{{ stages|length }} مرحله</span>
     </div>
 
     {% if stages %}
@@ -86,16 +86,15 @@
           <div class="rm-step-header">
             <div class="rm-step-meta">
               <span class="rm-step-num">مرحله {{ stage.order }}</span>
-              <span class="rm-step-period">{{ stage.duration_days }} روز</span>
+              <span class="tag tag-md tag-gray">{{ stage.duration_days }} روز</span>
             </div>
             <div class="rm-step-badges">
-              <span class="tag {% if prog == 100 %}rm-status-done{% elif stage.id == active_stage_id %}rm-status-active{% else %}rm-status-upcoming{% endif %}">
+              <span class="tag tag-lg {% if prog == 100 %}tag-green{% elif stage.id == active_stage_id %}tag-blue{% else %}tag-gray{% endif %}">
                 {% if prog == 100 %}تکمیل‌شده
                 {% elif stage.id == active_stage_id %}در حال انجام
                 {% else %}در انتظار{% endif %}
               </span>
-              {% if stage.phase_type %}<span class="tag tag-phase">{{ stage.get_phase_type_display }}</span>{% endif %}
-              {% if stage.priority %}<span class="tag tag-priority tag-priority-{{ stage.priority }}">{{ stage.get_priority_display }}</span>{% endif %}
+              {% if stage.phase_type %}<span class="tag tag-lg tag-amber">{{ stage.get_phase_type_display }}</span>{% endif %}
             </div>
           </div>
 
@@ -123,8 +122,7 @@
           </div>
 
           <div class="rm-step-footer">
-            <a href="{% url 'roadmap:stage_detail' stage.id %}" class="rm-btn rm-btn-xs rm-btn-primary">مشاهده جزئیات</a>
-            <a href="{% url 'roadmap:stage_edit' stage.id %}" class="rm-btn rm-btn-xs rm-btn-outline">ویرایش</a>
+            <a href="{% url 'roadmap:stage_detail' stage.id %}" class="btn btn-primary btn-full btn-md btn-fit">مشاهده جزئیات</a>
           </div>
         </div>
 

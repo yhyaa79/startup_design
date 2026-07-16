@@ -557,7 +557,7 @@
 
 .rm-page-desc {
     margin-top: 6px;
-    color: var(--ink-600);
+    color: var(--text-muted);
     font-size: var(--text-xl);
 }
 
@@ -567,6 +567,7 @@
     flex-shrink: 0;
     margin-right: auto;
 }
+
 
 .rm-stats-row-3 {
     display: grid;
@@ -594,7 +595,6 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    align-items: center;
 }
 
 .rm-stat-label {
@@ -604,7 +604,7 @@
 }
 
 .rm-stat-value {
-    font-size: var(--text-lg);
+    font-size: var(--text-2xl);
     font-weight: 700;
     color: var(--ink-900);
 }
@@ -635,7 +635,7 @@
 
 .rm-progress-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--purple));
+    background: var(--primary);
     border-radius: 99px;
     transition: width 0.4s ease;
 }
@@ -762,7 +762,7 @@
 
 .rm-step-body {
     flex: 1;
-    background: var(--page-bg);
+        background: var(--card);
     border-radius: var(--radius-md);
     padding: var(--gap-sm) var(--gap);
     margin-bottom: var(--gap-sm);
@@ -777,12 +777,12 @@
 }
 
 .rm-done .rm-step-body {
-    border-color: var(--green-soft);
+    border-color: var(--green);
 }
 
 .rm-active .rm-step-body {
-    border-color: var(--primary-soft);
-    background: var(--primary-softer);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
 }
 
 .rm-step-header {
@@ -1084,7 +1084,7 @@
     padding: var(--gap-smm);
     display: flex;
     flex-direction: column;
-    gap: var(--gap-smmm);
+    gap: var(--gap-smmmm);
     transition: box-shadow .15s ease, transform .15s ease;
 }
 
@@ -1116,7 +1116,7 @@
     line-height: 1.7;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
 }
 
@@ -1179,8 +1179,7 @@
 .rm-meta-row {
     display: flex;
     gap: var(--gap-sm);
-    padding: var(--gap-smmm) 0;
-    border-top: 1px solid var(--ink-200);
+    padding: var(--gap-smmmm) 0;
     border-bottom: 1px solid var(--ink-200);
 }
 
@@ -1832,6 +1831,7 @@
 
 .activity-header-breadcrumb a {
     text-decoration: none;
+    color: var(--blue);
 }
 
 .activity-header-breadcrumb a:hover {
@@ -2407,6 +2407,13 @@
     gap: 10px;
 }
 
+
+.sd-header-actions {
+    display: flex;
+    gap: var(--gap-sm);
+    flex-shrink: 0;
+    margin-bottom: var(--gap-sm);
+}
 
 .sd-eyebrow {
     font-size: var(--text-xl);

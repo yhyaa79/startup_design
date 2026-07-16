@@ -142,6 +142,7 @@ html {
     --gap-sm: calc(var(--gap) - 2px);
     --gap-smm: calc(var(--gap) - 6px);
     --gap-smmm: calc(var(--gap) - 12px);
+    --gap-smmmm: calc(var(--gap) - 16px);
     --gap-md: calc(var(--gap) * 0.75);
     --gap-lg: calc(var(--gap) + 2px);
     --gap-lgg: calc(var(--gap) + 6px);
@@ -695,4 +696,9 @@ a {
 .sd-back-btn:hover {
     box-shadow: var(--sd-shadow-md);
     color: var(--sd-primary);
+}
+
+
+.margin-right {
+ margin-right: auto;
 }

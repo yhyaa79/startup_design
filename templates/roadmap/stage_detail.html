@@ -48,6 +48,7 @@
                     <span> / </span>
                 </div>
                 <h1 class="sd-page-title">{{ stage.title }}</h1>
+                <p class="rm-page-desc">{{ stage.description }}</p>
             </div>
         </div>
         <div class="sd-topbar-left">
@@ -58,12 +59,16 @@
             {% else %}
             <span class="sd-status-pill sd-status-pending">در انتظار</span>
             {% endif %}
-            <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="sd-back-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="15 18 9 12 15 6"/>
-                </svg>
-            </a>
         </div>
+    </div>
+
+    <div class="sd-header-actions">
+        <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="btn btn-outline btn-full btn-lg btn-fit margin-right">
+            بازگشت به لیست
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+            </svg>
+        </a>
     </div>
 
     <!-- کارت‌های آماری -->
@@ -97,7 +102,7 @@
                 <!-- ستون فعالیت‌ها -->
         <div class="sd-info-col">
 
-            {% if stage.description %}
+<!--             {% if stage.description %}
             <div class="sd-card">
                 <div class="sd-card-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -110,7 +115,7 @@
                 <p class="sd-card-text">{{ stage.description }}</p>
             </div>
             {% endif %}
-
+ -->
 
             <div class="sd-card sd-card-full">
                 <div class="sd-card-title-row">

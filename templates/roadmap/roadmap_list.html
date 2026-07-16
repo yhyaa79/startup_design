@@ -16,9 +16,9 @@
       <h1 class="rm-page-title">نقشه‌های راه <span class="rm-title-grad">حرفه‌ای</span></h1>
       <p class="rm-page-sub">برنامه‌های توسعه حرفه‌ای شما</p>
     </div>
-    <a href="{% url 'roadmap:roadmap_create' %}" class="rm-btn rm-btn-primary">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <a href="{% url 'roadmap:roadmap_create' %}" class="btn btn-outline btn-full btn-lg btn-fit">
       ایجاد رودمپ جدید
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </a>
   </div>
 
@@ -58,7 +58,7 @@
     <div class="rm-card">
       <div class="rm-card-head">
         <h3 class="rm-card-title">{{ roadmap.title }}</h3>
-        <span class="rm-status-pill rm-status-{{ roadmap.status }}">
+        <span class="tag tag-lg tag-blue">
           {% if roadmap.status == 'active' %}فعال
           {% elif roadmap.status == 'completed' %}تکمیل‌شده
           {% elif roadmap.status == 'paused' %}متوقف
@@ -66,7 +66,7 @@
         </span>
       </div>
 
-      <p class="rm-card-desc">{{ roadmap.description|truncatewords:35 }}</p>
+      <p class="rm-card-desc">{{ roadmap.description }}</p>
 
 
 
@@ -90,8 +90,7 @@
       </div>
 
       <div class="rm-card-footer">
-        <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="rm-btn rm-btn-primary rm-n-sm">مشاهده جزئیات</a>
-        <a href="{% url 'roadmap:roadmap_edit' roadmap.id %}" class="rm-btn rm-btn-ghost rm-btn-sm">ویرایش</a>
+        <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="btn btn-primary btn-full btn-md btn-fit">مشاهده جزئیات</a>
       </div>
     </div>
     {% endfor %}

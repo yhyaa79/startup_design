@@ -8,7 +8,7 @@ from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta, date
 import json
-
+from .checkpoint_generator import generate_checkpoints_for_roadmap
 from .models import Roadmap, Stage, Activity, StageActivity
 from .forms import RoadmapCreateForm, StageForm, ActivityForm
 from .ai_roadmap import generate_roadmap
@@ -95,6 +95,7 @@ def roadmap_create(request):
                     'error': 'خطا در تولید نقشه راه. لطفاً دوباره تلاش کنید.',
                     'show_error_modal': True
                 })
+
             # ذخیره رودمپ
             try:
                 with transaction.atomic():
@@ -118,6 +119,9 @@ def roadmap_create(request):
                         total_score=quantitative_analysis.get('total_score', 0) or 0,
                         score_breakdown=quantitative_analysis,
                     )
+
+                    # ✅ برای جمع‌آوری اطلاعات لازم جهت ساخت batch چک‌پوینت در پایان
+                    checkpoint_inputs = []
 
                     # ایجاد مراحل
                     for stage_data in roadmap_data.get('stages', []):
@@ -156,11 +160,33 @@ def roadmap_create(request):
                                 }
                             )
 
-                            StageActivity.objects.create(
+                            stage_activity = StageActivity.objects.create(
                                 stage=stage,
                                 activity=activity,
                                 order=act_order,
                             )
+
+                            # ✅ فقط اطلاعات لازم را برای ساخت batch چک‌پوینت نگه می‌داریم
+                            checkpoint_inputs.append({
+                                'key': stage_activity.id,
+                                'title': activity.title,
+                                'description': activity.description,
+                                'category': activity.category,
+                                'stage_title': stage.title,
+                                'duration_days': activity_data.get('duration_days', 7),
+                                'start_date': stage.start_date,
+                            })
+
+                    # ✅ ساخت چک‌پوینت تمام فعالیت‌های رودمپ در یک فراخوانی واحد AI
+                    checkpoints_by_key = generate_checkpoints_for_roadmap(checkpoint_inputs)
+
+                    if checkpoints_by_key:
+                        stage_activities_to_update = list(
+                            StageActivity.objects.filter(id__in=checkpoints_by_key.keys())
+                        )
+                        for sa in stage_activities_to_update:
+                            sa.checkpoints = checkpoints_by_key.get(sa.id, [])
+                        StageActivity.objects.bulk_update(stage_activities_to_update, ['checkpoints'])
 
                     # فعال کردن اولین مرحله
                     first_stage = roadmap.stages.first()
