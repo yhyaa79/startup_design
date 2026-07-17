@@ -28,19 +28,30 @@ logger = logging.getLogger(__name__)
 #  لیست رودمپ‌ها
 # ═══════════════════════════════════════════════════════════════════
 
+from django.db.models import Count
+
 @login_required
 def roadmap_list(request):
     """نمایش لیست رودمپ‌های کاربر"""
-    
-    roadmaps = Roadmap.objects.filter(user=request.user).prefetch_related('stages')
-    
+
+    roadmaps = (
+        Roadmap.objects.filter(user=request.user)
+        .annotate(
+            stages_count=Count('stages', distinct=True),
+            activities_count=Count('stages__stage_activities', distinct=True),
+        )
+        .prefetch_related('stages')
+        .order_by('-id')
+    )
+
     context = {
         'roadmaps': roadmaps,
         'active_count': roadmaps.filter(status='active').count(),
         'completed_count': roadmaps.filter(status='completed').count(),
     }
-    
+
     return render(request, 'roadmap/roadmap_list.html', context)
+
 
 
 # ═══════════════════════════════════════════════════════════════════

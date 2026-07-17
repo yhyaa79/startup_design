@@ -48,7 +48,6 @@
                     <span> / </span>
                 </div>
                 <h1 class="sd-page-title">{{ stage.title }}</h1>
-                <p class="rm-page-desc">{{ stage.description }}</p>
             </div>
         </div>
         <div class="sd-topbar-left">
@@ -64,7 +63,7 @@
 
     <div class="sd-header-actions">
         <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="btn btn-outline btn-full btn-lg btn-fit margin-right">
-            بازگشت به لیست
+            بازگشت به نقشه راه
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="15 18 9 12 15 6"/>
             </svg>
@@ -102,7 +101,7 @@
                 <!-- ستون فعالیت‌ها -->
         <div class="sd-info-col">
 
-<!--             {% if stage.description %}
+            {% if stage.description %}
             <div class="sd-card">
                 <div class="sd-card-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -115,7 +114,7 @@
                 <p class="sd-card-text">{{ stage.description }}</p>
             </div>
             {% endif %}
- -->
+
 
             <div class="sd-card sd-card-full">
                 <div class="sd-card-title-row">
@@ -137,12 +136,12 @@
                             <div class="sd-activity-top">
                                 <span class="sd-activity-title">{{ item.activity.title }}</span>
                                 <div class="sd-activity-meta">
-                                    <span class="sd-tag">{{ item.activity.get_category_display }}</span>
-                                    <span class="sd-tag sd-tag-neutral">{{ item.activity.duration_days }} روز</span>
+                                    <span class="tag tag-md tag-blue">{{ item.activity.get_category_display }}</span>
+                                    <span class="tag tag-md tag-gray">{{ item.activity.duration_days }} روز</span>
                                     {% if item.is_completed %}
-                                    <span class="sd-tag sd-tag-done">✓ تکمیل</span>
+                                    <span class="tag tag-md tag-teal">✓ تکمیل</span>
                                     {% else %}
-                                    <span class="sd-tag sd-tag-pending">در انتظار</span>
+                                    <span class="tag tag-md tag-amber">در انتظار</span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -150,7 +149,7 @@
                             <p class="sd-activity-desc">{{ item.activity.description }}</p>
                             {% endif %}
                         </div>
-                        <a href="{% url 'roadmap:stage_activity_detail' item.id %}" class="sd-btn sd-btn-sm sd-btn-ghost">
+                        <a href="{% url 'roadmap:stage_activity_detail' item.id %}" class="btn btn-outline btn-full btn-md btn-fit margin-top">
                             جزئیات
                         </a>
                     </div>

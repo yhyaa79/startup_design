@@ -103,10 +103,11 @@
 
           <div class="rm-step-progress">
             <div class="rm-progress-bar-track rm-progress-sm">
-              <div class="rm-progress-bar-fill" style="width:{{ prog }}%"></div>
+              <div class="rm-progress-bar-fill {% if prog == 100 %}rm-done-background{% endif %}" style="width:{{ prog }}%"></div>
             </div>
-            <span class="rm-progress-label">{{ prog }}%</span>
+            <span class="rm-progress-label {% if prog == 100 %}rm-done-text{% endif %}">{{ prog }}%</span>
           </div>
+
 
           <div class="rm-step-quick-info">
             <div class="rm-quick-item">

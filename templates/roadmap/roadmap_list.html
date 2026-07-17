@@ -13,7 +13,7 @@
 
   <div class="rm-topbar">
     <div>
-      <h1 class="rm-page-title">نقشه‌های راه <span class="rm-title-grad">حرفه‌ای</span></h1>
+      <h1 class="rm-page-title">نقشه‌های راه <span class="rm-title-grad">حرفه‌ای شما</span></h1>
       <p class="rm-page-sub">برنامه‌های توسعه حرفه‌ای شما</p>
     </div>
     <a href="{% url 'roadmap:roadmap_create' %}" class="btn btn-outline btn-full btn-lg btn-fit">
@@ -58,7 +58,7 @@
     <div class="rm-card">
       <div class="rm-card-head">
         <h3 class="rm-card-title">{{ roadmap.title }}</h3>
-        <span class="tag tag-lg tag-blue">
+        <span class="rm-status-pill rm-list-status-{{ roadmap.status }}">
           {% if roadmap.status == 'active' %}فعال
           {% elif roadmap.status == 'completed' %}تکمیل‌شده
           {% elif roadmap.status == 'paused' %}متوقف
@@ -68,35 +68,52 @@
 
       <p class="rm-card-desc">{{ roadmap.description }}</p>
 
-
+      <div class="rm-list-progress-wrap">
+        <div class="rm-progress-meta">
+          <span>پیشرفت</span>
+          <span>{{ roadmap.get_progress }}%</span>
+        </div>
+        <div class="rm-progress-track">
+          <div class="rm-progress-fill" style="width: {{ roadmap.get_progress }}%;"></div>
+        </div>
+      </div>
 
       <div class="rm-meta-row">
         <div class="rm-meta-item">
           <span class="rm-meta-label">مدت</span>
-          <span class="rm-meta-val">{{ roadmap.duration_days }} روز</span>
-        </div>
-        <div class="rm-meta-item">
-          <span class="rm-meta-label">پیشرفت</span>
-          <span class="rm-meta-val">{{ roadmap.get_progress  }}%</span>
+          <span class="rm-meta-val">{{ roadmap.duration_days }}</span>
         </div>
         <div class="rm-meta-item">
           <span class="rm-meta-label">مراحل</span>
-          <span class="rm-meta-val">{{ roadmap.stages.count }}</span>
+          <span class="rm-meta-val">{{ roadmap.stages_count }}</span>
         </div>
         <div class="rm-meta-item">
           <span class="rm-meta-label">فعالیت</span>
-          <span class="rm-meta-val">{{ roadmap.stage_activities.count  }}</span>
+          <span class="rm-meta-val">{{ roadmap.activities_count }}</span>
+        </div>
+        <div class="rm-meta-item">
+          <span class="rm-meta-label">باقی‌مانده</span>
+          <span class="rm-meta-val">{{ roadmap.get_remaining_days }}</span>
         </div>
       </div>
 
+      {% with active_stage=roadmap.get_active_stage %}
+      {% if active_stage %}
+      <div class="rm-active-stage">
+        <span class="rm-active-stage-label">مرحله فعلی:</span>
+        <span class="rm-active-stage-name">{{ active_stage.title }}</span>
+      </div>
+      {% endif %}
+      {% endwith %}
+
       <div class="rm-card-footer">
-        <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="btn btn-primary btn-full btn-md btn-fit">مشاهده جزئیات</a>
+        <a href="{% url 'roadmap:roadmap_detail' roadmap.id %}" class="btn btn-primary btn-fit btn-md">مشاهده جزئیات</a>
       </div>
     </div>
     {% endfor %}
   </div>
-
   {% else %}
+
   <div class="rm-empty">
     <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
       <path d="M9 11l3 3L22 4"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -105,6 +122,5 @@
     <a href="{% url 'roadmap:roadmap_create' %}" class="rm-btn rm-btn-primary">ایجاد اولین رودمپ</a>
   </div>
   {% endif %}
-
 </div>
 {% endblock %}

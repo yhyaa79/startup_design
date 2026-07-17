@@ -168,6 +168,7 @@ html {
     --bg-page: #eef0f5;
     --card: #ffffff;
     --card-soft: #f5f6fa;
+    --card-soft-2: #fbfcfd;
     --line: #dbdada80;
     --bg: #F7F9FC;
     --white: #FFFFFF;
@@ -505,7 +506,6 @@ a {
     width: 20px;
     height: 20px;
     flex-shrink: 0;
-    margin-left: -5px;
 }
 
 /* 
@@ -701,4 +701,8 @@ a {
 
 .margin-right {
  margin-right: auto;
+}
+
+.margin-top {
+ margin-top: auto;
 }

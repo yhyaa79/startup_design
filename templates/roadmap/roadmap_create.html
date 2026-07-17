@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="rc-page">
+<div class="sd-page">
   <div class="rc-container">
 
     <div class="rc-header">
@@ -45,68 +45,69 @@
     <form method="post" class="rc-form">
       {% csrf_token %}
 
-      <div class="rc-card">
-        <div class="rc-card-label">
-          <span class="rc-step-badge">۱</span>
-          <div>
-            <h2 class="rc-section-title">انتخاب هدف</h2>
-            <p class="rc-section-desc">کدام هدف را دنبال می‌کنید؟</p>
+      <div class="rc-flex-card">
+        <div class="rc-card">
+          <div class="rc-card-label">
+            <div>
+              <h2 class="rc-section-title">انتخاب هدف</h2>
+              <p class="rc-section-desc">کدام هدف را دنبال می‌کنید؟</p>
+            </div>
           </div>
+
+          <div class="rc-radio-group">
+            {% for value, label in form.goal.field.choices %}
+            <label class="rc-radio-item">
+              <input type="radio" name="goal" value="{{ value }}"
+                {% if form.goal.value == value %}checked{% endif %} required>
+              <span class="rc-radio-box">
+                <span class="rc-radio-dot"></span>
+              </span>
+              <span class="rc-radio-text">{{ label }}</span>
+            </label>
+            {% endfor %}
+          </div>
+
+          {% if form.goal.errors %}
+          <div class="rc-field-error">{{ form.goal.errors.0 }}</div>
+          {% endif %}
         </div>
 
-        <div class="rc-radio-group">
-          {% for value, label in form.goal.field.choices %}
-          <label class="rc-radio-item">
-            <input type="radio" name="goal" value="{{ value }}"
-              {% if form.goal.value == value %}checked{% endif %} required>
-            <span class="rc-radio-box">
-              <span class="rc-radio-dot"></span>
-            </span>
-            <span class="rc-radio-text">{{ label }}</span>
-          </label>
-          {% endfor %}
-        </div>
+        <div class="rc-card">
+          <div class="rc-card-label">
+            <div>
+              <h2 class="rc-section-title">مدت زمان</h2>
+              <p class="rc-section-desc">برنامه‌ریزی برای چه بازه‌ای؟</p>
+            </div>
+          </div>
 
-        {% if form.goal.errors %}
-        <div class="rc-field-error">{{ form.goal.errors.0 }}</div>
-        {% endif %}
+          <div class="rc-input-wrap">
+            <input type="number" name="duration_days" id="id_duration_days"
+              min="0" max="1095" step="1" placeholder="مثال: 90"
+              value="{{ form.duration_days.value|default:'' }}"
+              class="rc-input" required>
+            <span class="rc-input-suffix">روز</span>
+          </div>
+
+          <div class="rc-duration-chips">
+            <button type="button" class="rc-chip" data-val="30">1 ماه</button>
+            <button type="button" class="rc-chip" data-val="90">3 ماه</button>
+            <button type="button" class="rc-chip" data-val="180">6 ماه</button>
+            <button type="button" class="rc-chip" data-val="365">1 سال</button>
+            <button type="button" class="rc-chip" data-val="730">2 سال</button>
+            <button type="button" class="rc-chip" data-val="1095">3 سال</button>
+          </div>
+
+          <p class="rc-hint">حداقل ۳۰ روز — حداکثر ۳ سال (۱۰۹۵ روز)</p>
+          {% if form.duration_days.errors %}
+          <div class="rc-field-error">{{ form.duration_days.errors.0 }}</div>
+          {% endif %}
+        </div>
       </div>
 
       <div class="rc-card">
         <div class="rc-card-label">
-          <span class="rc-step-badge">۲</span>
           <div>
-            <h2 class="rc-section-title">مدت زمان</h2>
-            <p class="rc-section-desc">برنامه‌ریزی برای چه بازه‌ای؟</p>
-          </div>
-        </div>
-
-        <div class="rc-input-wrap">
-          <input type="number" name="duration_days" id="id_duration_days"
-            min="0" max="1095" step="1" placeholder="مثال: 90"
-            value="{{ form.duration_days.value|default:'' }}"
-            class="rc-input" required>
-          <span class="rc-input-suffix">روز</span>
-        </div>
-
-        <div class="rc-duration-chips">
-          <button type="button" class="rc-chip" data-val="30">۱ ماه</button>
-          <button type="button" class="rc-chip" data-val="90">۳ ماه</button>
-          <button type="button" class="rc-chip" data-val="180">۶ ماه</button>
-          <button type="button" class="rc-chip" data-val="365">۱ سال</button>
-        </div>
-
-        <p class="rc-hint">حداقل ۳۰ روز — حداکثر ۳ سال (۱۰۹۵ روز)</p>
-        {% if form.duration_days.errors %}
-        <div class="rc-field-error">{{ form.duration_days.errors.0 }}</div>
-        {% endif %}
-      </div>
-
-      <div class="rc-card">
-        <div class="rc-card-label">
-          <span class="rc-step-badge rc-step-optional">۳</span>
-          <div>
-            <h2 class="rc-section-title">جزئیات اضافی <span class="rc-optional-tag">اختیاری</span></h2>
+            <h2 class="rc-section-title">جزئیات اضافی <span class="tag tag-md tag-gray">اختیاری</span></h2>
             <p class="rc-section-desc">توضیحات بیشتری درباره اهداف، تجربیات یا محدودیت‌هایتان</p>
           </div>
         </div>
@@ -117,12 +118,12 @@
       </div>
 
       <div class="rc-actions">
-        <a href="{% url 'roadmap:roadmap_list' %}" class="rc-btn rc-btn-ghost">انصراف</a>
-        <button type="submit" class="rc-btn rc-btn-primary">
+        <a href="{% url 'roadmap:roadmap_list' %}" class="btn btn-outline-gray btn-lg btn-fit">انصراف</a>
+        <button type="submit" class="btn btn-primary btn-lg btn-fit">
+          ایجاد رودمپ با هوش مصنوعی
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
             <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
           </svg>
-          ایجاد رودمپ با هوش مصنوعی
         </button>
       </div>
     </form>

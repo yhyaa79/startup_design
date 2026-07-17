@@ -42,12 +42,16 @@
             <span class="tag tag-lg tag-blue">
                 {% if stage_activity.is_completed %}تکمیل‌شده{% else %}در انتظار{% endif %}
                 </span>
-                <a href="{% url 'roadmap:stage_detail' stage.id %}" class="sd-back-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="15 18 9 12 15 6" />
-                    </svg>
-                </a>
             </div>
+        </div>
+
+        <div class="sd-header-actions">
+            <a href="{% url 'roadmap:stage_detail' stage.id %}" class="btn btn-outline btn-full btn-lg btn-fit margin-right">
+               بازگشت به مرحله ها
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </a>
         </div>
 
 
@@ -79,31 +83,54 @@
             <!-- ═══════════ MAIN ═══════════ -->
             <div class="activity-main">
 
-                <!-- نقاط کنترل -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">✓ نقاط کنترل</h2>
-                    </div>
-                    <p class="card-desc">فعالیت را به گام‌های کوچک‌تر بشکنید؛ می‌توانید نقطه کنترل را دستی بسازید یا از
-                        دوره‌ها/پروژه‌های موجود انتخاب کنید.</p>
+            <!-- نقاط کنترل -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">نقاط کنترل</h2>
+                    <button class="btn btn-primary btn-md" onclick="openCheckpointModal()">اضافه کردن نقطه کنترل</button>
+                </div>
+                <p class="card-desc">فعالیت را به گام‌های کوچک‌تر بشکنید؛ می‌توانید نقطه کنترل را دستی بسازید یا از
+                    دوره‌ها/پروژه‌های موجود انتخاب کنید.</p>
 
-                    <button class="btn btn-primary btn-md" onclick="openCheckpointModal()">اضافه کردن نقطه
-                        کنترل</button>
+                <div class="checkpoints-list" id="checkpointsList" style="margin-top: var(--gap-sm);">
+                    {% for checkpoint in stage_activity.checkpoints %}
+                    <div class="checkpoint-item {% if checkpoint.is_completed %}completed{% endif %}"
+                        data-checkpoint-id="{{ checkpoint.id }}">
 
-                    <div class="checkpoints-list" id="checkpointsList" style="margin-top: var(--gap-sm);">
-                        {% for checkpoint in stage_activity.checkpoints %}
-                        <div class="checkpoint-item {% if checkpoint.is_completed %}completed{% endif %}" data-checkpoint-id="{{ checkpoint.id }}">
+                        <div class="checkpoint-main">
                             <input type="checkbox" class="checkpoint-checkbox"
                                 {% if checkpoint.is_completed %}checked{% endif %}
                                 onchange="toggleCheckpoint({{ stage_activity.id }}, {{ checkpoint.id }})">
+
                             <div class="checkpoint-content">
-                                <div class="checkpoint-title">
-                                    {{ checkpoint.title }}
-                                    {% if checkpoint.source_type == 'course' %}<span class="tag tag-md tag-amber">دوره</span>
-                                    {% elif checkpoint.source_type == 'project' %}<span class="tag tag-md tag-amber">پروژه</span>
-                                    {% elif checkpoint.source_type == 'event' %}<span class="tag tag-md tag-amber">رویداد</span>{% endif %}
+                                <div class="checkpoint-head">
+                                    <div class="checkpoint-title">{{ checkpoint.title }}</div>
+
+                                    <div class="checkpoint-badges">
+                                        {% if checkpoint.source_type == 'course' %}
+                                            <span class="tag tag-md tag-amber">دوره</span>
+                                        {% elif checkpoint.source_type == 'project' %}
+                                            <span class="tag tag-md tag-amber">پروژه</span>
+                                        {% elif checkpoint.source_type == 'event' %}
+                                            <span class="tag tag-md tag-amber">رویداد</span>
+                                        {% else %}
+                                            <span class="tag tag-md tag-amber">دستی</span>
+                                        {% endif %}
+
+                                        {% if checkpoint.priority %}
+                                        <span class="checkpoint-priority priority-{{ checkpoint.priority|lower }}">
+                                            {% if checkpoint.priority|lower == 'high' %}اولویت بالا
+                                            {% elif checkpoint.priority|lower == 'medium' %}اولویت متوسط
+                                            {% elif checkpoint.priority|lower == 'low' %}اولویت پایین
+                                            {% else %}{{ checkpoint.priority }}{% endif %}
+                                        </span>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                {% if checkpoint.description %}<div class="checkpoint-desc">{{ checkpoint.description }}</div>{% endif %}
+
+                                {% if checkpoint.description %}
+                                <div class="checkpoint-desc">{{ checkpoint.description }}</div>
+                                {% endif %}
 
                                 {% if checkpoint.extra_details %}
                                 <div class="checkpoint-extra-details">
@@ -113,35 +140,45 @@
                                 </div>
                                 {% endif %}
 
-
-                                {% if checkpoint.priority %}
-                                <div class="checkpoint-extra-priority">
-                                    {{ checkpoint.priority }}
+                                <div class="checkpoint-meta-row">
+                                    {% if checkpoint.due_date %}
+                                    <span class="checkpoint-meta-item">سررسید: {{ checkpoint.due_date }}</span>
+                                    {% endif %}
+                                    {% if checkpoint.date %}
+                                    <span class="checkpoint-meta-item done">✅ تکمیل: {{ checkpoint.date }}</span>
+                                    {% endif %}
+                                    {% if checkpoint.source_url %}
+                                    <a href="{{ checkpoint.source_url }}" target="_blank" class="resource-url">
+                                        <span>مشاهده منبع</span>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                                            <path d="M15 3h6v6"/>
+                                            <path d="M10 14L21 3"/>
+                                        </svg>
+                                    </a>
+                                    {% endif %}
                                 </div>
-                                {% endif %}
 
-                                {% if checkpoint.date %}<div class="checkpoint-date">تکمیل: {{ checkpoint.date }}</div>{% endif %}
-                                {% if checkpoint.source_url %}
-                                <a href="{{ checkpoint.source_url }}" target="_blank" class="resource-url">بازدید ←</a>
-                                {% endif %}
-
-                                <!-- ✅ یادداشت اختصاصی همین آیتم -->
                                 <div class="checkpoint-note-box">
                                     <textarea class="form-textarea checkpoint-note-textarea"
                                         placeholder="یادداشت برای این مورد..."
                                         data-checkpoint-id="{{ checkpoint.id }}">{{ checkpoint.notes }}</textarea>
-                                    <button class="btn btn-outline btn-sm" onclick="saveCheckpointNote({{ stage_activity.id }}, {{ checkpoint.id }})">
+                                    <button class="btn btn-outline btn-sm btn-fit" onclick="saveCheckpointNote({{ stage_activity.id }}, {{ checkpoint.id }})">
                                         ذخیره یادداشت
                                     </button>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="checkpoint-actions">
                             <button class="btn btn-red btn-sm btn-fit" onclick="deleteCheckpoint({{ stage_activity.id }}, {{ checkpoint.id }})">حذف</button>
                         </div>
-                        {% empty %}
-                        <div class="empty-state">هنوز نقطه کنترلی اضافه نکرده‌اید.</div>
-                        {% endfor %}
                     </div>
+                    {% empty %}
+                    <div class="empty-state">هنوز نقطه کنترلی اضافه نکرده‌اید.</div>
+                    {% endfor %}
                 </div>
+            </div>
 
                 <!-- ═══════ MODAL: افزودن نقطه کنترل ═══════ -->
                 <div class="modal-overlay" id="checkpointModal">
@@ -217,62 +254,123 @@
                     </div>
                 </div>
 
-                <!-- منابع -->
+
+
+                <!-- کارت منابع (فقط لیست + دکمه باز کردن مودال) -->
                 <div class="card">
                     <div class="card-header">
                         <h2 class="card-title">منابع</h2>
+                        <button type="button" class="btn btn-primary btn-md" onclick="openResourceModal()">افزودن منبع</button>
                     </div>
                     <p class="card-desc">لینک، کتاب یا فایل‌های مفیدی که برای انجام این فعالیت استفاده می‌کنید را اینجا نگه دارید.</p>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">عنوان منبع</label>
-                            <input type="text" class="form-input" id="resourceTitle" placeholder="مثال: مقاله مرجع">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">نوع</label>
-                            <select class="form-select" id="resourceType">
-                                <option value="link">لینک</option>
-                                <option value="file">فایل</option>
-                                <option value="book">کتاب</option>
-                                <option value="course">دوره</option>
-                                <option value="other">سایر</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">آدرس (URL) — اختیاری</label>
-                        <input type="url" class="form-input" id="resourceUrl" placeholder="https://example.com">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">توضیحات (اختیاری)</label>
-                        <textarea class="form-textarea" id="resourceDesc" placeholder="توضیحات کوتاه"></textarea>
-                    </div>
-
-                    <button class="btn btn-primary btn-md" onclick="addResource()">اضافه کردن منبع</button>
-
                     <div class="resources-list" id="resourcesList" style="margin-top: var(--gap-sm);">
                         {% for resource in stage_activity.resources %}
-                        <div class="resource-item" data-resource-id="{{ resource.id }}">
+                        <div class="resource-item" data-type="{{ resource.type }}" data-resource-id="{{ resource.id }}">
                             <div class="resource-icon">
-                                {% if resource.type == 'link' %}{% elif resource.type == 'file' %}{% elif resource.type == 'book' %}📖{% elif resource.type == 'course' %}🎓{% else %}📌{% endif %}
+                                {% if resource.type == 'link' %}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+                                    <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+                                </svg>
+                                {% elif resource.type == 'file' %}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                                    <path d="M14 2v6h6"/>
+                                </svg>
+                                {% elif resource.type == 'book' %}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+                                </svg>
+                                {% elif resource.type == 'course' %}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z"/>
+                                    <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                                </svg>
+                                {% else %}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
+                                    <path d="M12 17h.01"/>
+                                </svg>
+                                {% endif %}
                             </div>
                             <div class="resource-content">
-                                <div class="resource-title">{{ resource.title }}</div>
-                                <span class="resource-type">{{ resource.type }}</span>
-                                {% if resource.url %}<div><a href="{{ resource.url }}" target="_blank" class="resource-url">{{ resource.url }}</a></div>{% endif %}
-                                {% if resource.description %}<p style="margin-top: 6px; color: var(--ink-600); font-size: var(--text-sm);">{{ resource.description }}</p>{% endif %}
+                                <div class="resource-head">
+                                    <span class="resource-title">{{ resource.title }}</span>
+                                    <span class="resource-type">{{ resource.get_type_display }}</span>
+                                </div>
+                                {% if resource.description %}
+                                <p class="resource-desc">{{ resource.description }}</p>
+                                {% endif %}
+                                {% if resource.url %}
+                                <a href="{{ resource.url }}" target="_blank" class="resource-url">
+                                    <span>مشاهده منبع</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                                        <path d="M15 3h6v6"/>
+                                        <path d="M10 14L21 3"/>
+                                    </svg>
+                                </a>
+                                {% endif %}
                             </div>
-                            <button class="btn btn-red btn-sm btn-fit"
-                                onclick="deleteResource({{ stage_activity.id }}, {{ resource.id }})">حذف</button>
+                            <button class="btn btn-icon btn-danger-ghost" onclick="deleteResource('{{ stage_activity.id }}', '{{ resource.id }}')" title="حذف">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 6h18"/>
+                                    <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                                    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                                </svg>
+                            </button>
                         </div>
                         {% empty %}
                         <div class="empty-state">هنوز منبعی اضافه نکرده‌اید.</div>
                         {% endfor %}
                     </div>
                 </div>
+
+                <!-- ═══════ MODAL: افزودن منبع ═══════ -->
+                <div class="modal-overlay" id="resourceModal">
+                    <div class="modal-box">
+                        <div class="modal-header">
+                            <h3 class="modal-title">افزودن منبع</h3>
+                            <button type="button" class="modal-close" onclick="closeResourceModal()">✕</button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">عنوان منبع</label>
+                                    <input type="text" class="form-input" id="resourceTitle" placeholder="مثال: مقاله مرجع">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">نوع</label>
+                                    <select class="form-select" id="resourceType">
+                                        <option value="link">لینک</option>
+                                        <option value="file">فایل</option>
+                                        <option value="book">کتاب</option>
+                                        <option value="course">دوره</option>
+                                        <option value="other">سایر</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">آدرس (URL) — اختیاری</label>
+                                <input type="url" class="form-input" id="resourceUrl" placeholder="https://example.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">توضیحات (اختیاری)</label>
+                                <textarea class="form-textarea" id="resourceDesc" placeholder="توضیحات کوتاه"></textarea>
+                            </div>
+
+                            <button class="btn btn-primary btn-md" onclick="addResource()">اضافه کردن منبع</button>
+                        </div>
+                    </div>
+                </div>
+
+
 
                 <!-- یادداشت‌ها -->
                 <div class="card">
@@ -335,17 +433,12 @@
                 <div class="card">
                     {% if not stage_activity.is_completed %}
                     <button class="btn btn-primary btn-full btn-lg" onclick="completeActivity()">تکمیل‌شد</button>
+                    <button type="button" style="margin-top: 5px;" class="btn btn-outline btn-full btn-lg" onclick="openActivityModal()">تغییر فعالیت</button>
                     {% else %}
                     <button class="btn btn-primary btn-full btn-lg" disabled>تکمیل‌شده</button>
+                    <button type="button" style="margin-top: 5px;" class="btn btn-outline btn-full btn-lg" disabled>تغییر فعالیت</button>
                     {% endif %}
 
-                    <button type="button" style="margin-top: 5px;" class="btn btn-outline btn-full btn-lg" onclick="openActivityModal()">
-                    تغییر فعالیت
-                    </button>
-
-                    <a href="{% url 'roadmap:stage_detail' stage.id %}" class="btn btn-outline-gray btn-full btn-lg" style="margin-top: var(--gap-sm);">
-                        بازگشت به مرحله ها ←
-                    </a>
                 </div>
 
             </div>
@@ -918,7 +1011,7 @@ function searchItems() {
                             onclick='addItemCheckpoint(${item.id}, "${currentItemType}", ${JSON.stringify(item.title)}, ${JSON.stringify(item.description || "")}, ${JSON.stringify(item.url)})'>
                             افزودن به چک‌لیست
                         </button>
-                        <a href="${item.url}" target="_blank" class="btn btn-outline-gray btn-sm">بازدید</a>
+                        <a href="${item.url}" target="_blank" class="btn btn-outline btn-sm">بازدید</a>
                     </div>
                 </div>
             `).join('');
@@ -988,6 +1081,103 @@ function saveCheckpointNote(stageActivityId, checkpointId) {
         else showAlert('danger', data.error || 'خطا در ذخیره یادداشت');
     });
 }
+
+
+
+// ═══════════════════════════════════════════
+// RESOURCE MODAL
+// ═══════════════════════════════════════════
+
+function openResourceModal() {
+    document.getElementById('resourceModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeResourceModal() {
+    document.getElementById('resourceModal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+document.getElementById('resourceModal').addEventListener('click', function (e) {
+    if (e.target === this) closeResourceModal();
+});
+
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeResourceModal();
+});
+
+// ═══════════════════════════════════════════
+// RESOURCES
+// ═══════════════════════════════════════════
+
+function addResource() {
+    const title = document.getElementById('resourceTitle').value;
+    const type = document.getElementById('resourceType').value;
+    const url = document.getElementById('resourceUrl').value;
+    const description = document.getElementById('resourceDesc').value;
+
+    if (!title) {
+        showAlert('warning', 'لطفاً عنوان منبع را وارد کنید');
+        return;
+    }
+
+    fetch(`/roadmap/activity/${ACTIVITY_ID}/resource/add/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ title, type, url, description })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const list = document.getElementById('resourcesList');
+            const emptyState = list.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+
+            const icons = { link: '🔗', file: '📄', book: '📖', course: '🎓', other: '📌' };
+            const html = `
+                <div class="resource-item" data-resource-id="${data.resource.id}">
+                    <div class="resource-icon">${icons[data.resource.type]}</div>
+                    <div class="resource-content">
+                        <div class="resource-head">
+                            <span class="resource-title">${data.resource.title}</span>
+                            <span class="resource-type">${data.resource.type}</span>
+                        </div>
+                        ${data.resource.description ? `<p class="resource-desc">${data.resource.description}</p>` : ''}
+                        ${data.resource.url ? `<a href="${data.resource.url}" target="_blank" class="resource-url"><span>مشاهده منبع</span></a>` : ''}
+                    </div>
+                    <button class="btn btn-icon btn-danger-ghost" onclick="deleteResource(${ACTIVITY_ID}, ${data.resource.id})" title="حذف">✕</button>
+                </div>`;
+            list.insertAdjacentHTML('beforeend', html);
+
+            document.getElementById('resourceTitle').value = '';
+            document.getElementById('resourceUrl').value = '';
+            document.getElementById('resourceDesc').value = '';
+            document.getElementById('resourceType').value = 'link';
+
+            closeResourceModal();
+            showAlert('success', 'منبع اضافه شد');
+        } else {
+            showAlert('danger', data.error || 'خطا در افزودن منبع');
+        }
+    });
+}
+
+function deleteResource(activityId, resourceId) {
+    if (confirm('آیا مطمئن هستید؟')) {
+        fetch(`/roadmap/activity/${activityId}/resource/${resourceId}/delete/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector(`[data-resource-id="${resourceId}"]`).remove();
+                showAlert('success', 'منبع حذف شد');
+            }
+        });
+    }
+}
+
 </script>
 
 {% endblock %}
