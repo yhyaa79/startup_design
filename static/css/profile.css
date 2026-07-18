@@ -28,17 +28,12 @@
 /* نوار عملیات بالای صفحه (ذخیره/بازگشت یا ویرایش/بازگشت) — چسبان به بالا
    تا در صفحه‌ی طولانی همیشه در دسترس بمونه */
 .div-btn-back-edit {
-    position: sticky;
-    top: 0;
+
     z-index: 40;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    padding: 16px var(--gap-lg);
-    margin: 0 0 var(--gap);
-    background: rgba(238, 240, 245, .9);
-    backdrop-filter: blur(6px);
-    border-bottom: 1px solid var(--line);
+    margin-top: var(--gap);
 }
 
 .div-btn-back-edit .rm-btn {
@@ -1005,16 +1000,16 @@
 
 .checkbox-delete {
     position: absolute;
-    top: 14px;
+    top: 8px;
     left: 14px;
     display: flex;
     align-items: center;
     gap: 6px;
     background: var(--red-soft);
     color: var(--red);
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     font-weight: 700;
-    padding: 4px 10px;
+    padding: 5px 10px;
     border-radius: 20px;
 }
 

@@ -659,13 +659,13 @@ a {
 
 .btn-ghost {
     background: transparent;
-    color: var(--text-muted);
-    border-color: transparent;
+    color: var(--ink-600);
+    border: 2px solid var(--border);
 }
 
 .btn-ghost:hover {
-    background: var(--bg);
-    color: var(--text-main);
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 

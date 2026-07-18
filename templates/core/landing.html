@@ -3,45 +3,69 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}خانه{% endblock %}
+{% block title %}استارت آپ دیزاین | رزومه و نقشه راه حرفه‌ای پزشکی{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/landing.css' %}">
 {% endblock %}
 
-{% block sidebar %}{% endblock %} 
+{% block sidebar %}{% endblock %}
 
 {% block content %}
 
-</head>
-
 <body>
 
-    <!-- ══ NAV ══ -->
+    <!-- ══ نوار بالای صفحه ══ -->
+    <header>
+        <nav class="landing-nav" aria-label="ناوبری اصلی">
+            <a href="{% url 'core:home' %}" class="nav-brand">
+                <span class="nav-logo-mark">
+                    <img src="/static/logo/logo_transparent.png" alt="نشان استارت آپ دیزاین">
+                </span>
+            </a>
+            <div class="nav-links">
+                <a href="#how">چطور کار می‌کند</a>
+                <a href="#features">امکانات</a>
+                <a href="#goals">اهداف حرفه‌ای</a>
+                <a href="#testimonials">تجربه کاربران</a>
+            </div>
+            <div class="nav-actions">
+                <a href="/accounts/login/" class="btn btn-ghost btn-fit btn-lg">ورود</a>
+                <a href="/accounts/register/" class="btn btn-primary btn-fit btn-lg">ثبت‌نام رایگان</a>
+            </div>
+        </nav>
+    </header>
+
     <main>
         <!-- ══ HERO ══ -->
         <section class="hero" aria-labelledby="hero-title">
             <div class="hero-text">
-                <div class="hero-eyebrow">ویژه دانشجویان علوم پزشکی ایران</div>
+                <div class="hero-eyebrow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3l1.9 5.2L19 10l-5.1 1.8L12 17l-1.9-5.2L5 10l5.1-1.8z" />
+                    </svg>
+                    ویژه دانشجویان علوم پزشکی ایران
+                </div>
                 <h1 class="hero-h1" id="hero-title">
-                    مسیر حرفه‌ات را<br />
-                    <em>با دقت</em> برنامه‌ریزی کن
+                    مسیر حرفه‌ای پزشکی‌ات را با<br />
+                    <span class="grad">استارت آپ دیزاین</span> بچین
                 </h1>
                 <p class="hero-sub">
-                    ResumeMD اولین پلتفرم تخصصی ساخت رزومه پزشکی و نقشه راه حرفه‌ای در ایران است.
-                    از استعداد درخشان تا فلوشیپ خارج، قدم‌به‌قدم باهاتیم.
+                    استارت آپ دیزاین رزومه تخصصی‌ات را می‌سازد و بر اساس آن، یک نقشه راه شخصی تا رسیدن به هدفی که
+                    داری طراحی می‌کند؛ از استعداد درخشان و امتیاز دستیاری تا هیئت علمی و فلوشیپ خارج از کشور.
                 </p>
                 <div class="hero-actions">
-                    <a href="/accounts/register/" class="btn btn-primary-landing btn-lg">رزومه‌ام را بسازم</a>
-                    <a href="#how" class="btn btn-ghost btn-lg">بیشتر بدانم</a>
+                    <a href="/accounts/register/" class="btn btn-primary btn-fit btn-md">رزومه‌ام را بسازم</a>
+                    <a href="#how" class="btn btn-ghost btn-fit btn-md">ببین چطور کار می‌کند</a>
                 </div>
                 <div class="hero-trust">
                     <div class="trust-dots">
                         <div class="trust-dot"></div>
-                        <div class="trust-dot" style="background:linear-gradient(135deg,#00b89c,#1a6ef5)"></div>
-                        <div class="trust-dot" style="background:linear-gradient(135deg,#1a6ef5,#7c3aed)"></div>
+                        <div class="trust-dot" style="background:linear-gradient(135deg,#ac63ea,#3E63DD)"></div>
+                        <div class="trust-dot" style="background:linear-gradient(135deg,#3E63DD,#2f5cf5)"></div>
                     </div>
-                    بیش از ۲,۰۰۰ دانشجوی پزشکی از ResumeMD استفاده می‌کنند
+                    بیش از ۲,۰۰۰ دانشجوی پزشکی همین حالا از استارت آپ دیزاین استفاده می‌کنند
                 </div>
             </div>
 
@@ -54,7 +78,7 @@
                             <div class="hc-dot done"></div>
                             <div class="hc-stage-title">پایه‌ریزی مهارت‌های پژوهشی</div>
                             <div class="hc-stage-bar">
-                                <div class="hc-stage-fill teal" style="width:100%"></div>
+                                <div class="hc-stage-fill purple" style="width:100%"></div>
                             </div>
                             <div class="hc-badge done">تکمیل</div>
                         </div>
@@ -77,24 +101,29 @@
                     </div>
                     <div class="hc-stat-row">
                         <div class="hc-stat">
-                            <div class="hc-stat-val blue">78<small style="font-size:.9rem">٪</small></div>
+                            <div class="hc-stat-val blue">۷۸<small style="font-size:.55em">٪</small></div>
                             <div class="hc-stat-sub">تکمیل رودمپ</div>
                         </div>
                         <div class="hc-stat">
-                            <div class="hc-stat-val teal">۱۴</div>
+                            <div class="hc-stat-val purple">۱۴</div>
                             <div class="hc-stat-sub">فعالیت انجام‌شده</div>
                         </div>
                         <div class="hc-stat">
-                            <div class="hc-stat-val" style="color:var(--ink);">۳</div>
+                            <div class="hc-stat-val" style="color:var(--ink-900);">۳</div>
                             <div class="hc-stat-sub">مرحله تدوین‌شده</div>
                         </div>
                     </div>
                 </div>
                 <div class="hc-float">
-                    <div class="hc-float-icon">✓</div>
+                    <div class="hc-float-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 12l5 5L20 6" />
+                        </svg>
+                    </div>
                     <div>
-                        <div style="font-size:.8rem;font-weight:700;">مقاله ISI ارسال شد!</div>
-                        <div style="font-size:.72rem;color:var(--ink-muted);">امروز · پزشکی داخلی</div>
+                        <div style="font-size:var(--text-lg);font-weight:700;">مقاله ISI ارسال شد!</div>
+                        <div style="font-size:var(--text-sm);color:var(--ink-400);">امروز · پزشکی داخلی</div>
                     </div>
                 </div>
             </div>
@@ -105,11 +134,11 @@
         <!-- ══ STATS BAR ══ -->
         <section class="stats-bar" aria-label="آمار پلتفرم">
             <div class="stat-item-landing">
-                <div class="si-val"><span class="accent">+۲</span>هزار</div>
+                <div class="si-val"><span class="blue">+۲</span>هزار</div>
                 <div class="si-label">دانشجوی فعال</div>
             </div>
             <div class="stat-item-landing">
-                <div class="si-val"><span class="teal">+۸</span>هزار</div>
+                <div class="si-val"><span class="purple">+۸</span>هزار</div>
                 <div class="si-label">فعالیت ثبت‌شده</div>
             </div>
             <div class="stat-item-landing">
@@ -117,8 +146,8 @@
                 <div class="si-label">هدف حرفه‌ای پشتیبانی‌شده</div>
             </div>
             <div class="stat-item-landing">
-                <div class="si-val"><span class="accent">۱۰۰٪</span></div>
-                <div class="si-label">تخصصی برای رشته‌های پزشکی</div>
+                <div class="si-val"><span class="blue">۱۰۰٪</span></div>
+                <div class="si-label">اختصاصی برای رشته‌های علوم پزشکی</div>
             </div>
         </section>
 
@@ -128,38 +157,63 @@
         <section class="section" id="how" aria-labelledby="how-title">
             <div class="section-head-landing">
                 <div class="sh-eyebrow">چطور کار می‌کند</div>
-                <h2 class="sh-title" id="how-title">چهار قدم تا رزومه حرفه‌ای پزشکی</h2>
+                <h2 class="sh-title" id="how-title">چهار قدم تا یک رزومه و نقشه راه حرفه‌ای</h2>
                 <p class="sh-sub">
-                    از ثبت‌نام تا داشتن یک نقشه راه شخصی‌سازی‌شده، فقط چند دقیقه کافی است.
+                    از ثبت‌نام تا داشتن برنامه‌ای شخصی‌سازی‌شده برای رسیدن به هدفت، فقط چند دقیقه زمان می‌برد.
                 </p>
             </div>
             <div class="steps-grid" role="list">
                 <div class="step-card" role="listitem">
                     <div class="step-num">۱</div>
-                    <div class="step-icon" aria-hidden="true">👤</div>
-                    <div class="step-title">پروفایل بساز</div>
-                    <div class="step-desc">اطلاعات تحصیلی، مقالات، دوره‌ها و سوابق اجرایی خود را وارد کن. هوش مصنوعی
-                        کمکت می‌کند.</div>
+                    <div class="step-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="4" />
+                            <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+                        </svg>
+                    </div>
+                    <div class="step-title">پروفایلت را بساز</div>
+                    <div class="step-desc">اطلاعات تحصیلی، مقالات، دوره‌ها و سوابق اجرایی‌ات را وارد کن؛ در این مسیر
+                        هوش مصنوعی کنارت است.</div>
                 </div>
                 <div class="step-card" role="listitem">
                     <div class="step-num">۲</div>
-                    <div class="step-icon" aria-hidden="true">🎯</div>
+                    <div class="step-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="8" />
+                            <circle cx="12" cy="12" r="4" />
+                            <circle cx="12" cy="12" r=".5" />
+                        </svg>
+                    </div>
                     <div class="step-title">هدفت را انتخاب کن</div>
-                    <div class="step-desc">استعداد درخشان، ۴۰ امتیازی، هیئت علمی یا فلوشیپ خارج — هر کدام مسیر جداگانه
-                        دارند.</div>
+                    <div class="step-desc">استعداد درخشان، ۴۰ امتیازی، هیئت علمی یا فلوشیپ خارج؛ هرکدام مسیر
+                        مخصوص به خودشان را دارند.</div>
                 </div>
                 <div class="step-card" role="listitem">
                     <div class="step-num">۳</div>
-                    <div class="step-icon teal" aria-hidden="true">🗺️</div>
-                    <div class="step-title">نقشه راه بگیر</div>
-                    <div class="step-desc">سیستم بر اساس پروفایل و هدفت یک نقشه راه مرحله‌به‌مرحله می‌سازد. کاملاً
-                        شخصی‌سازی‌شده.</div>
+                    <div class="step-icon purple" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 20l-6-2V4l6 2 6-2 6 2v14l-6-2-6 2z" />
+                            <path d="M9 6v14M15 4v14" />
+                        </svg>
+                    </div>
+                    <div class="step-title">نقشه راهت را بگیر</div>
+                    <div class="step-desc">سیستم بر اساس پروفایل و هدفت، یک نقشه راه مرحله‌به‌مرحله و کاملاً
+                        شخصی‌سازی‌شده می‌سازد.</div>
                 </div>
                 <div class="step-card" role="listitem">
                     <div class="step-num">۴</div>
-                    <div class="step-icon teal" aria-hidden="true">📈</div>
-                    <div class="step-title">پیشرفت رو رصد کن</div>
-                    <div class="step-desc">فعالیت‌هایت را تیک بزن، پیشرفتت را ببین، و در زمان درست به هدفت برس.</div>
+                    <div class="step-icon purple" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19h16M6 16l4-5 3 3 5-7" />
+                        </svg>
+                    </div>
+                    <div class="step-title">پیشرفتت را دنبال کن</div>
+                    <div class="step-desc">فعالیت‌هایت را تیک بزن، درصد پیشرفت را ببین و در زمان درست به هدفت
+                        برس.</div>
                 </div>
             </div>
         </section>
@@ -168,51 +222,80 @@
         <section class="section" id="features" aria-labelledby="feat-title" style="padding-top:0">
             <div class="section-head-landing">
                 <div class="sh-eyebrow">امکانات</div>
-                <h2 class="sh-title" id="feat-title">ابزارهایی که واقعاً به کار می‌آیند</h2>
-                <p class="sh-sub">هر ابزار برای یک نیاز واقعی دانشجوی علوم پزشکی طراحی شده.</p>
+                <h2 class="sh-title" id="feat-title">ابزارهایی که واقعاً به کارت می‌آیند</h2>
+                <p class="sh-sub">هر ابزار برای یک نیاز واقعی دانشجوی علوم پزشکی طراحی شده است.</p>
             </div>
             <div class="features-grid" role="list">
                 <article class="feat-card" role="listitem">
-                    <div class="feat-icon" style="background:rgba(26,110,245,.08);color:var(--accent)"
-                        aria-hidden="true">📄</div>
+                    <div class="feat-icon blue" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                            <path d="M14 3v5h5M9 13h6M9 17h6" />
+                        </svg>
+                    </div>
                     <h3 class="feat-title">رزومه تخصصی پزشکی</h3>
-                    <p class="feat-desc">فیلدهای اختصاصی برای مقاله ISI، ایمپکت فاکتور، چارک ژورنال، کنگره، ارائه پوستر
-                        و همه آنچه رزومه پزشکی نیاز دارد.</p>
+                    <p class="feat-desc">فیلدهای اختصاصی برای مقاله ISI، ایمپکت فاکتور، چارک ژورنال و ارائه پوستر؛
+                        همه‌ی چیزی که یک رزومه پزشکی به آن نیاز دارد.</p>
                 </article>
                 <article class="feat-card" role="listitem">
-                    <div class="feat-icon" style="background:rgba(0,184,156,.08);color:var(--accent-2)"
-                        aria-hidden="true">🤖</div>
+                    <div class="feat-icon purple" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="7" y="7" width="10" height="10" rx="2" />
+                            <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4" />
+                        </svg>
+                    </div>
                     <h3 class="feat-title">نقشه راه هوشمند</h3>
-                    <p class="feat-desc">هوش مصنوعی پروفایل شما را تحلیل و یک برنامه گام‌به‌گام متناسب با هدف حرفه‌ای،
-                        بازه زمانی و رشته‌ات می‌سازد.</p>
+                    <p class="feat-desc">هوش مصنوعی پروفایلت را تحلیل و برنامه‌ای گام‌به‌گام متناسب با هدف حرفه‌ای،
+                        بازه زمانی و رشته‌ات طراحی می‌کند.</p>
                 </article>
                 <article class="feat-card" role="listitem">
-                    <div class="feat-icon" style="background:rgba(124,58,237,.08);color:#7c3aed" aria-hidden="true">⚠️
+                    <div class="feat-icon amber" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 4l9 16H3z" />
+                            <path d="M12 10v4M12 17.5v.1" />
+                        </svg>
                     </div>
                     <h3 class="feat-title">شناسایی نقطه ضعف</h3>
-                    <p class="feat-desc">سیستم با بررسی پروفایل، ضعیف‌ترین نقطه رزومه‌ات را شناسایی و راه جبران آن را
-                        پیشنهاد می‌دهد.</p>
+                    <p class="feat-desc">سیستم با بررسی پروفایلت، ضعیف‌ترین نقطه رزومه‌ات را پیدا و راه جبران آن
+                        را پیشنهاد می‌دهد.</p>
                 </article>
                 <article class="feat-card" role="listitem">
-                    <div class="feat-icon" style="background:rgba(232,64,64,.08);color:var(--danger)"
-                        aria-hidden="true">✅</div>
+                    <div class="feat-icon red" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="4" width="16" height="16" rx="3" />
+                            <path d="M8 12l2.5 2.5L16 9" />
+                        </svg>
+                    </div>
                     <h3 class="feat-title">چک‌لیست فعالیت‌ها</h3>
-                    <p class="feat-desc">هر مرحله به فعالیت‌های کوچک قابل اجرا تقسیم می‌شود. فعالیت‌هایت را تیک بزن و
-                        پیشرفتت را ببین.</p>
+                    <p class="feat-desc">هر مرحله به فعالیت‌های کوچک و قابل‌اجرا تقسیم می‌شود؛ تیک بزن و پیشرفتت را
+                        دقیق دنبال کن.</p>
                 </article>
                 <article class="feat-card" role="listitem">
-                    <div class="feat-icon" style="background:rgba(26,110,245,.08);color:var(--accent)"
-                        aria-hidden="true">📊</div>
+                    <div class="feat-icon blue" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+                        </svg>
+                    </div>
                     <h3 class="feat-title">داشبورد پیشرفت</h3>
-                    <p class="feat-desc">یک نگاه به داشبورد کافی است: درصد تکمیل رودمپ، تعداد مراحل، فعالیت‌های
-                        انجام‌شده و ماندگی بازمانده.</p>
+                    <p class="feat-desc">یک نگاه به داشبورد کافی‌ست: درصد تکمیل رودمپ، تعداد مراحل و فعالیت‌های
+                        انجام‌شده را می‌بینی.</p>
                 </article>
                 <article class="feat-card" role="listitem">
-                    <div class="feat-icon" style="background:rgba(0,184,156,.08);color:var(--accent-2)"
-                        aria-hidden="true">🌐</div>
+                    <div class="feat-icon purple" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M3 12h18M12 3c2.5 2.5 4 6 4 9s-1.5 6.5-4 9c-2.5-2.5-4-6-4-9s1.5-6.5 4-9z" />
+                        </svg>
+                    </div>
                     <h3 class="feat-title">پشتیبانی چند رشته</h3>
-                    <p class="feat-desc">پزشکی، دندان‌پزشکی، داروسازی، پرستاری و فیزیوتراپی — هر رشته مسیر اختصاصی خودش
-                        را دارد.</p>
+                    <p class="feat-desc">پزشکی، دندان‌پزشکی، داروسازی، پرستاری و فیزیوتراپی؛ هر رشته مسیر
+                        اختصاصی خودش را دارد.</p>
                 </article>
             </div>
         </section>
@@ -224,41 +307,63 @@
                     <div class="sh-eyebrow">اهداف حرفه‌ای</div>
                     <h2 class="sh-title" id="goals-title">هر هدف، یک مسیر اختصاصی</h2>
                     <p class="sh-sub">
-                        نقشه راه شما بر اساس هدف نهایی حرفه‌ای کاملاً متفاوت است. ResumeMD هر چهار مسیر را پشتیبانی
-                        می‌کند.
+                        نقشه راهت بر اساس هدف نهایی حرفه‌ای‌ات کاملاً متفاوت است. استارت آپ دیزاین از هر چهار مسیر
+                        پشتیبانی می‌کند.
                     </p>
                 </div>
                 <div class="goals-grid" role="list">
                     <article class="goal-card" role="listitem">
-                        <div class="goal-icon" aria-hidden="true">⭐</div>
+                        <div class="goal-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 3l2.5 5.7 6.2.6-4.7 4.2 1.4 6.1L12 16.7l-5.4 2.9 1.4-6.1-4.7-4.2 6.2-.6z" />
+                            </svg>
+                        </div>
                         <div>
                             <h3 class="goal-title">استعداد درخشان</h3>
-                            <p class="goal-desc">مسیر رتبه اول — از مقالات ISI، امتیاز پژوهشی تا مهارت‌های بالینی لازم
-                                برای پرونده استعداد درخشان.</p>
+                            <p class="goal-desc">مسیر رتبه اول؛ از مقالات ISI و امتیاز پژوهشی تا مهارت‌های بالینی
+                                لازم برای پرونده استعداد درخشان.</p>
                         </div>
                     </article>
                     <article class="goal-card" role="listitem">
-                        <div class="goal-icon" aria-hidden="true">🏅</div>
+                        <div class="goal-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="8" r="5" />
+                                <path d="M9 12.5L7 21l5-3 5 3-2-8.5" />
+                            </svg>
+                        </div>
                         <div>
                             <h3 class="goal-title">۴۰ امتیازی</h3>
-                            <p class="goal-desc">استراتژی کسب امتیاز از مقاله، کنگره، دوره آموزشی و سوابق اجرایی برای
-                                رسیدن به ۴۰ امتیاز دستیاری.</p>
+                            <p class="goal-desc">استراتژی کسب امتیاز از مقاله، کنگره، دوره آموزشی و سوابق اجرایی
+                                برای رسیدن به ۴۰ امتیاز دستیاری.</p>
                         </div>
                     </article>
                     <article class="goal-card" role="listitem">
-                        <div class="goal-icon teal" aria-hidden="true">🎓</div>
+                        <div class="goal-icon purple" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 4L2 9l10 5 10-5-10-5z" />
+                                <path d="M6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5" />
+                            </svg>
+                        </div>
                         <div>
                             <h3 class="goal-title">هیئت علمی</h3>
-                            <p class="goal-desc">مسیر جذب هیئت علمی دانشگاه — تقویت سابقه پژوهشی، آموزشی و اجرایی لازم
-                                برای فراخوان‌های دانشگاه.</p>
+                            <p class="goal-desc">مسیر جذب هیئت علمی دانشگاه؛ تقویت سابقه پژوهشی، آموزشی و اجرایی
+                                لازم برای فراخوان‌های دانشگاهی.</p>
                         </div>
                     </article>
                     <article class="goal-card" role="listitem">
-                        <div class="goal-icon teal" aria-hidden="true">✈️</div>
+                        <div class="goal-icon purple" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 12l18-8-8 18-2-8-8-2z" />
+                            </svg>
+                        </div>
                         <div>
-                            <h3 class="goal-title">ریسرچ پوزیشن / فلوشیپ خارج</h3>
-                            <p class="goal-desc">آمادگی برای اپلای فلوشیپ بین‌المللی — از IELTS و پرزنتیشن تا لترز و CV
-                                انگلیسی استاندارد.</p>
+                            <h3 class="goal-title">ریسرچ پوزیشن و فلوشیپ خارج</h3>
+                            <p class="goal-desc">آمادگی برای اپلای فلوشیپ بین‌المللی؛ از IELTS و ارائه علمی تا
+                                لتر و CV انگلیسی استاندارد.</p>
                         </div>
                     </article>
                 </div>
@@ -266,28 +371,38 @@
         </div>
 
         <!-- ══ TESTIMONIALS ══ -->
-        <section class="section" aria-labelledby="testi-title">
+        <section class="section" id="testimonials" aria-labelledby="testi-title">
             <div class="section-head-landing">
                 <div class="sh-eyebrow">تجربه کاربران</div>
                 <h2 class="sh-title" id="testi-title">دانشجویانی که مسیرشان را پیدا کردند</h2>
             </div>
             <div class="testi-grid" role="list">
                 <blockquote class="testi-card" role="listitem">
-                    <p class="testi-quote">قبل از ResumeMD اصلاً نمی‌دونستم از کجا شروع کنم. الان یه برنامه دقیق دارم و
-                        می‌دونم هر هفته چی باید انجام بدم.</p>
+                    <div class="testi-quote-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 7C6 7 4 9.5 4 12.5S6 18 9 18v-2c-1.7 0-3-1.3-3-3.5 0-.6.1-1 .3-1.5H9V7zm9 0c-3 0-5 2.5-5 5.5S15 18 18 18v-2c-1.7 0-3-1.3-3-3.5 0-.6.1-1 .3-1.5H18V7z" />
+                        </svg>
+                    </div>
+                    <p class="testi-quote">قبل از استارت آپ دیزاین اصلاً نمی‌دونستم از کجا شروع کنم. الان یه برنامه دقیق دارم
+                        و می‌دونم هر هفته چی باید انجام بدم.</p>
                     <div class="testi-author">
                         <div class="testi-avatar" aria-hidden="true">م</div>
                         <div>
                             <div class="testi-name">محمد رضایی</div>
-                            <div class="testi-role">دانشجوی پزشکی — اینترن — هدف: استعداد درخشان</div>
+                            <div class="testi-role">دانشجوی پزشکی، اینترن — هدف: استعداد درخشان</div>
                         </div>
                     </div>
                 </blockquote>
                 <blockquote class="testi-card" role="listitem">
-                    <p class="testi-quote">نقطه ضعفم رو سریع پیدا کرد: هیچ ارائه‌ای در کنگره نداشتم. بعد از سه ماه الان
-                        دو ارائه ثبت کردم.</p>
+                    <div class="testi-quote-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 7C6 7 4 9.5 4 12.5S6 18 9 18v-2c-1.7 0-3-1.3-3-3.5 0-.6.1-1 .3-1.5H9V7zm9 0c-3 0-5 2.5-5 5.5S15 18 18 18v-2c-1.7 0-3-1.3-3-3.5 0-.6.1-1 .3-1.5H18V7z" />
+                        </svg>
+                    </div>
+                    <p class="testi-quote">نقطه ضعفم را سریع پیدا کرد: هیچ ارائه‌ای در کنگره نداشتم. بعد از سه ماه
+                        الان دو ارائه ثبت کرده‌ام.</p>
                     <div class="testi-author">
-                        <div class="testi-avatar" style="background:linear-gradient(135deg,#00b89c,#1a6ef5)"
+                        <div class="testi-avatar" style="background:linear-gradient(135deg,#ac63ea,#2f5cf5)"
                             aria-hidden="true">ز</div>
                         <div>
                             <div class="testi-name">زهرا محمدی</div>
@@ -296,10 +411,15 @@
                     </div>
                 </blockquote>
                 <blockquote class="testi-card" role="listitem">
-                    <p class="testi-quote">برای اپلای فلوشیپ کاملاً گم بودم. ResumeMD یه چک‌لیست واقعی داد که دقیقاً
-                        می‌دونم تا ۶ ماه دیگه باید چی داشته باشم.</p>
+                    <div class="testi-quote-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 7C6 7 4 9.5 4 12.5S6 18 9 18v-2c-1.7 0-3-1.3-3-3.5 0-.6.1-1 .3-1.5H9V7zm9 0c-3 0-5 2.5-5 5.5S15 18 18 18v-2c-1.7 0-3-1.3-3-3.5 0-.6.1-1 .3-1.5H18V7z" />
+                        </svg>
+                    </div>
+                    <p class="testi-quote">برای اپلای فلوشیپ کاملاً گم بودم. استارت آپ دیزاین یک چک‌لیست واقعی داد که دقیقاً
+                        می‌دانم تا ۶ ماه دیگر باید چه چیزهایی داشته باشم.</p>
                     <div class="testi-author">
-                        <div class="testi-avatar" style="background:linear-gradient(135deg,#7c3aed,#1a6ef5)"
+                        <div class="testi-avatar" style="background:linear-gradient(135deg,#3E63DD,#ac63ea)"
                             aria-hidden="true">ع</div>
                         <div>
                             <div class="testi-name">علی حسینی</div>
@@ -313,18 +433,22 @@
         <!-- ══ CTA ══ -->
         <div class="cta-section">
             <div class="cta-box">
-                <h2>همین الان مسیرت را شروع کن</h2>
+                <h2>همین حالا مسیرت را شروع کن</h2>
                 <p>ثبت‌نام رایگان است. در کمتر از ۵ دقیقه پروفایل و نقشه راهت آماده می‌شود.</p>
                 <div class="cta-actions">
-                    <a href="/accounts/register/" class="btn btn-primary-landing btn-lg">ساخت پروفایل رایگان</a>
-                    <a href="/accounts/login/" class="btn btn-teal btn-lg">ورود به حساب</a>
+                    <a href="/accounts/register/" class="btn btn-purple btn-fit btn-lg">ساخت پروفایل رایگان</a>
+                    <a href="/accounts/login/" class="btn btn-primary btn-fit btn-lg">ورود به حساب</a>
                 </div>
             </div>
         </div>
 
+        <footer class="landing-footer">
+            <div>© استارت آپ دیزاین — همراه دانشجویان علوم پزشکی ایران</div>
+            <div>
+                <a href="#how">چطور کار می‌کند</a>
+            </div>
+        </footer>
+
     </main>
 
-
-
-
-    {% endblock %}
+{% endblock %}

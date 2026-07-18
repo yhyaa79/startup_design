@@ -16,26 +16,23 @@
 
 
 
-<div class="div-btn-back-edit">
-    {% block topbar_actions %}
-    <button type="submit" form="profileForm" class="rm-btn rm-btn-primary">
-        ذخیره ویرایش
-    </button>
-
-
-    <a href="{% url 'accounts:profile' pk=request.user.profile.pk %}" class="rm-btn rm-btn-outline">
-        بازگشت
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="15 18 9 12 15 6" />
-        </svg>
-    </a>
-    {% endblock %}
-</div>
-
-
 
 <div class="content">
+    <div class="div-btn-back-edit">
+        {% block topbar_actions %}
+        <button type="submit" form="profileForm" class="btn btn-primary btn-md btn-fit">
+            ذخیره ویرایش
+        </button>
 
+
+        <a href="{% url 'accounts:profile' pk=request.user.profile.pk %}" class="btn btn-outline btn-md btn-fit">
+            بازگشت
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6" />
+            </svg>
+        </a>
+        {% endblock %}
+    </div>
     <form id="profileForm" class="profile-card" method="post" action="{% url 'accounts:edit_profile' %}">
         {% csrf_token %}
 

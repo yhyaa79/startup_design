@@ -16,7 +16,7 @@ TIMEOUT = 120  # ثانیه
 
 GAPGPT_API_URL = settings.GAPGPT_API_BASE
 GAPGPT_API_KEY = settings.GAPGPT_API_KEY
-
+GAPGPT_MODEL = settings.GAPGPT_MODEL_NAME
 
 # ═══════════════════════════════════════════════════════════════
 # ساختار داده‌های مورد انتظار (Schema)
@@ -229,13 +229,15 @@ def _call_gpt_api(messages: list, max_tokens: int = 4000) -> str:
         "Content-Type": "application/json",
     }
 
+
     payload = {
-        "model": GAPGPT_API_URL,
+        "model": GAPGPT_MODEL,
         "messages": messages,
         "max_tokens": max_tokens,
         "temperature": 0.7,
         "response_format": {"type": "json_object"},
     }
+
 
     try:
         response = requests.post(
