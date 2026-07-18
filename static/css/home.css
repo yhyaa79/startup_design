@@ -1989,6 +1989,7 @@ h1 {
     justify-content: center;
     gap: 8px;
     padding: 8px;
+    padding-bottom: 4px;
     text-align: center;
     backface-visibility: hidden;
     transition: transform .9s cubic-bezier(.65, .05, .25, 1), opacity .9s ease, box-shadow .35s ease, border-color .35s ease;
@@ -2003,7 +2004,7 @@ h1 {
 }
 
 .item .label {
-    font-size: var(--text-xl);
+    font-size: var(--text-base);
     font-weight: 700;
     color: var(--ink);
     line-height: 1.5;
@@ -2015,6 +2016,7 @@ h1 {
     color: var(--muted);
     line-height: 1.6;
     max-width: 90%;
+    margin-bottom: 6px;
 }
 
 .item.is-active {
@@ -2031,8 +2033,8 @@ h1 {
 }
 
 .status-circle {
-    width: 56px;
-    height: 56px;
+    width: 36px;
+    height: 36px;
     position: relative;
     display: flex;
     align-items: center;
@@ -2040,10 +2042,10 @@ h1 {
 }
 
 .loader {
-    width: 38px;
-    height: 38px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    border: 4px solid rgba(124, 77, 255, .15);
+    border: 3.5px solid rgba(124, 77, 255, .15);
     border-right-color: var(--blue);
     opacity: 0;
     animation: spin .8s linear infinite;
@@ -2055,8 +2057,8 @@ h1 {
 }
 
 .result-icon {
-    width: 52px;
-    height: 52px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;

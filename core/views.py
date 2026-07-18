@@ -798,6 +798,199 @@ def _get_weak_point(profile, roadmap, stages):
     return weaknesses[0] if weaknesses else None
 
 
+
+# ======================================================================
+# بخش ۱۳: مراحل گردونه‌ی وضعیت کاربر (برای core/home.html)
+# ======================================================================
+
+def _get_onboarding_wheel_steps(user, profile, roadmaps):
+    """
+    آیتم‌های گردونه‌ی سه‌بعدی «مراحل» بر اساس وضعیت واقعی کاربر.
+    هر آیتم: label, desc, result ('success' یا 'fail').
+
+    اگر کاربر مهمان باشد یا پروفایل نداشته باشد، همه‌ی مراحل fail
+    برمی‌گردند (چون هنوز هیچ اقدامی ثبت نشده است).
+    """
+
+    GUEST_STEPS = [
+        {
+            'label': 'ساخت حساب کاربری',
+            'desc': 'ثبت‌نام در سامانه با شماره تماس یا ایمیل، اولین قدم برای شروع مسیر پژوهشی و دسترسی به رودمپ شخصی‌سازی‌شده.',
+            'result': 'fail',
+        },
+        {
+            'label': 'تکمیل اطلاعات هویتی',
+            'desc': 'ثبت نام، نام خانوادگی، جنسیت، تاریخ تولد، شهر، شماره تماس و ایمیل در بخش پروفایل تا سایر بخش‌های سامانه برای شما فعال شوند.',
+            'result': 'fail',
+        },
+        {
+            'label': 'تعیین هدف و تخصص',
+            'desc': 'مشخص‌کردن هدف اصلی (مثلاً پذیرش دستیاری، مهاجرت تحصیلی یا فلوشیپ) و حوزه‌ی تخصصی، تا پیشنهادهای دوره و پروژه دقیق‌تر شوند.',
+            'result': 'fail',
+        },
+        {
+            'label': 'تکمیل سوابق تحصیلی',
+            'desc': 'افزودن مقاطع تحصیلی گذرانده‌شده شامل دانشگاه، رشته و سال فارغ‌التحصیلی برای تکمیل رزومه‌ی پژوهشی.',
+            'result': 'fail',
+        },
+        {
+            'label': 'ثبت سطح زبان انگلیسی',
+            'desc': 'واردکردن سطح زبان (بر اساس مدرک یا خودارزیابی) که در محاسبه‌ی نقاط ضعف و پیشنهادهای بهبود مسیر استفاده می‌شود.',
+            'result': 'fail',
+        },
+        {
+            'label': 'ساخت رودمپ',
+            'desc': 'ایجاد اولین نقشه‌راه (رودمپ) هوشمند بر اساس هدف و پروفایل شما، شامل مراحل و فعالیت‌های پیشنهادی.',
+            'result': 'fail',
+        },
+        {
+            'label': 'شروع مراحل رودمپ',
+            'desc': 'فعال‌کردن اولین مرحله از رودمپ و آغاز حرکت روی برنامه‌ی زمان‌بندی‌شده‌ای که سامانه برایتان طراحی کرده است.',
+            'result': 'fail',
+        },
+        {
+            'label': 'تکمیل یک فعالیت',
+            'desc': 'انجام و علامت‌زدن حداقل یک فعالیت از داخل مراحل رودمپ به‌عنوان «تکمیل‌شده» برای پیشرفت واقعی در مسیر.',
+            'result': 'fail',
+        },
+        {
+            'label': 'ثبت مقاله پژوهشی',
+            'desc': 'افزودن حداقل یک مقاله (چاپ‌شده یا در حال بررسی) به پروفایل که مستقیماً روی امتیاز نمای پروژه‌های تحقیقاتی اثر می‌گذارد.',
+            'result': 'fail',
+        },
+        {
+            'label': 'شرکت در پروژه تحقیقاتی',
+            'desc': 'عضویت در یک پروژه تحقیقاتی موجود یا ثبت پروژه‌ی شخصی خودتان در بخش پروژه‌ها برای کسب تجربه‌ی همکاری علمی.',
+            'result': 'fail',
+        },
+        {
+            'label': 'گذراندن دوره آموزشی',
+            'desc': 'ثبت‌نام و اتمام حداقل یک دوره‌ی آموزشی مرتبط با هدف شما از میان دوره‌های پیشنهادی سامانه.',
+            'result': 'fail',
+        },
+        {
+            'label': 'ثبت ارائه در کنگره',
+            'desc': 'افزودن سابقه‌ی ارائه‌ی پوستر یا سخنرانی در کنگره‌های علمی و دانشجویی به بخش «ارائه‌ها»ی پروفایل.',
+            'result': 'fail',
+        },
+        {
+            'label': 'ثبت سابقه اجرایی',
+            'desc': 'افزودن عضویت در تشکل‌های دانشجویی، کمیته‌های علمی یا سوابق مدیریتی که به تکمیل رزومه‌ی غیرتحصیلی شما کمک می‌کند.',
+            'result': 'fail',
+        },
+        {
+            'label': 'اتصال شبکه‌های اجتماعی/علمی',
+            'desc': 'افزودن پروفایل‌های علمی مانند ORCID، LinkedIn یا ResearchGate برای افزایش دیده‌شدن و اعتبار پژوهشی.',
+            'result': 'fail',
+        },
+    ]
+
+    if not getattr(user, 'is_authenticated', False) or not profile:
+        return GUEST_STEPS
+
+    has_identity = all(
+        str(getattr(profile, f, '') or '').strip()
+        for f in ['first_name', 'last_name', 'phone', 'email', 'city']
+    )
+    has_goal = bool(profile.goal and profile.specialty)
+    has_education = profile.educations.exists()
+    has_english_level = bool(str(getattr(profile, 'english_level', '') or '').strip())
+    has_roadmap = roadmaps.exists()
+    has_started_stage = Stage.objects.filter(
+        roadmap__user=user, status__in=['active', 'completed']
+    ).exists()
+    has_completed_activity = StageActivity.objects.filter(
+        stage__roadmap__user=user, is_completed=True
+    ).exists()
+    has_article = profile.articles.exists()
+    has_project = ResearchProject.objects.filter(owner_profile=profile).exists()
+    if not has_project:
+        try:
+            from project.models import ProjectMember
+            # اسم فیلدی که ProjectMember را به Profile وصل می‌کند معمولاً یکی از این‌هاست
+            for field_name in ('profile', 'member', 'member_profile', 'user_profile'):
+                if hasattr(ProjectMember, field_name):
+                    has_project = ProjectMember.objects.filter(**{field_name: profile}).exists()
+                    break
+        except ImportError:
+            pass
+    has_course = profile.training_courses.exists()
+    has_presentation = profile.presentations.exists()
+    has_executive_record = profile.executive_records.exists()
+    has_social_profile = profile.social_profiles.exists()
+
+    return [
+        {
+            'label': 'تکمیل اطلاعات هویتی',
+            'desc': 'ثبت نام، نام خانوادگی، شماره تماس، ایمیل و شهر در بخش پروفایل تا سایر بخش‌های سامانه برای شما فعال شوند.',
+            'result': 'success' if has_identity else 'fail',
+        },
+        {
+            'label': 'تعیین هدف و تخصص',
+            'desc': 'مشخص‌کردن هدف اصلی (مثلاً پذیرش دستیاری، مهاجرت تحصیلی یا فلوشیپ) و حوزه‌ی تخصصی، تا پیشنهادهای دوره و پروژه دقیق‌تر شوند.',
+            'result': 'success' if has_goal else 'fail',
+        },
+        {
+            'label': 'ثبت سوابق تحصیلی',
+            'desc': 'افزودن مقاطع تحصیلی گذرانده‌شده شامل دانشگاه، رشته و سال فارغ‌التحصیلی برای تکمیل رزومه‌ی پژوهشی.',
+            'result': 'success' if has_education else 'fail',
+        },
+        {
+            'label': 'ثبت سطح زبان انگلیسی',
+            'desc': 'واردکردن سطح زبان (بر اساس مدرک یا خودارزیابی) که در محاسبه‌ی نقاط ضعف و پیشنهادهای بهبود مسیر استفاده می‌شود.',
+            'result': 'success' if has_english_level else 'fail',
+        },
+        {
+            'label': 'ساخت رودمپ',
+            'desc': 'ایجاد اولین نقشه‌راه (رودمپ) هوشمند بر اساس هدف و پروفایل شما، شامل مراحل و فعالیت‌های پیشنهادی.',
+            'result': 'success' if has_roadmap else 'fail',
+        },
+        {
+            'label': 'شروع مراحل رودمپ',
+            'desc': 'فعال‌کردن یا تکمیل حداقل یکی از مراحل رودمپ و آغاز حرکت روی برنامه‌ی زمان‌بندی‌شده‌ای که سامانه برایتان طراحی کرده است.',
+            'result': 'success' if has_started_stage else 'fail',
+        },
+        {
+            'label': 'انجام فعالیت ها',
+            'desc': 'انجام و علامت‌زدن حداقل یک فعالیت از داخل مراحل رودمپ به‌عنوان «تکمیل‌شده» برای پیشرفت واقعی در مسیر.',
+            'result': 'success' if has_completed_activity else 'fail',
+        },
+        {
+            'label': 'ثبت مقاله پژوهشی',
+            'desc': 'افزودن حداقل یک مقاله (چاپ‌شده یا در حال بررسی) به پروفایل که مستقیماً روی امتیاز نمای پروژه‌های تحقیقاتی اثر می‌گذارد.',
+            'result': 'success' if has_article else 'fail',
+        },
+    ]
+
+
+"""         {
+            'label': 'شرکت در پروژه تحقیقاتی',
+            'desc': 'عضویت در یک پروژه تحقیقاتی موجود یا ثبت پروژه‌ی شخصی خودتان در بخش پروژه‌ها برای کسب تجربه‌ی همکاری علمی.',
+            'result': 'success' if has_project else 'fail',
+        },
+        {
+            'label': 'گذراندن دوره آموزشی',
+            'desc': 'ثبت‌نام و اتمام حداقل یک دوره‌ی آموزشی مرتبط با هدف شما از میان دوره‌های پیشنهادی سامانه.',
+            'result': 'success' if has_course else 'fail',
+        },
+        {
+            'label': 'ثبت ارائه در کنگره',
+            'desc': 'افزودن سابقه‌ی ارائه‌ی پوستر یا سخنرانی در کنگره‌های علمی و دانشجویی به بخش «ارائه‌ها»ی پروفایل.',
+            'result': 'success' if has_presentation else 'fail',
+        },
+        {
+            'label': 'ثبت سابقه اجرایی',
+            'desc': 'افزودن عضویت در تشکل‌های دانشجویی، کمیته‌های علمی یا سوابق مدیریتی که به تکمیل رزومه‌ی غیرتحصیلی شما کمک می‌کند.',
+            'result': 'success' if has_executive_record else 'fail',
+        },
+        {
+            'label': 'اتصال شبکه‌های اجتماعی/علمی',
+            'desc': 'افزودن پروفایل‌های علمی مانند ORCID، LinkedIn یا ResearchGate برای افزایش دیده‌شدن و اعتبار پژوهشی.',
+            'result': 'success' if has_social_profile else 'fail',
+        },
+ """
+    
+
 # ======================================================================
 # ویو اصلی داشبورد
 # ======================================================================
@@ -929,6 +1122,7 @@ def home(request):
         completed_activity_count,
     )
     weak_point = _get_weak_point(profile, roadmap, stages)
+    onboarding_wheel_steps = _get_onboarding_wheel_steps(request.user, profile, roadmaps)
 
     context = {
         'profile': profile,
@@ -977,7 +1171,7 @@ def home(request):
         'selected_roadmap_completed_activities': selected_roadmap_counts['completed_activities'],
 
         'all_user_stage_activities': all_user_stage_activities,
-
+        'onboarding_wheel_steps_json': mark_safe(json.dumps(onboarding_wheel_steps, ensure_ascii=False)),
     }
 
     return render(request, 'core/home.html', context)
