@@ -3,6 +3,11 @@
 
 {% block title %}{{ course.title }}{% endblock %}
 {% block topbar_title %}جزئیات دوره{% endblock %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="cs-course-detail-page">

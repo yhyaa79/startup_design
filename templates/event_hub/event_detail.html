@@ -4,6 +4,10 @@
 {% load static %}
 {% load custom_filters %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% endblock %}
+
 {% block content %}
 
     <main class="eh-page">

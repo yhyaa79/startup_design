@@ -5,6 +5,10 @@
 
 {% block title %}{{ profile.first_name }} {{ profile.last_name }}{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% endblock %}
+
 {% block content %}
 
 <div class="div-hidden">

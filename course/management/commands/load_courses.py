@@ -52,6 +52,7 @@ class Command(BaseCommand):
                             'percentage': c.get('percentage', ''),
                             'instructor': c.get('instructor', ''),
                             'video_link': c.get('videoLink', ''),
+                            'thumbnail': c.get('thumbnail', ''),   # این خط اضافه شود
                             'active': c.get('active', True),
                         }
 
