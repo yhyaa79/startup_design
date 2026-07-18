@@ -5,6 +5,18 @@ from django.db import models
 
 
 class Event(models.Model):
+    CATEGORY = [
+        ('سایر', 'سایر'),
+        ('جشنواره ها', 'جشنواره ها'),
+        ('المپیادهای علمی', 'المپیادهای علمی'),
+        ('برنامه های نخبگانی', 'برنامه های نخبگانی'),
+        ('رویدادهای پژوهشی', 'رویدادهای پژوهشی'),
+        ('رویدادهای فناورانه', 'رویدادهای فناورانه'),
+        ('فرصت های بین المللی', 'فرصت های بین المللی'),
+    ]
+    
+    category = models.CharField('دسته بندی', max_length=20, choices=CATEGORY, blank=True, default='سایر')
+
     title = models.CharField('عنوان رویداد', max_length=300)
     slug = models.SlugField('اسلاگ', unique=True)
     section = models.CharField('بخش', max_length=100, blank=True)

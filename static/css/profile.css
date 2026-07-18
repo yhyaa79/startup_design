@@ -7,8 +7,7 @@
    ====================================================================== */
 
 .content {
-    width: 100%;
-    max-width: 900px;
+    width: 90%;
     margin: 0 auto;
     padding: 0 var(--gap-lg) var(--gap-lggg);
 }
