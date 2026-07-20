@@ -1,13 +1,27 @@
 # course/views.py
 
+from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from django.db.models import F, Q
 from .models import Course, Category
 
 
+SORT_OPTIONS = {
+    'newest': ('-created_at', 'جدیدترین'),
+    'popular': ('-view_count', 'محبوب‌ترین'),
+    'rating': ('-stars', 'بیشترین امتیاز'),
+    'oldest': ('created_at', 'قدیمی‌ترین'),
+}
+
+PAGE_SIZE = 10
+
+
 def course_list(request):
     query = request.GET.get('q', '').strip()
     category_slug = request.GET.get('category', '').strip()
+    sort_key = request.GET.get('sort', 'newest').strip()
+    if sort_key not in SORT_OPTIONS:
+        sort_key = 'newest'
 
     courses = Course.objects.filter(active=True).select_related('category')
 
@@ -22,6 +36,15 @@ def course_list(request):
             Q(long_desc__icontains=query)
         )
 
+    order_field, _ = SORT_OPTIONS[sort_key]
+    courses = courses.order_by(order_field)
+
+    total_count = courses.count()
+
+    paginator = Paginator(courses, PAGE_SIZE)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
     categories = (
         Category.objects
         .filter(courses__active=True)
@@ -33,12 +56,26 @@ def course_list(request):
         for cat in categories
     ]
 
+    sort_choices = [
+        {'key': key, 'label': label} for key, (_, label) in SORT_OPTIONS.items()
+    ]
+
+    # Build query string (without 'page') to keep filters when paginating
+    params = request.GET.copy()
+    params.pop('page', None)
+    base_qs = params.urlencode()
+
     context = {
-        'courses': courses,
+        'courses': page_obj,
+        'page_obj': page_obj,
+        'paginator': paginator,
         'query': query,
         'selected_category': category_slug,
+        'selected_sort': sort_key,
         'categories': categories,
-        'total_count': courses.count(),
+        'sort_choices': sort_choices,
+        'total_count': total_count,
+        'base_qs': base_qs,
     }
     return render(request, 'course/course_list.html', context)
 

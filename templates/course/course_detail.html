@@ -6,29 +6,60 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/course.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="cs-course-detail-page">
+
+    <div class="cs-detail-topnav">
+        <nav class="cs-breadcrumb">
+            <a href="{% url 'course:list' %}">لیست دوره‌ها</a>
+            <span>/</span>
+            <a href="{% url 'course:list' %}?category={{ course.category.slug }}">{{ course.category.name }}</a>
+            <span>/</span>
+            <span class="current">{{ course.title }}</span>
+        </nav>
+    </div>
+
     <section class="cs-course-detail-hero">
         <div class="cs-course-detail-media">
             {% if course.thumbnail %}
             <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}">
+            {% else %}
+            <div class="cs-card-thumb-placeholder cs-detail-placeholder">📚</div>
+            {% endif %}
+            {% if course.percentage %}
+            <span class="cs-discount-badge cs-detail-discount">{{ course.percentage }}% تخفیف</span>
             {% endif %}
         </div>
 
         <div class="cs-course-detail-info">
             <span class="cs-course-category">{{ course.category.name }}</span>
             <h1>{{ course.title }}</h1>
-            <p>{{ course.short_desc }}</p>
+            <p class="cs-detail-short">{{ course.short_desc }}</p>
 
             <div class="cs-course-detail-meta">
-                <span>مدرس: {{ course.instructor }}</span>
-                <span>مدت: {{ course.duration|default:"—" }}</span>
-                <span>امتیاز: {{ course.stars }}/5</span>
+                <span class="cs-meta-item">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    مدرس: {{ course.instructor|default:"—" }}
+                </span>
+                <span class="cs-meta-item">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    مدت: {{ course.duration|default:"—" }}
+                </span>
+                <span class="cs-stars" title="{{ course.stars }} از ۵">
+                    {% for i in "12345" %}{% if forloop.counter <= course.stars %}★{% else %}☆{% endif %}{% endfor %}
+                    <b>{{ course.stars }}/5</b>
+                </span>
                 <span class="cs-view-count">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
                     </svg>
@@ -36,29 +67,39 @@
                 </span>
             </div>
 
-
-            <div class="cs-course-detail-price">
-                {% if course.discount_price %}
-                    <span class="cs-price-main">{{ course.main_price }} تومان</span>
-                    <span class="cs-price-discount">{{ course.discount_price }} تومان</span>
-                {% elif course.main_price %}
-                    <span class="cs-price-discount">{{ course.main_price }} تومان</span>
-                {% else %}
-                    <span class="cs-price-free">رایگان</span>
-                {% endif %}
+            <div class="cs-detail-purchase-card">
+                <div class="cs-course-detail-price">
+                    {% if course.discount_price %}
+                        <span class="cs-price-main">{{ course.main_price }} تومان</span>
+                        <span class="cs-price-discount">{{ course.discount_price }}<i>تومان</i></span>
+                    {% elif course.main_price %}
+                        <span class="cs-price-discount">{{ course.main_price }}<i>تومان</i></span>
+                    {% else %}
+                        <span class="cs-price-free">رایگان</span>
+                    {% endif %}
+                </div>
+                <a href="{{ course.video_link|default:'#' }}" class="cs-buy-btn">
+                    خرید و شروع دوره
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                </a>
+                <span class="cs-guarantee">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    دسترسی مادام‌العمر پس از خرید
+                </span>
             </div>
-
-            <a href="{{ course.video_link|default:'#' }}" class="cs-buy-btn">خرید دوره</a>
         </div>
     </section>
 
-    <section class="cs-course-detail-body">
+    <section class="cs-course-detail-body" id="cs-desc">
         <h2>توضیحات کامل</h2>
-        <p>{{ course.long_desc|linebreaksbr }}</p>
+        <p>{{ course.long_desc|linebreaksbr|default:"توضیحی برای این دوره ثبت نشده است." }}</p>
     </section>
 
     {% if related %}
-    <section class="cs-course-related">
+    <section class="cs-course-related" id="cs-related">
         <h2>دوره‌های مرتبط</h2>
         <div class="cs-course-grid">
             {% for item in related %}
@@ -70,16 +111,64 @@
                         {% else %}
                         <div class="cs-card-thumb-placeholder">📚</div>
                         {% endif %}
+                        <span class="cs-cat-badge">{{ item.category.name }}</span>
                     </div>
                     <div class="cs-card-body-course">
                         <div class="cs-card-title-course">{{ item.title }}</div>
                         <div class="cs-card-desc">{{ item.short_desc }}</div>
                     </div>
                 </a>
+                <div class="cs-card-footer">
+                    <div class="cs-price-block">
+                        {% if item.discount_price %}
+                        <span class="cs-price-discount">{{ item.discount_price }} تومان</span>
+                        {% elif item.main_price %}
+                        <span class="cs-price-discount">{{ item.main_price }} تومان</span>
+                        {% else %}
+                        <span class="cs-price-free">رایگان</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'course:detail' item.course_id %}" class="cs-btn-enroll">مشاهده</a>
+                </div>
             </article>
             {% endfor %}
         </div>
     </section>
     {% endif %}
+
+    <!-- Mobile sticky purchase bar: CTA is never lost while scrolling on small screens -->
+    <div class="cs-mobile-buy-bar">
+        <div class="cs-mobile-buy-price">
+            {% if course.discount_price %}
+            <span class="cs-price-main">{{ course.main_price }} تومان</span>
+            <span class="cs-price-discount">{{ course.discount_price }} تومان</span>
+            {% elif course.main_price %}
+            <span class="cs-price-discount">{{ course.main_price }} تومان</span>
+            {% else %}
+            <span class="cs-price-free">رایگان</span>
+            {% endif %}
+        </div>
+        <a href="{{ course.video_link|default:'#' }}" class="cs-buy-btn">خرید دوره</a>
+    </div>
 </div>
+
+<script>
+(function () {
+    var links = document.querySelectorAll('.cs-section-link');
+    if (!links.length) return;
+    var sections = Array.prototype.map.call(links, function (l) {
+        return document.querySelector(l.getAttribute('href'));
+    });
+    window.addEventListener('scroll', function () {
+        var pos = window.scrollY + 120;
+        var activeIndex = 0;
+        sections.forEach(function (sec, i) {
+            if (sec && sec.offsetTop <= pos) activeIndex = i;
+        });
+        links.forEach(function (l, i) {
+            l.classList.toggle('active', i === activeIndex);
+        });
+    });
+})();
+</script>
 {% endblock %}

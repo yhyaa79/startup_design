@@ -6,50 +6,123 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/course.css' %}">
 {% endblock %}
 
 {% block content %}
 
-<div class="">
-    <section class="cs-hero-course">
-        <div class="cs-hero-content">
-            <span class="cs-hero-eyebrow">بیش از {{ total_count }} دوره تخصصی</span>
-            <h1>مسیر علمی‌ات را با جدیت طی کن</h1>
-            <p>دوره‌های آموزش و منتورینگ در حوزه‌های پژوهش، نوآوری و المپیادهای علمی</p>
+<section class="cs-hero-course">
+    <div class="cs-hero-content">
+        <span class="cs-hero-eyebrow">بیش از {{ total_count }} دوره تخصصی</span>
+        <h1>مسیر علمی‌ات را <span>با جدیت</span> طی کن</h1>
+        <p>دوره‌های آموزش و منتورینگ در حوزه‌های پژوهش، نوآوری و المپیادهای علمی</p>
 
-            <form method="get" action="{% url 'course:list' %}" class="cs-search-wrap">
-                {% if selected_category %}
-                <input type="hidden" name="category" value="{{ selected_category }}" />
-                {% endif %}
-                <svg class="cs-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-                <input type="text" name="q" placeholder="جستجو در دوره‌ها..." value="{{ query }}" autocomplete="off" />
-                <button type="submit">جستجو</button>
-            </form>
-        </div>
-    </section>
+        <form method="get" action="{% url 'course:list' %}" class="cs-search-wrap">
+            {% if selected_category %}
+            <input type="hidden" name="category" value="{{ selected_category }}" />
+            {% endif %}
+            {% if selected_sort %}
+            <input type="hidden" name="sort" value="{{ selected_sort }}" />
+            {% endif %}
+            <svg class="cs-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" name="q" placeholder="جستجو در دوره‌ها، مدرسان و موضوعات..." value="{{ query }}"
+                autocomplete="off" />
+            <button type="submit">جستجو</button>
+        </form>
+    </div>
+</section>
 
-    <div class="cs-page-body">
-        <main>
-            <div class="cs-content-head">
-                <h2>
-                    {% if selected_category %}
-                    {% for cat in categories %}{% if cat.key == selected_category %}{{ cat.label }}{% endif %}{% endfor %}
-                    {% else %}
-                    همه دوره‌ها
-                    {% endif %}
-                    {% if query %}
-                    <span class="cs-query-tag">«{{ query }}» <a
-                            href="?{% if selected_category %}category={{ selected_category }}{% endif %}">✕</a></span>
-                    {% endif %}
-                </h2>
-                <span class="cs-result-count">{{ total_count }} دوره</span>
+<div class="cs-course-page">
+
+    <nav class="cs-breadcrumb">
+        <a href="/">خانه</a>
+        <span>/</span>
+        <span class="current">دوره‌ها</span>
+    </nav>
+
+    <div class="cs-page-body cs-page-body-full">
+
+        <!-- ===== Toolbar: filters + sort (sticky, always accessible) ===== -->
+        <div class="cs-toolbar cs-toolbar-sticky">
+            <div class="cs-toolbar-cats-wrap">
+                <div class="cs-toolbar-cats">
+                    <a href="?{% if query %}q={{ query }}&{% endif %}sort={{ selected_sort }}"
+                        class="cs-chip {% if not selected_category %}active{% endif %}">
+                        همه
+                    </a>
+                    {% for cat in categories %}
+                    <a href="?category={{ cat.key }}{% if query %}&q={{ query }}{% endif %}&sort={{ selected_sort }}"
+                        class="cs-chip {% if selected_category == cat.key %}active{% endif %}">
+                        {{ cat.label }}
+                        <span class="cs-chip-badge">{{ cat.count }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+                <div class="cs-toolbar-fade" aria-hidden="true"></div>
             </div>
 
+            <div class="cs-toolbar-sort">
+                <label for="cs-sort-select">مرتب‌سازی:</label>
+                <div class="cs-select-wrap">
+                    <select id="cs-sort-select" onchange="window.location.href=this.value">
+                        {% for choice in sort_choices %}
+                        <option
+                            value="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if query %}q={{ query }}&{% endif %}sort={{ choice.key }}"
+                            {% if selected_sort == choice.key %}selected{% endif %}>
+                            {{ choice.label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Active filters summary: tells the user exactly what they're looking at ===== -->
+        {% if query or selected_category %}
+        <div class="cs-active-filters">
+            <span class="cs-active-filters-label">فیلترهای فعال:</span>
+            {% if selected_category %}
+            <span class="cs-filter-pill">
+                {% for cat in categories %}{% if cat.key == selected_category %}{{ cat.label }}{% endif %}{% endfor %}
+                <a href="?{% if query %}q={{ query }}&{% endif %}sort={{ selected_sort }}"
+                    aria-label="حذف فیلتر دسته‌بندی">✕</a>
+            </span>
+            {% endif %}
+            {% if query %}
+            <span class="cs-filter-pill">
+                «{{ query }}»
+                <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}sort={{ selected_sort }}"
+                    aria-label="حذف عبارت جستجو">✕</a>
+            </span>
+            {% endif %}
+            <a href="{% url 'course:list' %}" class="cs-clear-all">پاک کردن همه</a>
+        </div>
+        {% endif %}
+
+        <div class="cs-content-head">
+            <h2>
+                {% if selected_category %}
+                {% for cat in categories %}{% if cat.key == selected_category %}{{ cat.label }}{% endif %}{% endfor %}
+                {% else %}
+                همه دوره‌ها
+                {% endif %}
+            </h2>
+            {% if courses %}
+            <span class="cs-result-count">نمایش {{ page_obj.start_index }}–{{ page_obj.end_index }} از {{ total_count }}
+                دوره</span>
+            {% else %}
+            <span class="cs-result-count">۰ دوره</span>
+            {% endif %}
+        </div>
+
+        <main class="cs-main-full">
             {% if not courses %}
             <div class="cs-empty">
                 <div class="cs-empty-icon">🔍</div>
@@ -111,31 +184,87 @@
                             <span class="cs-price-free">رایگان</span>
                             {% endif %}
                         </div>
-                        <a href="{% url 'course:detail' c.course_id %}" class="cs-btn-enroll">ثبت‌نام</a>
+                        <a href="{% url 'course:detail' c.course_id %}"
+                            class="btn btn-primary btn-fit btn-md">ثبت‌نام</a>
                     </div>
                 </article>
                 {% endfor %}
             </div>
+
+            <!-- ===== Pagination ===== -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <nav class="cs-pagination" aria-label="صفحه‌بندی">
+                {% if page_obj.has_previous %}
+                <a class="cs-page-btn cs-page-nav"
+                    href="?{% if base_qs %}{{ base_qs }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6" /></svg>
+                    قبلی
+                </a>
+                {% else %}
+                <span class="cs-page-btn cs-page-nav disabled">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6" /></svg>
+                    قبلی
+                </span>
+                {% endif %}
+
+                <div class="cs-page-numbers">
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if num == page_obj.number %}
+                    <span class="cs-page-btn active">{{ num }}</span>
+                    {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                    <a class="cs-page-btn" href="?{% if base_qs %}{{ base_qs }}&{% endif %}page={{ num }}">{{ num }}</a>
+                    {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                    <a class="cs-page-btn" href="?{% if base_qs %}{{ base_qs }}&{% endif %}page={{ num }}">{{ num }}</a>
+                    {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
+                    <span class="cs-page-dots">…</span>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+
+                {% if page_obj.has_next %}
+                <a class="cs-page-btn cs-page-nav"
+                    href="?{% if base_qs %}{{ base_qs }}&{% endif %}page={{ page_obj.next_page_number }}">
+                    بعدی
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6" /></svg>
+                </a>
+                {% else %}
+                <span class="cs-page-btn cs-page-nav disabled">
+                    بعدی
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6" /></svg>
+                </span>
+                {% endif %}
+            </nav>
+            {% endif %}
             {% endif %}
         </main>
-
-        <aside class="cs-sidebar-course">
-            <div class="cs-sidebar-course-title">دسته‌بندی‌ها</div>
-            <ul class="cs-cat-list">
-                {% for cat in categories %}
-                <li>
-                    <a href="?category={{ cat.key }}{% if query %}&q={{ query }}{% endif %}"
-                        class="{% if selected_category == cat.key %}active{% endif %}">
-                        {{ cat.label }}
-                        <span class="cs-badge">{{ cat.count }}</span>
-                    </a>
-                </li>
-                {% endfor %}
-            </ul>
-            {% if selected_category %}
-            <a href="{% url 'course:list' %}{% if query %}?q={{ query }}{% endif %}" class="cs-all-link">نمایش همه</a>
-            {% endif %}
-        </aside>
     </div>
+
+    <button type="button" id="cs-back-to-top" class="cs-back-to-top" aria-label="بازگشت به بالای صفحه">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5" />
+            <polyline points="5 12 12 5 19 12" />
+        </svg>
+    </button>
 </div>
+
+<script>
+    (function () {
+        var btn = document.getElementById('cs-back-to-top');
+        if (!btn) return;
+        window.addEventListener('scroll', function () {
+            btn.classList.toggle('show', window.scrollY > 500);
+        });
+        btn.addEventListener('click', function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    })();
+</script>
 {% endblock %}

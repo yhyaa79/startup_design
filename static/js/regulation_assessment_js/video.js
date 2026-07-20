@@ -33,7 +33,7 @@ const VIDEO_DATABASE = {
             discountPrice: '1,680,000',
             percentage: '10',
             instructor: 'جمعی از مدال آوران',
-            thumbnail: '/static/image_card/IMG_20260506_215201.jpg',
+            thumbnail: '/media/image_card/IMG_20260506_215201.jpg',
             videoLink: 'https://example.com',
             active: true
         },
@@ -49,7 +49,7 @@ const VIDEO_DATABASE = {
             discountPrice: '1,660,000',
             percentage: '10',
             instructor: 'جمعی از مدال آوران',
-            thumbnail: '/static/image_card/IMG_20260506_215206.jpg',
+            thumbnail: '/media/image_card/IMG_20260506_215206.jpg',
             videoLink: 'https://example.com',
             active: true
         },
@@ -65,7 +65,7 @@ const VIDEO_DATABASE = {
             discountPrice: '1,600,000',
             percentage: '10',
             instructor: 'جمعی از مدال آوران',
-            thumbnail: '/static/image_card/IMG_20260506_215211.jpg',
+            thumbnail: '/media/image_card/IMG_20260506_215211.jpg',
             videoLink: 'https://example.com',
             active: true
         },
@@ -81,7 +81,7 @@ const VIDEO_DATABASE = {
             discountPrice: '1,890,000',
             percentage: '10',
             instructor: 'جمعی از مدال آوران',
-            thumbnail: '/static/image_card/549fd6a7-9a20-4a94-be1e-52a6659cc8da.png.jpeg',
+            thumbnail: '/media/image_card/549fd6a7-9a20-4a94-be1e-52a6659cc8da.png.jpeg',
             videoLink: 'https://example.com',
             active: true
         },
@@ -97,7 +97,7 @@ const VIDEO_DATABASE = {
             discountPrice: '1,650,000',
             percentage: '15',
             instructor: 'جمعی از مدال آوران',
-            thumbnail: '/static/image_card/IMG_20260506_215220.jpg',
+            thumbnail: '/media/image_card/IMG_20260506_215220.jpg',
             videoLink: 'https://example.com',
             active: true  /* false */
         },
@@ -116,7 +116,7 @@ const VIDEO_DATABASE = {
         discountPrice: '1,060,000',
         percentage: '15',
         instructor: 'دپارتمان پژوهشی',
-        thumbnail: '/static/image_card/IMG_20232506_215701.jpeg',
+        thumbnail: '/media/image_card/IMG_20232506_215701.jpeg',
         videoLink: 'https://example.com',
         active: true
     }, ],
@@ -135,7 +135,7 @@ const VIDEO_DATABASE = {
             discountPrice: '2,080,000',
             percentage: '15',
             instructor: 'دپارتمان پژوهشی',
-            thumbnail: '/static/image_card/IMG_20260506_215224.jpg',
+            thumbnail: '/media/image_card/IMG_20260506_215224.jpg',
             videoLink: 'https://example.com',
             active: true  /* false */
         },
@@ -151,7 +151,7 @@ const VIDEO_DATABASE = {
             discountPrice: '4,490,000',
             percentage: '10',
             instructor: 'دپارتمان پژوهشی',
-            thumbnail: '/static/image_card/71f2f4b2-bee2-4a3e-9bc4-aa7dca42dd4b.png.jpeg',
+            thumbnail: '/media/image_card/71f2f4b2-bee2-4a3e-9bc4-aa7dca42dd4b.png.jpeg',
             videoLink: 'https://example.com',
             active: true  /* false */
         },
@@ -170,7 +170,7 @@ const VIDEO_DATABASE = {
             discountPrice: '799,000',
             percentage: '20',
             instructor: 'دپارتمان پژوهشی',
-            thumbnail: '/static/image_card/1778095626950.jpg',
+            thumbnail: '/media/image_card/1778095626950.jpg',
             videoLink: 'https://example.com',
             active: true  /* false */
         },
@@ -186,7 +186,7 @@ const VIDEO_DATABASE = {
             discountPrice: '935,000',
             percentage: '15',
             instructor: 'دپارتمان پژوهشی',
-            thumbnail: '/static/image_card/1778096846187.jpg',
+            thumbnail: '/media/image_card/1778096846187.jpg',
             videoLink: 'https://example.com',
             active: true  /* false */
         },
@@ -199,7 +199,7 @@ const VIDEO_DATABASE = {
             stars: 4,
             duration: '2 ساعت',
             instructor: 'دپارتمان پژوهشی',
-            thumbnail: '/static/image_card/1778095626950.jpg',
+            thumbnail: '/media/image_card/1778095626950.jpg',
             videoLink: 'https://example.com',
             active: true  /* false */
         },
@@ -216,7 +216,7 @@ const VIDEO_DATABASE = {
         stars: 4,
         duration: '2 ساعت',
         instructor: 'محمدرضا علیمردانی',
-        thumbnail: '/static/image_card/b85d4f94-4fed-402a-a849-f3bae0c1bafc.jpeg',
+        thumbnail: '/media/image_card/b85d4f94-4fed-402a-a849-f3bae0c1bafc.jpeg',
         videoLink: 'https://example.com',
         active: true
     }, ],
@@ -234,7 +234,7 @@ const VIDEO_DATABASE = {
             discountPrice: '3,600,000',
             percentage: '20',
             instructor: 'دپارتمان ثبت اختراع',
-            thumbnail: '/static/image_card/071349cf-65dd-4aea-889a-65c551d4a62f.jpeg',
+            thumbnail: '/media/image_card/071349cf-65dd-4aea-889a-65c551d4a62f.jpeg',
             videoLink: 'https://example.com',
             active: true
         },
@@ -250,7 +250,7 @@ const VIDEO_DATABASE = {
             discountPrice: '12,150,000',
             percentage: '10',
             instructor: 'دپارتمان ثبت اختراع',
-            thumbnail: '/static/image_card/IMG_20260506_232826.jpeg',
+            thumbnail: '/media/image_card/IMG_20260506_232826.jpeg',
             videoLink: 'https://example.com',
             active: true
         },
@@ -269,7 +269,7 @@ const VIDEO_DATABASE = {
             discountPrice: '4,900,000',
             percentage: '15 ',
             instructor: 'دپارتمان نوآوری و کارآفرینی',
-            thumbnail: '/static/image_card/1778094301755.jpg',
+            thumbnail: '/media/image_card/1778094301755.jpg',
             videoLink: 'https://example.com',
             active: true  /* false */
         },
@@ -285,7 +285,7 @@ const VIDEO_DATABASE = {
             discountPrice: '350,000',
             percentage: '30',
             instructor: 'حسن اسماعیلی',
-            thumbnail: '/static/image_card/d763e9f4-17fb-4f4c-9c3e-d77bf08ba4ff.jpeg',
+            thumbnail: '/media/image_card/d763e9f4-17fb-4f4c-9c3e-d77bf08ba4ff.jpeg',
             videoLink: 'https://example.com',
             active: true
         },
@@ -301,7 +301,7 @@ const VIDEO_DATABASE = {
             discountPrice: '1,800,000',
             percentage: '10',
             instructor: 'پوریا فتح الله زاده',
-            thumbnail: '/static/image_card/22f6ecb4-44d4-44ba-95c7-f09f711f1c46.jpeg',
+            thumbnail: '/media/image_card/22f6ecb4-44d4-44ba-95c7-f09f711f1c46.jpeg',
             videoLink: 'https://example.com',
             active: true  /* false */
         },
@@ -319,7 +319,7 @@ const VIDEO_DATABASE = {
             discountPrice: '510,000',
             percentage: '15',
             instructor: 'محمد محسن خدابنده',
-            thumbnail: '/static/image_card/1778096277918.jpg',
+            thumbnail: '/media/image_card/1778096277918.jpg',
             videoLink: 'https://example.com',
             active: true
         },
@@ -332,7 +332,7 @@ const VIDEO_DATABASE = {
             stars: 4,
             duration: '2 ساعت',
             instructor: 'ایمان رجائی',
-            thumbnail: '/static/image_card/1ea0ff8a-359f-41e0-87cb-bb6bd6156658.jpeg',
+            thumbnail: '/media/image_card/1ea0ff8a-359f-41e0-87cb-bb6bd6156658.jpeg',
             videoLink: 'https://example.com',
             active: true
         },
@@ -349,7 +349,7 @@ const VIDEO_DATABASE = {
         stars: 4,
         duration: '2 ساعت',
         instructor: 'ستاره شهسواری',
-        thumbnail: '/static/image_card/images-3.jpeg',
+        thumbnail: '/media/image_card/images-3.jpeg',
         videoLink: 'https://example.com',
         active: true
     }, ]

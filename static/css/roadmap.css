@@ -2332,8 +2332,8 @@
 }
 
 .checkpoint-meta-item {
-    font-size: var(--text-md);
-    color: var(--ink-500);
+    font-size: var(--text-lg);
+    color: var(--ink-700);
     display: inline-flex;
     align-items: center;
     gap: 4px;

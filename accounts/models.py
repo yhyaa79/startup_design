@@ -46,12 +46,12 @@ class Profile(models.Model):
     # --- هویتی ---
     first_name = models.CharField('نام', max_length=100)
     last_name = models.CharField('نام خانوادگی', max_length=100)
-    gender = models.CharField('جنسیت', max_length=10, choices=GENDER_CHOICES)
+    gender = models.CharField('جنسیت', max_length=10, choices=GENDER_CHOICES, blank=True)
     marital_status = models.CharField('وضعیت تأهل', max_length=10, choices=MARITAL_CHOICES, blank=True)
     military_status = models.CharField('وضعیت سربازی', max_length=20, choices=MILITARY_CHOICES, blank=True)
     job_title = models.CharField('عنوان شغلی', max_length=150, blank=True)
     birth_date = models.CharField('تاریخ تولد', max_length=20)
-    country = models.CharField('کشور', max_length=100, blank=True, default='ایران')
+    country = models.CharField('کشور', max_length=100, blank=True)
     city = models.CharField('استان / شهر محل سکونت', max_length=100, blank=True)
     phone = models.CharField('شماره موبایل', max_length=20)
     email = models.EmailField('ایمیل', blank=True)
@@ -71,8 +71,8 @@ class Profile(models.Model):
     procedures = models.TextField('مهارت‌های پروسیجرال', blank=True)
 
     # --- زبان ---
-    native_lang = models.CharField('زبان مادری', max_length=50, default='فارسی')
-    english_level = models.CharField('سطح زبان انگلیسی', max_length=5, choices=ENGLISH_LEVEL_CHOICES, blank=True, default='')
+    native_lang = models.CharField('زبان مادری', max_length=50, blank=True)
+    english_level = models.CharField('سطح زبان انگلیسی', max_length=5, choices=ENGLISH_LEVEL_CHOICES, blank=True)
     lang_cert = models.TextField('مدرک زبان انگلیسی', blank=True)
     other_langs = models.TextField('سایر زبان‌ها', blank=True)
 

@@ -1,3 +1,4 @@
+
 function initBylawSelect() {
     const trigger = document.getElementById('select-trigger');
     const customSelect = document.getElementById('custom-select');
@@ -98,3 +99,6 @@ function showWithAnimation(id) {
         target.style.transform = 'translateY(0)';
     });
 }
+
+
+document.addEventListener('DOMContentLoaded', initBylawSelect);
