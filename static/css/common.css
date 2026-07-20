@@ -149,6 +149,7 @@ html {
     --gap-lggg: calc(var(--gap) + 12px);
     --gap-xl: calc(var(--gap) * 2);
     --gap-2xl: calc(var(--gap) * 3);
+    --gap-3xl: calc(var(--gap) * 4);
 
     /* === Typography === */
     --text: 8px;
@@ -700,11 +701,11 @@ a {
 
 
 .margin-right {
- margin-right: auto;
+    margin-right: auto;
 }
 
 .margin-top {
- margin-top: auto;
+    margin-top: auto;
 }
 
 
@@ -713,8 +714,10 @@ a {
 
 
 .img-wrapper img {
-  mix-blend-mode: multiply;
-  display: block;
+    width: 250px;
+    mix-blend-mode: multiply;
+    display: block;
+    margin-top: -40px;
 }
 
 
@@ -735,11 +738,13 @@ a {
     width: max-content;
     max-width: 90vw;
     z-index: 1055;
-    pointer-events: none; /* container کلیک نمی‌گیره */
+    pointer-events: none;
+    /* container کلیک نمی‌گیره */
 }
 
 .rs-alert {
-    pointer-events: all; /* ← alert و دکمه‌هاش کلیک می‌گیرن */
+    pointer-events: all;
+    /* ← alert و دکمه‌هاش کلیک می‌گیرن */
     padding: 1rem;
     border-radius: 8px;
     margin-bottom: 0.5rem;

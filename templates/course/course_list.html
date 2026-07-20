@@ -12,11 +12,20 @@
 {% block content %}
 
 <section class="cs-hero-course">
+    <nav class="cs-breadcrumb">
+        <a href="/">خانه</a>
+        <span>/</span>
+        <span class="current">دوره‌ها</span>
+    </nav>
     <div class="cs-hero-content">
-        <span class="cs-hero-eyebrow">بیش از {{ total_count }} دوره تخصصی</span>
-        <h1>مسیر علمی‌ات را <span>با جدیت</span> طی کن</h1>
-        <p>دوره‌های آموزش و منتورینگ در حوزه‌های پژوهش، نوآوری و المپیادهای علمی</p>
+        <div class="cs-hero-content-img">
+            <div class="cs-hero-content">
+                <span class="cs-hero-eyebrow">بیش از {{ total_count }} دوره تخصصی</span>
+                <h1>دوره های اموزشی</h1>
+                <p>دوره‌های آموزش و منتورینگ در حوزه‌های پژوهش، نوآوری و المپیادهای علمی</p>
+            </div>
 
+        </div>
         <form method="get" action="{% url 'course:list' %}" class="cs-search-wrap">
             {% if selected_category %}
             <input type="hidden" name="category" value="{{ selected_category }}" />
@@ -29,6 +38,7 @@
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
+            
             <input type="text" name="q" placeholder="جستجو در دوره‌ها، مدرسان و موضوعات..." value="{{ query }}"
                 autocomplete="off" />
             <button type="submit">جستجو</button>
@@ -37,12 +47,6 @@
 </section>
 
 <div class="cs-course-page">
-
-    <nav class="cs-breadcrumb">
-        <a href="/">خانه</a>
-        <span>/</span>
-        <span class="current">دوره‌ها</span>
-    </nav>
 
     <div class="cs-page-body cs-page-body-full">
 
@@ -141,9 +145,9 @@
                             <div class="cs-card-thumb-placeholder">📚</div>
                             {% endif %}
                             {% if c.percentage %}
-                            <span class="cs-discount-badge">{{ c.percentage }}% تخفیف</span>
+                            <span class="cs-discount-badge tag tag-lg tag-amber">{{ c.percentage }}% تخفیف</span>
                             {% endif %}
-                            <span class="cs-cat-badge">{{ c.category.name }}</span>
+                            <span class="cs-cat-badge tag tag-lg tag-amber">{{ c.category.name }}</span>
                         </div>
 
                         <div class="cs-card-body-course">

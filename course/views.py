@@ -13,7 +13,7 @@ SORT_OPTIONS = {
     'oldest': ('created_at', 'قدیمی‌ترین'),
 }
 
-PAGE_SIZE = 10
+PAGE_SIZE = 12
 
 
 def course_list(request):

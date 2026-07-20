@@ -26,7 +26,34 @@
 /* ============================================================
    BREADCRUMB (shared between list & detail)
 ============================================================ */
+
 .cs-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--text-2xl);
+    color: #fff;
+    position: absolute;
+    top: 30px;
+    right: 40px;
+}
+
+.cs-breadcrumb a {
+    color: #fff;
+    text-decoration: none;
+    transition: color var(--transition);
+}
+
+.cs-breadcrumb a:hover {
+    color: #fff;
+}
+
+.cs-breadcrumb .current {
+    color: #fff;
+    font-weight: 600;
+}
+
+.cs-breadcrumb-detail {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -34,17 +61,17 @@
     color: var(--ink-600);
 }
 
-.cs-breadcrumb a {
+.cs-breadcrumb-detail a {
     color: var(--ink-600);
     text-decoration: none;
     transition: color var(--transition);
 }
 
-.cs-breadcrumb a:hover {
+.cs-breadcrumb-detail a:hover {
     color: var(--primary);
 }
 
-.cs-breadcrumb .current {
+.cs-breadcrumb-detail .current {
     color: var(--ink-900);
     font-weight: 600;
 }
@@ -55,7 +82,7 @@
 .cs-hero-course {
     position: relative;
     overflow: hidden;
-    padding: var(--gap-xl) var(--gap-2xl);
+    padding: var(--gap-2xl) var(--gap-3xl);
     margin-bottom: var(--gap-lg);
 
 
@@ -65,7 +92,7 @@
     height: 400px;
 
 
-    background-image: url("/static/images/d19a8f50f70944b0c4b2fdf4553d2462.jpg");
+    background-image: url("/static/images/myimageupscaler_quick_d19a8f50f70944b0c4b2fdf4553d2462.png");
 
     background-size: cover;
     background-position: center;
@@ -104,6 +131,12 @@
     gap: var(--gap-smmm);
 }
 
+.cs-hero-content-img {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
 .cs-hero-eyebrow {
     display: inline-flex;
     align-items: center;
@@ -126,15 +159,13 @@
 }
 
 .cs-hero-content h1 span {
-    background: linear-gradient(90deg, #ffe9a8, #ffd0e0);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: #fff;
 }
 
 .cs-hero-content p {
     color: rgba(255, 255, 255, 0.88);
     font-size: var(--text-2xl);
+    font-weight: 700;
     line-height: 1.9;
     margin-bottom: var(--gap-sm);
 }
@@ -145,7 +176,7 @@
     gap: var(--gap-xs);
     background: var(--card);
     border-radius: 999px;
-    padding: 6px 10px 6px 7px;
+    padding: 4px 10px 4px 5px;
     box-shadow: var(--shadow-elevated);
     margin-top: var(--gap-xs);
     width: 80%;
@@ -527,12 +558,10 @@
 
 .cs-card-course {
     background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--shadow-card);
+    border-radius: var(--radius-lg);
+    padding: var(--gap-smmm);
+    box-shadow: var(--shadow-sm);
+    min-width: 0;
     transition: box-shadow .15s ease, transform .15s ease;
 }
 
@@ -555,18 +584,17 @@
     aspect-ratio: 16 / 10;
     background: var(--primary-softer);
     overflow: hidden;
+    border-radius: var(--radius-md);
 }
 
 .cs-card-thumb img {
     width: 100%;
     height: 100%;
+    border-radius: var(--radius-md);
     object-fit: cover;
     transition: transform .4s var(--ease);
 }
 
-.cs-card-course:hover .cs-card-thumb img {
-    transform: scale(1.06);
-}
 
 .cs-card-thumb-placeholder {
     width: 100%;
@@ -605,7 +633,7 @@
 }
 
 .cs-card-body-course {
-    padding: var(--gap-smm) var(--gap-sm) 0;
+    padding: var(--gap-smmm) var(--gap-smmm) 0;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -657,7 +685,7 @@
 
 .cs-stars {
     color: var(--gold);
-    font-size: var(--text-base);
+    font-size: var(--text-xl);
     letter-spacing: 1px;
     display: inline-flex;
     align-items: center;
@@ -675,7 +703,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--gap-xs);
-    padding: var(--gap-smm) var(--gap-sm);
+    padding: var(--gap-smmm) var(--gap-smmm);
     border-top: 1px solid var(--rule);
     margin-top: var(--gap-smmm);
 }
@@ -687,13 +715,13 @@
 }
 
 .cs-price-main {
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     color: var(--ink-400);
     text-decoration: line-through;
 }
 
 .cs-price-discount {
-    font-size: var(--text-xl);
+    font-size: var(--text-2xl);
     font-weight: 700;
     color: var(--ink-900);
 }
