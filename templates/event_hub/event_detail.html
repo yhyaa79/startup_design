@@ -1,245 +1,273 @@
 <!-- templates/event_hub/event_detail.html -->
-
 {% extends 'base.html' %}
+
+{% block title %}{{ event.title }}{% endblock %}
+{% block topbar_title %}جزئیات رویداد{% endblock %}
 {% load static %}
-{% load custom_filters %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/event.css' %}">
 {% endblock %}
 
 {% block content %}
 
-    <main class="eh-page">
-            <div class="eh-container">
-                <a class="eh-back-detail" href="{% url 'event_hub:event_list' %}">بازگشت به لیست رویدادها</a>
-                <h1 class="eh-title-detail">{{ event.title }}</h1>
-                <p class="eh-subtitle-detail">{{ event.short_description }}</p>
+<div class="eh-detail-page">
+
+    <div class="eh-detail-topnav">
+        <a href="{% url 'event_hub:event_list' %}" class="sd-back-btn" aria-label="بازگشت به لیست رویدادها">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6" />
+            </svg>
+        </a>
+        <nav class="eh-breadcrumb-detail">
+            <a href="/">خانه</a>
+            <span>/</span>
+            <a href="{% url 'event_hub:event_list' %}">رویدادها</a>
+            <span>/</span>
+            <a href="?category={{ event.category }}">{{ event.get_category_display }}</a>
+            <span>/</span>
+            <span class="current">{{ event.title }}</span>
+        </nav>
+    </div>
+
+    <!-- ===== In-page section nav ===== -->
+    <nav class="eh-section-nav" aria-label="پیمایش بخش‌ها">
+        <a href="#eh-intro" class="eh-section-link active">معرفی</a>
+        {% if event.completion_steps %}<a href="#eh-steps" class="eh-section-link">مراحل تکمیل</a>{% endif %}
+        {% if event.terms_and_conditions %}<a href="#eh-terms" class="eh-section-link">شرایط و ضوابط</a>{% endif %}
+        {% if event.common_mistakes %}<a href="#eh-mistakes" class="eh-section-link">اشتباهات رایج</a>{% endif %}
+        {% if related_events %}<a href="#eh-related" class="eh-section-link">رویدادهای مشابه</a>{% endif %}
+    </nav>
+
+    <!-- ===== Hero ===== -->
+    <section class="eh-detail-hero">
+        <div class="eh-detail-info">
+            <span class="eh-category-badge">{{ event.get_category_display }}</span>
+            <h1>{{ event.title }}</h1>
+            {% if event.section %}<span class="eh-detail-section-name">بخش: {{ event.section }}</span>{% endif %}
+            <p class="eh-detail-short">{{ event.short_description }}</p>
+
+            <div class="eh-detail-meta">
+                {% if event.difficulty %}<span class="tag tag-lg tag-amber">سطح دشواری: {{ event.difficulty }}</span>{% endif %}
+                {% if event.activity_level %}<span class="tag tag-lg tag-blue">سطح فعالیت: {{ event.activity_level }}</span>{% endif %}
+                {% if event.activity_type %}<span class="tag tag-lg tag-purple">{{ event.activity_type }}</span>{% endif %}
+                {% if event.required_time %}<span class="tag tag-lg tag-gray">زمان موردنیاز: {{ event.required_time }}</span>{% endif %}
+                {% if event.resume_impact %}<span class="tag tag-lg tag-green">اثر در رزومه: {{ event.resume_impact }}</span>{% endif %}
+                {% if event.compiler %}<span class="tag tag-lg tag-gold">تهیه‌کننده: {{ event.compiler }}</span>{% endif %}
             </div>
-  
 
-        <section class="eh-content">
-            <div class="eh-container">
-                <div class="eh-detail-layout">
-                    <article class="eh-panel">
-                        <h2 class="eh-section-title">اطلاعات سریع</h2>
-
-                        <dl class="eh-dl">
-                            <div><dt>تهیه‌کننده</dt><dd>{{ event.compiler }}</dd></div>
-                            <div>
-                                <dt>مخاطبان</dt>
-                                <dd>
-                                    {% if event.audience %}
-                                        <ul class="eh-list">
-                                            {% for item in event.audience %}
-                                            <li>{{ item }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                </dd>
-                            </div>
-                            <div><dt>هدف</dt><dd>{{ event.goal }}</dd></div>
-                            <div><dt>اثر در رزومه</dt><dd>{{ event.resume_impact }}</dd></div>
-                            <div><dt>نوع فعالیت</dt><dd>{{ event.activity_type }}</dd></div>
-                        </dl>
-                    </article>
-
-                    <article class="eh-panel">
-                        <h2 class="eh-section-title">معرفی کامل</h2>
-                        <p class="eh-text">{{ event.intro }}</p>
-
-                        <h3 class="eh-subsection-title">مخاطبان پژوهشی</h3>
-                        {% if event.research_audiences %}
-                            <ul class="eh-list">
-                                {% for item in event.research_audiences %}
-                                <li>{{ item }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-
-                        <h3 class="eh-subsection-title">مهارت‌های آموخته‌شده</h3>
-                        {% if event.skills_learned %}
-                            <ul class="eh-list">
-                                {% for item in event.skills_learned %}
-                                <li>{{ item }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </article>
+            {% if event.audience %}
+            <div>
+                <h3 style="font-size:var(--text-lg);color:var(--ink-700);margin-bottom:6px;">مخاطبان:</h3>
+                <div class="eh-audience-list">
+                    {% for a in event.audience %}<span class="tag tag-md tag-gray">{{ a }}</span>{% endfor %}
                 </div>
+            </div>
+            {% endif %}
 
-                <article class="eh-panel eh-panel-full">
-                    <h2 class="eh-section-title">مراحل تکمیل</h2>
-                    <div class="eh-steps">
-                        {% for step in event.completion_steps %}
-                        <div class="eh-step">
-                            <div class="eh-step-head">مرحله {{ step.step }}: {{ step.title }}</div>
-                            
-                            {% if step.word_limit %}
-                                <p class="eh-text"><strong>حد کلمات:</strong> {{ step.word_limit }}</p>
-                            {% endif %}
+            {% if event.inline_cta_buttons %}
+            <div class="eh-cta-row">
+                {% for btn in event.inline_cta_buttons %}
+                <a href="{{ btn.url|default:'#' }}" class="eh-cta-btn" target="_blank" rel="noopener">{{ btn.label }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
 
-                            {# بررسی نوع description #}
-                            {% if step.description %}
-                                {% if step.description|is_list %}
-                                    {# اگر description یک لیست است #}
-                                    <ul class="eh-list">
-                                        {% for item in step.description %}
-                                        <li>{{ item }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                {% else %}
-                                    {# اگر description یک string است #}
-                                    <p class="eh-text">{{ step.description }}</p>
-                                {% endif %}
-                            {% endif %}
+        <aside class="eh-side-card">
+            {% if event.goal %}
+            <div>
+                <h3>هدف</h3>
+                <p style="color:var(--ink-700);font-size:var(--text-lg);line-height:1.9;">{{ event.goal }}</p>
+            </div>
+            {% endif %}
+            {% if event.main_advantage %}
+            <div class="eh-advantage-box">
+                <b style="display:block;margin-bottom:4px;color:var(--ink-900);">مزیت اصلی</b>
+                {{ event.main_advantage }}
+            </div>
+            {% endif %}
+            {% if event.suitable_for %}
+            <div>
+                <h3>مناسب برای</h3>
+                <p style="color:var(--ink-700);font-size:var(--text-lg);line-height:1.9;">{{ event.suitable_for }}</p>
+            </div>
+            {% endif %}
+        </aside>
+    </section>
 
-                            {# بخش‌های داخلی (مرحله 4) #}
-                            {% if step.sections %}
-                                <div class="eh-subsections">
-                                    {% for section in step.sections %}
-                                    <div class="eh-subsection">
-                                        <h4>{{ section.title }}</h4>
-                                        {% if section.word_limit %}
-                                            <p class="eh-text"><strong>حد کلمات:</strong> {{ section.word_limit }}</p>
-                                        {% endif %}
-                                        <p class="eh-text">{{ section.description }}</p>
-                                        {% if section.includes %}
-                                            <ul class="eh-list">
-                                                {% for item in section.includes %}
-                                                <li>{{ item }}</li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% endif %}
-                                        {% if section.notes %}
-                                            <div class="eh-notes">
-                                                <strong>نکات:</strong>
-                                                <ul class="eh-list">
-                                                    {% for note in section.notes %}
-                                                    <li>{{ note }}</li>
-                                                    {% endfor %}
-                                                </ul>
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
+    <!-- ===== Body ===== -->
+    <div class="eh-detail-body">
 
-                            {# گزینه‌ها (مرحله 7) #}
-                            {% if step.options %}
-                                <ul class="eh-list">
-                                    {% for option in step.options %}
-                                    <li>{{ option }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
+        {% if event.intro or event.research_audiences or event.skills_learned %}
+        <section class="eh-detail-block" id="eh-intro">
+            <h2>معرفی کامل</h2>
+            {% if event.intro %}<p>{{ event.intro }}</p>{% endif %}
 
-                            {# تبعات (مرحله 8) #}
-                            {% if step.implications %}
-                                <div class="eh-implications">
-                                    {% for key, value in step.implications.items %}
-                                    <div class="eh-implication-item">
-                                        <strong>{{ key|title }}:</strong>
-                                        <p class="eh-text">{{ value }}</p>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
+            {% if event.research_audiences %}
+            <div style="margin-top:var(--gap-sm);">
+                <h3 style="font-size:var(--text-xl);color:var(--ink-900);margin-bottom:8px;">مخاطبان پژوهشی</h3>
+                <div class="eh-audience-list">
+                    {% for r in event.research_audiences %}<span class="tag tag-md tag-blue">{{ r }}</span>{% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if event.skills_learned %}
+            <div style="margin-top:var(--gap-sm);">
+                <h3 style="font-size:var(--text-xl);color:var(--ink-900);margin-bottom:10px;">مهارت‌های آموخته‌شده</h3>
+                <div class="eh-skills-grid">
+                    {% for s in event.skills_learned %}
+                    <div class="eh-skill-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        {{ s }}
                     </div>
-                </article>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
 
-                <article class="eh-panel eh-panel-full">
-                    <h2 class="eh-section-title">مزایا و نکات کلیدی</h2>
-                    <div class="eh-two-col">
-                        <div>
-                            <h3 class="eh-subsection-title">مزایا</h3>
-                            {% if event.benefits %}
-                                {% if event.benefits.research %}
-                                <div class="eh-benefit-category">
-                                    <strong>پژوهشی:</strong>
-                                    <ul class="eh-list">
-                                        {% for item in event.benefits.research %}
-                                        <li>{{ item }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                                {% endif %}
+        {% if event.completion_steps %}
+        <section class="eh-detail-block" id="eh-steps">
+            <h2>مراحل تکمیل</h2>
+            <ol class="eh-steps-list">
+                {% for step in event.completion_steps %}
+                <li class="eh-step-item">
+                    <span class="eh-step-num">{{ forloop.counter }}</span>
+                    <span class="eh-step-text">{{ step }}</span>
+                </li>
+                {% endfor %}
+            </ol>
+        </section>
+        {% endif %}
 
-                                {% if event.benefits.personal_and_professional %}
-                                <div class="eh-benefit-category">
-                                    <strong>فردی و حرفه‌ای:</strong>
-                                    <ul class="eh-list">
-                                        {% for item in event.benefits.personal_and_professional %}
-                                        <li>{{ item }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                                {% endif %}
+        {% if event.terms_and_conditions %}
+        <section class="eh-detail-block" id="eh-terms">
+            <h2>شرایط و ضوابط</h2>
+            <ul class="eh-terms-list">
+                {% for term in event.terms_and_conditions %}
+                <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                    {{ term }}
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
 
-                                {% if event.benefits.social %}
-                                <div class="eh-benefit-category">
-                                    <strong>اجتماعی:</strong>
-                                    <ul class="eh-list">
-                                        {% for item in event.benefits.social %}
-                                        <li>{{ item }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                                {% endif %}
-                            {% endif %}
-                        </div>
-                        <div>
-                            <h3 class="eh-subsection-title">اشتباهات رایج</h3>
-                            {% if event.common_mistakes %}
-                                <ul class="eh-list">
-                                    {% for item in event.common_mistakes %}
-                                    <li>{{ item }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-
-                            <h3 class="eh-subsection-title">توصیه‌های کاربردی</h3>
-                            {% if event.practical_recommendations %}
-                                <ul class="eh-list">
-                                    {% for item in event.practical_recommendations %}
-                                    <li>{{ item }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                        </div>
-                    </div>
-                </article>
-
-                <article class="eh-panel eh-panel-full">
-                    <h2 class="eh-section-title">شرایط و رویدادهای مشابه</h2>
-                    <div class="eh-two-col">
-                        <div>
-                            <h3 class="eh-subsection-title">شرایط و ضوابط</h3>
-                            {% if event.terms_and_conditions %}
-                                <ul class="eh-list">
-                                    {% for item in event.terms_and_conditions %}
-                                    <li>{{ item }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                        </div>
-                        <div>
-                            <h3 class="eh-subsection-title">فرصت‌های مشابه</h3>
-                            {% if event.similar_opportunities %}
-                                <ul class="eh-list">
-                                    {% for item in event.similar_opportunities %}
-                                    <li>{{ item }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                        </div>
-                    </div>
-                </article>
+        {% if event.benefits %}
+        <section class="eh-detail-block">
+            <h2>مزایا</h2>
+            <div class="eh-benefits-grid">
+                {% for key, value in event.benefits.items %}
+                <div class="eh-benefit-item">
+                    <b>{{ key }}</b>
+                    <span>{{ value }}</span>
+                </div>
+                {% endfor %}
             </div>
         </section>
-    </main>
+        {% endif %}
 
+        {% if event.practical_recommendations %}
+        <section class="eh-detail-block">
+            <h2>توصیه‌های کاربردی</h2>
+            <ul class="eh-tips-list">
+                {% for tip in event.practical_recommendations %}
+                <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18h6M10 22h4M12 2a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 2z" />
+                    </svg>
+                    {{ tip }}
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        {% if event.common_mistakes %}
+        <section class="eh-detail-block" id="eh-mistakes">
+            <h2>اشتباهات رایج</h2>
+            <ul class="eh-mistakes-list">
+                {% for mistake in event.common_mistakes %}
+                <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    {{ mistake }}
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        {% if event.page_cta_buttons %}
+        <section class="eh-detail-block">
+            <div class="eh-cta-row">
+                {% for btn in event.page_cta_buttons %}
+                <a href="{{ btn.url|default:'#' }}" class="eh-cta-btn" target="_blank" rel="noopener">{{ btn.label }}</a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+
+    {% if event.similar_opportunities or related_events %}
+    <section class="eh-related" id="eh-related">
+        <h2>فرصت‌های و رویدادهای مشابه</h2>
+        <div class="eh-related-grid">
+            {% for rel in related_events %}
+            <article class="eh-card">
+                <a class="eh-card-a" href="{% url 'event_hub:event_detail' rel.slug %}">
+                    <div class="eh-card-top">
+                        <span class="tag tag-md tag-purple">{{ rel.get_category_display }}</span>
+                    </div>
+                    <div class="eh-card-body">
+                        <div class="eh-card-title">{{ rel.title }}</div>
+                        <div class="eh-card-desc">{{ rel.short_description }}</div>
+                    </div>
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+{% if event.page_cta_buttons %}
+<div class="eh-mobile-cta-bar">
+    <a href="{{ event.page_cta_buttons.0.url|default:'#' }}" class="eh-cta-btn" target="_blank" rel="noopener">
+        {{ event.page_cta_buttons.0.label }}
+    </a>
+</div>
+{% endif %}
+
+<script>
+    (function () {
+        var links = document.querySelectorAll('.eh-section-link');
+        var sections = [];
+        links.forEach(function (link) {
+            var id = link.getAttribute('href').slice(1);
+            var section = document.getElementById(id);
+            if (section) sections.push({ link: link, section: section });
+        });
+        if (!sections.length) return;
+        window.addEventListener('scroll', function () {
+            var pos = window.scrollY + 120;
+            var current = sections[0];
+            sections.forEach(function (item) {
+                if (item.section.offsetTop <= pos) current = item;
+            });
+            links.forEach(function (l) { l.classList.remove('active'); });
+            current.link.classList.add('active');
+        });
+    })();
+</script>
 {% endblock %}

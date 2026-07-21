@@ -52,6 +52,13 @@
     {% if user.is_authenticated %}
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
+            <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="بستن منو">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="sidebar-close-icon">
+                    <line x1="20" y1="4" x2="20" y2="20"></line>
+                    <line x1="4" y1="12" x2="16" y2="12"></line>
+                    <polyline points="12 16 16 12 12 8"></polyline>
+                </svg>
+            </button>
             <a href="{% url 'core:home' %}" class="logo-mark">
                 <div class="logo-icon">
                     <img src="/static/logo/logo_transparent.png" alt="logo" class="logo-aside">
@@ -203,6 +210,13 @@
     {% endif %}
     {% endblock %}
     <div class="main {% if request.resolver_match.url_name == 'landing' or request.resolver_match.url_name == 'login' or request.resolver_match.url_name == 'register' or request.resolver_match.url_name == 'edit_profile_ai' or request.resolver_match.url_name == 'edit_profile' %}full-width{% endif %}" id="main">
+        <button class="sidebar-open-btn" id="sidebarOpenBtn" aria-label="باز کردن منو">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+        </button>
         {% block content %}{% endblock %}
         <footer class="dashboard-footer">
             <div class="footer-container">

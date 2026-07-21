@@ -1,55 +1,349 @@
 <!-- templates/event_hub/event_list.html -->
-
-
 {% extends 'base.html' %}
+
+{% block title %}رویدادها{% endblock %}
+{% block topbar_title %}لیست رویدادها{% endblock %}
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/event.css' %}">
 {% endblock %}
 
 {% block content %}
 
-    <main class="eh-page">
-        <section class="eh-header">
-            <div class="eh-container">
-                <h1 class="eh-title">هاب رویدادهای رزومه‌ساز</h1>
-                <p class="eh-subtitle">فهرست رویدادهای مرتبط با رزومه و رشد پژوهشی برای دانشجویان علوم پزشکی</p>
+<section class="eh-hero">
+
+    <nav class="eh-breadcrumb">
+        <a href="/">خانه</a>
+        <span>/</span>
+        <span class="current">رویدادها</span>
+    </nav>
+
+    <div class="eh-hero-content">
+        <form method="get" action="{% url 'event_hub:event_list' %}" class="eh-search-wrap">
+            <svg class="eh-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" name="q" placeholder="جستجو در رویدادها، بخش‌ها و موضوعات..." value="{{ query }}"
+                autocomplete="off" />
+            <button type="submit">جستجو</button>
+        </form>
+
+        <div class="eh-hero-content-heder">
+            <div class="eh-hero-content-eyebrow">
+                <span class="eh-hero-eyebrow">بیش از {{ total_count }} رویداد فعال</span>
+                <h1>رویدادها و فرصت‌های علمی</h1>
+                <p>جشنواره‌ها، المپیادها، برنامه‌های نخبگانی و فرصت‌های پژوهشی و بین‌المللی در یک‌جا</p>
             </div>
-        </section>
+            <div class="img-wrapper">
+                <img src="/static/images/telegram-cloud-photo.png" alt="logo" class="logo-aside">
+            </div>
+        </div>
 
-        <section class="eh-content">
-            <div class="eh-container">
-                <div class="eh-grid">
-                    {% for event in events %}
-                    <article class="eh-card">
-                        <div class="eh-card-inf">
-                            <div class="eh-card-head">
-                                <span class="eh-badge">{{ event.activity_type|truncatechars:25 }}</span>
-                                <span class="eh-meta">{{ event.resume_impact }}</span>
+    </div>
+</section>
+
+<div class="eh-page">
+
+    {% if mode == 'rows' %}
+    <!-- ==========================================================
+         حالت پیش‌فرض: یک ردیف افقی به ازای هر دسته‌بندی (حداکثر ۵ رویداد)
+    =========================================================== -->
+    <div class="eh-rows">
+        {% for row in category_rows %}
+        <section class="eh-cat-row">
+            <div class="eh-cat-row-head">
+                <div class="eh-cat-row-title">
+                    {{ row.label }}
+                    <span class="eh-cat-row-count">{{ row.count }} رویداد</span>
+                </div>
+                <a href="?category={{ row.key }}" class="eh-see-all">
+                    مشاهده همه
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="eh-row-scroll-wrap">
+                <div class="eh-row-scroll">
+                    {% for e in row.events %}
+                    <div class="eh-row-card">
+                        <article class="eh-card">
+                            <a class="eh-card-a" href="{% url 'event_hub:event_detail' e.slug %}">
+                                <div class="eh-card-top">
+                                    {% if e.difficulty %}<span
+                                        class="tag tag-md tag-gray">{{ e.difficulty }}</span>{% endif %}
+                                </div>
+                                <div class="eh-card-body">
+                                    <div class="eh-card-title">{{ e.title }}</div>
+                                    <div class="eh-card-desc">{{ e.short_description }}</div>
+                                    <div class="eh-card-meta">
+                                        {% if e.required_time %}
+                                        <span class="eh-meta-item">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <polyline points="12 6 12 12 16 14" />
+                                            </svg>
+                                            {{ e.required_time }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="eh-card-footer">
+                                {% if e.resume_impact %}
+                                <span class="eh-resume-impact">اثر در رزومه: <b>{{ e.resume_impact }}</b></span>
+                                {% else %}
+                                <span class="eh-resume-impact">&nbsp;</span>
+                                {% endif %}
+                                <a href="{% url 'event_hub:event_detail' e.slug %}" class="eh-btn-view">مشاهده</a>
                             </div>
-
-                            <h2 class="eh-card-title">{{ event.title }}</h2>
-                            <p class="eh-card-desc">{{ event.short_description|truncatechars:200 }}</p>
-
-                            <div class="eh-chip-row">
-                                <span class="eh-chip">{{ event.activity_type }}</span>
-                                <span class="eh-chip">{{ event.difficulty }}</span>
-                            </div>
-                        </div>
-                        <a class="eh-btn" href="{% url 'event_hub:event_detail' event.slug %}">مشاهده جزئیات</a>
-                    </article>
-                    {% empty %}
-                    <div class="eh-empty">
-                        رویدادی برای نمایش وجود ندارد.
+                        </article>
                     </div>
                     {% endfor %}
+
+                    {% if row.has_more %}
+                    <div class="eh-row-see-all-card">
+                        <a href="?category={{ row.key }}" class="eh-row-see-all-btn">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                            مشاهده همه
+                            <span style="font-weight:500;font-size:var(--text-base);">({{ row.count }} رویداد)</span>
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </section>
+        {% empty %}
+        <div class="eh-empty">
+            <div class="eh-empty-icon">📭</div>
+            <h3>هنوز رویدادی ثبت نشده</h3>
+            <p>به‌زودی رویدادهای جدید اینجا نمایش داده می‌شوند.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- ==========================================================
+         حالت گرید فیلترشده: وقتی «مشاهده همه» یک دسته‌بندی زده شده
+         یا جستجو انجام شده
+    =========================================================== -->
+    <!-- ===== نوار فیلتر: بازگشت + همه‌ی دسته‌بندی‌ها (اسکرول افقی) + مرتب‌سازی ===== -->
+    <div class="eh-toolbar eh-toolbar-sticky">
+        <div class="eh-toolbar-cats-wrap">
+            <div class="eh-toolbar-cats">
+                <a href="{% url 'event_hub:event_list' %}" class="eh-chip">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                    همه دسته‌بندی‌ها
+                </a>
+                {% for cat in categories %}
+                <a href="?category={{ cat.key }}{% if query %}&q={{ query }}{% endif %}&sort={{ selected_sort }}"
+                    class="eh-chip {% if selected_category == cat.key %}active{% endif %}">
+                    {{ cat.label }}
+                    <span class="eh-chip-badge">{{ cat.count }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="eh-toolbar-sort">
+            <label for="eh-sort-select">مرتب‌سازی:</label>
+            <div class="eh-select-wrap">
+                <select id="eh-sort-select" onchange="window.location.href=this.value">
+                    {% for choice in sort_choices %}
+                    <option
+                        value="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if query %}q={{ query }}&{% endif %}sort={{ choice.key }}"
+                        {% if selected_sort == choice.key %}selected{% endif %}>
+                        {{ choice.label }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    {% if query or selected_category %}
+    <div class="eh-active-filters">
+        <span class="eh-active-filters-label">فیلترهای فعال:</span>
+        {% if selected_category %}
+        <span class="eh-filter-pill">
+            {{ selected_category_label }}
+            <a href="?{% if query %}q={{ query }}&{% endif %}sort={{ selected_sort }}"
+                aria-label="حذف فیلتر دسته‌بندی">✕</a>
+        </span>
+        {% endif %}
+        {% if query %}
+        <span class="eh-filter-pill">
+            «{{ query }}»
+            <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}sort={{ selected_sort }}"
+                aria-label="حذف عبارت جستجو">✕</a>
+        </span>
+        {% endif %}
+        <a href="{% url 'event_hub:event_list' %}" class="eh-clear-all">پاک کردن همه</a>
+    </div>
+    {% endif %}
+
+    <div class="eh-content-head">
+        <h2>{% if selected_category_label %}{{ selected_category_label }}{% else %}نتایج جستجو{% endif %}</h2>
+        {% if events %}
+        <span class="eh-result-count">نمایش {{ page_obj.start_index }}–{{ page_obj.end_index }} از {{ total_count }}
+            رویداد</span>
+        {% else %}
+        <span class="eh-result-count">۰ رویداد</span>
+        {% endif %}
+    </div>
+
+    <main>
+        {% if not events %}
+        <div class="eh-empty">
+            <div class="eh-empty-icon">🔍</div>
+            <h3>رویدادی یافت نشد</h3>
+            <p>عبارت دیگری امتحان کنید یا دسته‌بندی را تغییر دهید.</p>
+        </div>
+        {% else %}
+        <div class="eh-grid">
+            {% for e in events %}
+            <article class="eh-card">
+                <a class="eh-card-a" href="{% url 'event_hub:event_detail' e.slug %}">
+                    <div class="eh-card-top">
+                        <span class="tag tag-md tag-purple">{{ e.get_category_display }}</span>
+                        {% if e.difficulty %}<span class="tag tag-md tag-gray">{{ e.difficulty }}</span>{% endif %}
+                    </div>
+                    <div class="eh-card-body">
+                        <div class="eh-card-title">{{ e.title }}</div>
+                        <div class="eh-card-desc">{{ e.short_description }}</div>
+                        <div class="eh-card-meta">
+                            {% if e.required_time %}
+                            <span class="eh-meta-item">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                </svg>
+                                {{ e.required_time }}
+                            </span>
+                            {% endif %}
+                            {% if e.activity_type %}
+                            <span class="eh-meta-item">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                                </svg>
+                                {{ e.activity_type }}
+                            </span>
+                            {% endif %}
+                            {% if e.section %}
+                            <span class="eh-meta-item">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                                {{ e.section }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                <div class="eh-card-footer">
+                    {% if e.resume_impact %}
+                    <span class="eh-resume-impact">اثر در رزومه: <b>{{ e.resume_impact }}</b></span>
+                    {% else %}
+                    <span class="eh-resume-impact">&nbsp;</span>
+                    {% endif %}
+                    <a href="{% url 'event_hub:event_detail' e.slug %}" class="eh-btn-view">مشاهده جزئیات</a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="eh-pagination" aria-label="صفحه‌بندی">
+            {% if page_obj.has_previous %}
+            <a class="eh-page-btn"
+                href="?{% if base_qs %}{{ base_qs }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6" /></svg>
+                قبلی
+            </a>
+            {% else %}
+            <span class="eh-page-btn disabled">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6" /></svg>
+                قبلی
+            </span>
+            {% endif %}
+
+            <div class="eh-page-numbers">
+                {% for num in page_obj.paginator.page_range %}
+                {% if num == page_obj.number %}
+                <span class="eh-page-btn active">{{ num }}</span>
+                {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                <a class="eh-page-btn" href="?{% if base_qs %}{{ base_qs }}&{% endif %}page={{ num }}">{{ num }}</a>
+                {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                <a class="eh-page-btn" href="?{% if base_qs %}{{ base_qs }}&{% endif %}page={{ num }}">{{ num }}</a>
+                {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
+                <span class="eh-page-dots">…</span>
+                {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if page_obj.has_next %}
+            <a class="eh-page-btn"
+                href="?{% if base_qs %}{{ base_qs }}&{% endif %}page={{ page_obj.next_page_number }}">
+                بعدی
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6" /></svg>
+            </a>
+            {% else %}
+            <span class="eh-page-btn disabled">
+                بعدی
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6" /></svg>
+            </span>
+            {% endif %}
+        </nav>
+        {% endif %}
+        {% endif %}
     </main>
-</body>
-</html>
+    {% endif %}
 
+    <button type="button" id="eh-back-to-top" class="eh-back-to-top" aria-label="بازگشت به بالای صفحه">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5" />
+            <polyline points="5 12 12 5 19 12" />
+        </svg>
+    </button>
+</div>
 
+<script>
+    (function () {
+        var btn = document.getElementById('eh-back-to-top');
+        if (btn) {
+            window.addEventListener('scroll', function () {
+                btn.classList.toggle('show', window.scrollY > 500);
+            });
+            btn.addEventListener('click', function () {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+    })();
+</script>
 {% endblock %}

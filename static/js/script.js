@@ -39,12 +39,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-
-const menuToggle = document.getElementById('menuToggle');
+const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+const sidebarOpenBtn = document.getElementById('sidebarOpenBtn');
 const sidebar = document.getElementById('sidebar');
 const main = document.getElementById('main');
 
-menuToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('closed');
-    main.classList.toggle('full');
+sidebarCloseBtn.addEventListener('click', () => {
+    sidebar.classList.add('closed');
+    main.classList.add('full');
+});
+
+sidebarOpenBtn.addEventListener('click', () => {
+    sidebar.classList.remove('closed');
+    main.classList.remove('full');
 });

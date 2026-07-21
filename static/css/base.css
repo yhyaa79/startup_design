@@ -42,7 +42,6 @@
 }
 
 .logo-icon {
-    width: 136px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -53,6 +52,11 @@
     width: 20px;
     height: 20px;
 }
+
+.logo-aside {
+    width: 136px;
+}
+
 
 .logo-text {
     font-size: var(--text-7xl);
@@ -393,6 +397,63 @@
 
 
 
-.logo-aside {
-    width: stretch;
+
+
+
+.sidebar-close-btn {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+}
+
+.sidebar-close-btn:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.sidebar-close-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.sidebar-open-btn {
+    display: none;
+    position: fixed;
+    top: 35px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    background: var(--white);
+    color: var(--text-muted);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    z-index: 101;
+}
+
+.sidebar-open-btn:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.sidebar-open-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.main.full .sidebar-open-btn {
+    display: flex;
 }
